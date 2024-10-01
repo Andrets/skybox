@@ -1,0 +1,18 @@
+.container {
+  display: grid;
+  grid-template-columns: 137px 1fr;
+  align-items: center;
+  margin: 16px 0 0 0;
+
+  &:first-child {
+    margin: 24px 0 0 0;
+  }
+}
+
+.poster{
+  .category{
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+  }
+}

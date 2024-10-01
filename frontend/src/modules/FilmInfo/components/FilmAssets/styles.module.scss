@@ -1,0 +1,23 @@
+.swiper {
+  width: 100%;
+
+  .slide {
+    width: 100%;
+    aspect-ratio: 375/200;
+    position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+  }
+}
+
+.pagination {
+}

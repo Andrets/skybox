@@ -1,0 +1,18 @@
+div.container {
+  position: relative;
+  flex: 1 0 auto;
+  max-width: 100%;
+
+  .video {
+    width: 100%;
+    overflow: hidden;
+    flex: 1 0 auto;
+    margin: 0 auto;
+    video {
+      left: 50%;
+      transform: translate(-50%);
+      height: 100%;
+      position: absolute;
+    }
+  }
+}

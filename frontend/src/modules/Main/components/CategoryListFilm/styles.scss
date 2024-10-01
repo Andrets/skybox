@@ -1,0 +1,20 @@
+.category-list__swiper {
+  .swiper-wrapper + .swiper-pagination {
+    width: auto;
+    position: relative;
+    top: 0;
+    right: auto;
+    bottom: auto;
+    margin: 12px 0 0 0;
+
+    .swiper-pagination-bullet {
+      background-color: rgba(170, 178, 189, 1);
+      opacity: 1;
+      transform: scale(1);
+
+      &.swiper-pagination-bullet-active {
+        background: var(--main-theme-color-2);
+      }
+    }
+  }
+}

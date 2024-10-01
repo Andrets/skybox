@@ -1,0 +1,12 @@
+.playBtn {
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  background: rgba(24, 24, 24, 1);
+
+  .playSVG {
+    width: 28px;
+    height: 32px;
+    transform: translateX(3px);
+  }
+}

@@ -1,0 +1,12 @@
+.container {
+  flex: 1 0 auto;
+  background: rgba(38, 38, 38, 1);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  margin: 24px 0 0 0;
+  align-items: flex-start;
+
+  .link {
+    margin: 24px 0 0 0;
+  }
+}

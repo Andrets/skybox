@@ -1,0 +1,21 @@
+.sideBtnsCont {
+  display: flex;
+  flex-direction: column;
+
+  position: absolute;
+  align-items: center;
+
+  bottom: 50px;
+  right: 12px;
+
+  .btn {
+    min-width: none;
+    width: 64px;
+    height: 64px;
+    padding: 0;
+
+    &:last-child {
+      margin: 12px 0 0 0;
+    }
+  }
+}

@@ -1,0 +1,48 @@
+.container {
+  display: flex;
+  justify-content: space-between;
+  margin: 16px 0 0 0;
+}
+
+.text {
+  font-family: "SF Pro Text";
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  text-align: left;
+}
+.toggler {
+  border-radius: 16px;
+  width: 39px;
+  height: 24px;
+  flex: 0 0 auto;
+  position: relative;
+  background-color: rgba(51, 51, 51, 1);
+  margin-left: 16px;
+  transition: 0.25s ease-in-out;
+
+  &.active {
+    background-color: var(--main-theme-color-2);
+  }
+
+  input {
+    display: none;
+  }
+}
+
+.circle {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 18px;
+  height: 18px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.25s ease-in-out;
+
+  &.active {
+    transform: translate(18px, -50%);
+  }
+
+  transform: translate(4px, -50%);
+}

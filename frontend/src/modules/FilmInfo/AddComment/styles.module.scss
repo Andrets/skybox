@@ -1,0 +1,35 @@
+.container {
+  display: flex;
+  flex-direction: column;
+
+  .textarea {
+    resize: none;
+    margin: 16px 0 0 0;
+    background-color: rgba(38, 38, 38, 1);
+    border-radius: 12px;
+    padding: 16px;
+    min-height: 120px;
+    outline: none;
+    border: 1px solid rgba(251, 138, 0, 0);
+    transition: 0.25s;
+    caret-color: var(--main-theme-color-2);
+
+    &:focus {
+      border: 1px solid rgba(251, 138, 0, 0.88);
+    }
+  }
+
+  .sendComment {
+    background-color: var(--main-theme-color-2);
+    min-height: 60px;
+    border-radius: 4px;
+    margin: 16px 0 0px 0;
+    width: 100%;
+    border-radius: 12px;
+  }
+
+  .sendComment:disabled {
+    background-color: rgba(38, 38, 38, 1);
+    color: var(--sub-text-color);
+  }
+}

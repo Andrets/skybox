@@ -1,0 +1,33 @@
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  run_pull:
+    name: run pull
+    runs-on: ubuntu-latest
+    environment: deployment
+
+    steps:
+      - name: Install ssh keys
+        run: |
+          install -m 600 -D /dev/null ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
+
+      - name: Clone repository if not exists
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+            if [ ! -d ${{ secrets.WORK_DIR }}/.git ]; then
+              git clone https://github.com/Andrets/skybox.git ${{ secrets.WORK_DIR }};
+            fi
+          "
+
+      - name: Connect and Pull
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git checkout main && git pull && sudo docker compose -f docker-compose.yaml -p skybox down && sudo docker compose -f docker-compose.yaml -p skybox up -d --build"
+
+      - name: Clean up
+        run: rm -rf ~/.ssh

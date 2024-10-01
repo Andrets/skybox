@@ -1,0 +1,33 @@
+.container {
+  width: 100%;
+  overflow: auto;
+  .item {
+    padding: 24px 12px;
+    color: var(--sub-text-color);
+    font-family: "SF Pro Text";
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 22px;
+    text-align: left;
+    text-transform: capitalize;
+    &:first-child {
+      padding-left: 15px;
+    }
+
+    &.active {
+      position: relative;
+      color: var(--main-theme-color-2);
+      &:after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 12px;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background-color: var(--main-theme-color-2);
+      }
+    }
+  }
+}

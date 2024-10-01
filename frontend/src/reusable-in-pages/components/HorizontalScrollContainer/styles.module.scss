@@ -1,0 +1,11 @@
+.scrollContainer {
+  position: relative;
+  overflow: scroll;
+}
+
+.content {
+  display: flex;
+  position: absolute;
+  min-width: 100%;
+  top: 0;
+}

@@ -1,0 +1,86 @@
+div.container {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  min-height: 88px;
+  background-color: var(--main-theme-color-1);
+  margin-top: auto;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  .link {
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    width: 100%;
+    max-width: 120px;
+  }
+}
+
+.link {
+  svg,
+  path,
+  rect {
+    transition: 0.25s;
+  }
+  .activeClipsIcon {
+    .mainRect {
+      border-color: var(--main-theme-color-2);
+
+      svg {
+        fill: var(--main-theme-color-2);
+      }
+    }
+
+    .backRect {
+      border-color: var(--main-theme-color-2);
+    }
+  }
+}
+
+.icon {
+  path {
+    fill: rgba(204, 209, 217, 1);
+  }
+
+  &.active {
+    path {
+      fill: var(--main-theme-color-2);
+    }
+  }
+
+  &.bookmark {
+    width: 13px;
+    path {
+      fill: none;
+    }
+    &.active {
+      path {
+        stroke: var(--main-theme-color-2);
+      }
+    }
+  }
+
+  &.home {
+    width: 18px;
+  }
+
+  &.profile {
+    width: 16px;
+  }
+}
+
+.clips {
+  width: 20px;
+  &.active {
+    rect {
+      stroke: var(--main-theme-color-2);
+    }
+
+    path {
+      fill: var(--main-theme-color-2);
+    }
+  }
+}

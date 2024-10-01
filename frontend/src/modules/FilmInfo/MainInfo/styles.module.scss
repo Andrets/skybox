@@ -1,0 +1,23 @@
+.main {
+  position: relative;
+  width: 100%;
+  border-bottom: 1px solid rgba(121, 120, 124, 0.5);
+
+  .title {
+    margin: 24px 0 0 0;
+  }
+
+  .rating {
+    margin: 8px 0 0 0;
+
+    svg {
+      fill: var(--main-theme-color-2);
+    }
+  }
+
+  .marks {
+    display: flex;
+    gap: 4px;
+    margin: 8px 0 16px 0;
+  }
+}

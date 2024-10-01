@@ -1,0 +1,31 @@
+.info {
+  background: rgba(24, 24, 24, 1);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  overflow: auto;
+
+  .container {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 24px;
+
+    .sectHeader {
+      margin: 16px 0 0 0;
+    }
+  }
+}
+
+.link {
+  background-color: var(--main-theme-color-2);
+  min-height: 60px;
+  border-radius: 4px;
+  margin: 16px 0 16px 0;
+  width: 100%;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-direction: row;
+}

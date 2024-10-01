@@ -1,0 +1,29 @@
+.form {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  margin: 16px 0 0 0;
+
+  .submitBtn {
+    width: 100%;
+    background: var(--main-theme-color-2);
+    min-height: 60px;
+    border-radius: 4px;
+    margin: 16px 0 16px 0;
+    width: 100%;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-direction: row;
+    min-width: auto;
+    min-height: auto;
+    transition: 0.25s ease-in-out;
+  }
+
+  .submitBtn:disabled {
+    background: rgba(38, 38, 38, 1);
+    color: rgba(121, 120, 124, 1);
+  }
+}

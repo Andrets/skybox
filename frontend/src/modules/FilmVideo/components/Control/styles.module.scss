@@ -1,0 +1,27 @@
+.control {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #0000001c;
+
+  .name {
+    padding: 12px;
+  }
+  .playBtn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .timeSlider {
+    position: absolute;
+    width: 100%;
+    padding: 0 16px;
+    left: 0;
+    right: 0;
+    bottom: 30px;
+  }
+}

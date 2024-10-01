@@ -1,0 +1,16 @@
+.swiper-wrapper + .swiper-pagination {
+  width: auto;
+  left:50%;
+  transform: translateX(-50%);
+
+
+  .swiper-pagination-bullet {
+    background-color: rgba(170, 178, 189, 1);
+    opacity: 1;
+    transform: scale(1);
+
+    &.swiper-pagination-bullet-active {
+      background: var(--main-theme-color-2);
+    }
+  }
+}

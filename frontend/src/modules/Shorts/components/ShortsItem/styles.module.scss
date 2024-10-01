@@ -1,0 +1,10 @@
+div.video {
+  height: 100%;
+  position: relative;
+  video {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 100%;
+  }
+}

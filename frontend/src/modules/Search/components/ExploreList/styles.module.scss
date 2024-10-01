@@ -1,0 +1,26 @@
+div.header {
+  margin-top: 24px;
+  padding: 0 6px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+
+  .exploreItem {
+    justify-content: flex-start;
+    padding: 8px 0;
+    font-family: "SF Pro Display";
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 20.29px;
+    text-align: left;
+    color: var(--main-text-color);
+    padding-left: 6px;
+    padding-right: 6px;
+
+    &:first-child {
+      margin: 8px 0 0 0;
+    }
+  }
+}

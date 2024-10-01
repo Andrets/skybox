@@ -1,0 +1,44 @@
+div.container {
+  width: 100%;
+  aspect-ratio: 311/463;
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+
+  img {
+    width: 100%;
+    height: 100%;
+  }
+
+  .playBtn {
+    font-family: "SF Pro Text";
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 22px;
+    text-align: left;
+    min-height: 60px;
+    min-width: 134px;
+    background-color: var(--main-theme-color-2);
+    box-shadow: 0px 8px 12px -4px rgba(251, 138, 0, 0.16);
+    border-radius: 12px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 24px;
+    color: var(--main-text-color);
+    align-items: center;
+    justify-content: center;
+    text-transform: capitalize;
+    display: flex;
+
+    .txt{
+        transform: translateY(1px);
+    }
+    
+
+    svg {
+      margin-right: 8px;
+      display: block;
+    }
+  }
+}

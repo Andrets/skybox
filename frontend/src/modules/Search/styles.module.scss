@@ -1,0 +1,16 @@
+.container {
+  position: relative;
+  overflow: hidden;
+  flex: 1 0 auto;
+  .content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+    padding: 0 16px;
+  }
+}

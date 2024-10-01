@@ -1,0 +1,29 @@
+.text {
+  width: 100%;
+  text-align: center;
+  margin: 32px 0 0 0;
+  font-family: "SF Pro Display";
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 16.71px;
+  text-align: center;
+  color: rgba(121, 120, 124, 1);
+}
+
+.logos {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  margin: 20px 0 0 0;
+
+  svg {
+    &:last-child {
+      margin-left: 8px;
+    }
+  }
+}
+
+.container {
+  flex: 1 0 auto;
+}

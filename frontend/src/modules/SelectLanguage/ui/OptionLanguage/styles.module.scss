@@ -1,0 +1,32 @@
+.container {
+  padding: 24px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+ 
+  .lang {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .title {
+    font-family: "SF Pro Text";
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 22px;
+    text-align: left;
+  }
+
+  .subtitle {
+    font-family: "SF Pro Text";
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 22px;
+    text-align: left;
+
+    color: rgba(121, 120, 124, 1);
+    display: block;
+    margin: 0px 0 0 0;
+  }
+}

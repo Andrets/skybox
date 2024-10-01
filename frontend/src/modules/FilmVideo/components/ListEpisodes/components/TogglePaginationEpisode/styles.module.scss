@@ -1,0 +1,26 @@
+.listPaginationGroup {
+  display: flex;
+  border: 0;
+  margin: 8px 0 0 0;
+  button.toggler {
+    padding: 0;
+    border: 0;
+    position: relative;
+
+    &:first-child {
+      margin-left: 0;
+
+      &::after {
+        display: none;
+      }
+    }
+
+    margin-left: 32px;
+
+    &::after {
+      content: "/";
+      position: absolute;
+      left: -16px;
+    }
+  }
+}

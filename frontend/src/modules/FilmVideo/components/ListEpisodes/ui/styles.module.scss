@@ -1,0 +1,40 @@
+button.episodeListBtn {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  font-family: "SF Pro Text";
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 22px;
+  text-align: left;
+  background-color: rgba(58, 58, 60, 1);
+
+  &.active {
+    background: var(--main-theme-color-2);
+  }
+
+  &.disabled {
+    position: relative;
+    background: rgba(43, 43, 44, 1);
+    .lockSVG {
+      position: absolute;
+      right: 4px;
+      top: 4px;
+    }
+    color: var(--main-text-color) !important;
+  }
+}
+
+button.toggleBtn {
+  font-family: "SF Pro Text";
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  color: rgba(121, 120, 124, 1);
+  padding: 0;
+  min-width: 0;
+
+  &.active {
+    color: var(--main-theme-color-2);
+  }
+}
