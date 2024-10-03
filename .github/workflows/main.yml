@@ -11,17 +11,18 @@ jobs:
     environment: deployment
 
     steps:
-      - name: Install ssh keys
+      - name: Install SSH keys
         run: |
-          install -m 600 -D /dev/null ~/.ssh/id_rsa
+          mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H github.com >> ~/.ssh/known_hosts
 
       - name: Clone repository if not exists
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
             if [ ! -d ${{ secrets.WORK_DIR }}/.git ]; then
-              git clone https://github.com/Andrets/skybox.git ${{ secrets.WORK_DIR }};
+              git clone git@github.com:Andrets/skybox.git ${{ secrets.WORK_DIR }};
             fi
           "
 
