@@ -20,7 +20,7 @@ jobs:
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
             if [ ! -d ${{ secrets.WORK_DIR }}/.git ]; then
-              git clone git@github.com:Andrets/skybox.git ${{ secrets.WORK_DIR }};
+              git clone https://github.com/Andrets/skybox.git ${{ secrets.WORK_DIR }};
             fi
           "
 
