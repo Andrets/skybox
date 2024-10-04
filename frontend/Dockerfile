@@ -3,7 +3,7 @@ FROM node as vite-app
 WORKDIR /app
 COPY . .
 
-RUN ["npm", "i"]
+RUN ["npm", "i", "--legacy-peer-deps"]
 RUN ["npm", "run", "build"]
 
 FROM nginx:alpine
