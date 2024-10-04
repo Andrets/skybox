@@ -1,6 +1,6 @@
 services:
   postgresql:
-    image: postgresql
+    image: postgres
     restart: always
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
