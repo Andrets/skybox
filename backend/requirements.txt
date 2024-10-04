@@ -37,3 +37,4 @@ psycopg2-binary
 djangorestframework-simplejwt
 drf-yasg
 django-storages
+openpyxl
