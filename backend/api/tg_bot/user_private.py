@@ -34,7 +34,7 @@ import os
 user_private = Router()
 load_dotenv()
 
-bot = Bot('8090358352:AAHqI7UIDxQSgAr0MUKug8Ixc0OeozWGv7I', default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+bot = Bot(getenv('BOT_TOKEN'), default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
 @user_private.message(CommandStart())
 async def start_message(message: Message, bot: Bot):

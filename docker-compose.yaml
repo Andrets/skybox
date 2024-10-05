@@ -21,6 +21,14 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_DB=${POSTGRES_DB}
       - ROOT_DOMAIN=http://127.0.0.1:8000
+      - BOT_TOKEN=${BOT_TOKEN}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_STORAGE_BUCKET_NAME=${AWS_STORAGE_BUCKET_NAME}
+      - AWS_S3_REGION_NAME=${AWS_S3_REGION_NAME}
+      - AWS_S3_ENDPOINT_URL=${AWS_S3_ENDPOINT_URL}
+      - AWS_S3_CUSTOM_DOMAIN=${AWS_S3_CUSTOM_DOMAIN}
     ports:
       - 8000:8000
     depends_on:
@@ -61,6 +69,12 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.aiogram
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - ACCOUNT_ID=${ACCOUNT_ID}
+      - SECRET_KEY=${SECRET_KEY}
+      - YOOKASSA_SHOP_ID=${YOOKASSA_SHOP_ID}
+      - YOOKASSA_SECRET_KEY=${YOOKASSA_SECRET_KEY}
     depends_on:
       - backend
 

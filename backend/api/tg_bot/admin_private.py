@@ -21,10 +21,14 @@ from PIL import Image
 import aiofiles
 import openpyxl
 import os
+from os import getenv, environ
+from dotenv import load_dotenv
+
+
 
 admin_private = Router()
-
-bot = Bot('8090358352:AAHqI7UIDxQSgAr0MUKug8Ixc0OeozWGv7I', default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+load_dotenv()
+bot = Bot(getenv('BOT_TOKEN'), default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
 async def send_users_xlsx(chat_id):
     # Создаем новый рабочий файл

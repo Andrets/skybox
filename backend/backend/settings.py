@@ -5,17 +5,17 @@ import os
 
 # Настройки S3
 # AWS S3 настройки
-""" AWS_ACCESS_KEY_ID = 'NH9Q3XYBHSIYLCBX1VAV'
-AWS_SECRET_ACCESS_KEY = 'mDvlC5tUkiD9Lrr04a38phKl52SBgRgDd1E5ACg3'
-AWS_STORAGE_BUCKET_NAME = 'db3c5564-9df7e9c8-879a-46bd-ba04-f363ec17e9d0'  # ваше имя бакета
-AWS_S3_REGION_NAME = 'ru-1'  # ваш регион
+""" AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME') # ваше имя бакета
+AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME')  # ваш регион
 
 # Настройка хранилища
 DEFAULT_FILE_STORAGE = 'storages.backends.s3.S3Boto3'
-AWS_S3_ENDPOINT_URL = 'https://s3.timeweb.cloud'  # ваш URL
+AWS_S3_ENDPOINT_URL = os.environ.get('AWS_S3_ENDPOINT_URL') # ваш URL
 
 # Дополнительные параметры, если нужно
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.timeweb.cloud' """
+AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN') """
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-u&j=n=&3s995s^y_h6oacvv8bfb-2x*_669lgc7fnn&9+-7bok'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
