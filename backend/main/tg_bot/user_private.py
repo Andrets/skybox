@@ -1,3 +1,4 @@
+import os
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.filters import CommandStart
@@ -23,14 +24,11 @@ import uuid
 
 from yookassa import Configuration, Payment
 
-Configuration.account_id = '289119'
-Configuration.secret_key = 'test_eUXMP4FptkXeMLTg4Sd4XD9ODUfoAjvddfQhgKB4EII'
+Configuration.account_id = os.environ.get('ACCOUNT_ID')
+Configuration.secret_key = os.environ.get('SECRET_KEY')
 
-YOOKASSA_SHOP_ID = '506751'
-YOOKASSA_SECRET_KEY = '381764678:TEST:91042'
-""" 
-PAYMENTS_PROVIDER_TOKEN = '381764678:TEST:90774'
- """
+YOOKASSA_SHOP_ID = os.environ.get('YOOKASSA_SHOP_ID')
+YOOKASSA_SECRET_KEY = os.environ.get('YOOKASSA_SECRET_KEY')
 
 def create(prices,chat_id):
     idempotence_key = str(uuid.uuid4())
