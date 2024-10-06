@@ -167,10 +167,10 @@ USE_I18N = True
 USE_TZ = True
 
 
-STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_URL = '/api/staticfiles/'
+STATIC_ROOT = '/app/staticfiles/'
 # Настройки хранения медиафайлов
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/api/static/media/'
+MEDIA_ROOT = '/app/staticfiles/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
