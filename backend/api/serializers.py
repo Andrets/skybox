@@ -9,6 +9,7 @@ from .models import (
     StatusNew,
     Comments,
     History,
+    Series,
 )
 
 class UsersSerializer(serializers.ModelSerializer):
@@ -41,11 +42,13 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+
 class SerailSerializer(serializers.ModelSerializer):
+    genre = serializers.StringRelatedField()
+
     class Meta:
         model = Serail
-        fields = '__all__'
-
+        fields = ['id', 'name', 'vertical_photo', 'genre', 'rating']
 
 class StatusNewSerializer(serializers.ModelSerializer):
     class Meta:
@@ -63,3 +66,10 @@ class HistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = History
         fields = '__all__'
+
+
+class SeriesSerializer(serializers.ModelSerializer):
+    serail_name = serializers.CharField(source='serail.name', read_only=True)
+    class Meta:
+        model = Series
+        fields = ['id', 'serail_name', 'episode', 'name', 'likes', 'video']

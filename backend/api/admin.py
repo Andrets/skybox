@@ -134,8 +134,8 @@ admin.site.register(Series, SeriesAdmin)
 class CommentsAdmin(admin.ModelAdmin):
     list_per_page = 500
     list_filter = ['user']
-    search_fields = ['user__name', 'text']
-    fields = ('text', 'user')
+    search_fields = ['user__name', 'text',  'serail']
+    fields = ('text', 'user', 'serail')
 
     class Meta:
         model = Comments

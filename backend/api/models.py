@@ -1,5 +1,5 @@
 from django.db import models
-
+from .storage_backends import VideoStorage, PhotoStorage
 
 class Language(models.Model):
     lang_name = models.CharField('Имя языка на анг.', null=True, max_length=300, blank=True)
@@ -79,7 +79,7 @@ class Genre(models.Model):
 class Serail(models.Model):
     
     name = models.CharField('Имя', max_length=500, null=True, blank=True)
-    vertical_photo = models.ImageField('Вертикальная обложка', null=True, upload_to='static/media/serail/', blank=True)
+    vertical_photo = models.ImageField('Вертикальная обложка', null=True, storage=PhotoStorage(), upload_to='serail/', blank=True)
     horizontal_photo0 = models.ImageField('Горизонтальная обложка',null=True, upload_to='static/media/serail/', blank=True)
     horizontal_photo1 = models.ImageField('Горизонтальная обложка 2', null=True, upload_to='static/media/serail/', blank=True)
     horizontal_photo2 = models.ImageField('Горизонтальная обложка 3', null=True, upload_to='static/media/serail/', blank=True)
@@ -90,10 +90,8 @@ class Serail(models.Model):
     horizontal_photo7 = models.ImageField('Горизонтальная обложка 8', null=True, upload_to='static/media/serail/', blank=True)
     horizontal_photo8 = models.ImageField('Горизонтальная обложка 9', null=True, upload_to='static/media/serail/', blank=True)
     horizontal_photo9 = models.ImageField('Горизонтальная обложка 10', null=True, upload_to='static/media/serail/', blank=True)
-
-
     
-    genre = models.ForeignKey(Genre, on_delete=models.SET_NULL, null=True)
+    genre = models.ForeignKey(Genre, on_delete=models.SET_NULL, null=True, related_name='serails')
     rating = models.IntegerField('Рейтинг', default=0, null=False, blank=True)
     description = models.TextField('Описание', null=True, blank=True)
 
@@ -103,11 +101,11 @@ class Serail(models.Model):
         return f'{self.name} - {self.genre} с {self.rating} рейтингом'
 
     class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
+        verbose_name = 'Сериал'
+        verbose_name_plural = 'Сериалы'
 
 class StatusNew(models.Model):
-    serail = models.ForeignKey(Serail, on_delete=models.SET_NULL, null=True)
+    serail = models.ForeignKey(Serail, on_delete=models.SET_NULL, null=True, related_name='statusnew')
 
     list_per_page = 500
 
@@ -120,6 +118,7 @@ class StatusNew(models.Model):
 
 
 class Comments(models.Model):
+    serail = models.ForeignKey(Serail, on_delete=models.CASCADE, null=True, related_name='comments')
     text = models.TextField('Текст комментария', null=True, blank=True)
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
 
@@ -139,7 +138,6 @@ class History(models.Model):
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
 
     def __str__(self):
-        comment_excerpt = (self.text[:16] + '...') if self.text else '...'
         
         return f'{self.user.name}/{self.user.tg_username} - {self.serailerail.name}'
 
@@ -153,7 +151,7 @@ class Series(models.Model):
     episode = models.BigIntegerField('Номер эпизода', null=False)
     name = models.CharField('Имя серии', max_length=500, null=False)
     likes = models.BigIntegerField('Лайки', default=0, )
-    video = models.FileField(upload_to='series/')
+    video = models.FileField(upload_to='series/', storage=VideoStorage())
 
     list_per_page = 500
 
@@ -168,7 +166,6 @@ class Series(models.Model):
 class Payments(models.Model):
     user = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True)
     summa = models.BigIntegerField('Сумма оплаты', default=0, null=True)
-    
 
     list_per_page = 500
 
@@ -180,25 +177,13 @@ class Payments(models.Model):
         verbose_name_plural = 'Транзакции'
 
 
+class ViewedSeries(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    series = models.ForeignKey(Series, on_delete=models.CASCADE)
+    viewed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'series') 
 
 
 
-""" class Films(models.Model):
-    name
-    photo
-    genre
-    created_date
-    eng desc 
-    etc. lang desc
- """
-""" class Player(models.Model):
-    name
-    likes = models.BigIntegerField('Лайки')
-    url
-    statis is new
-    pagination per page
-    status for user
-    tg_id = models.BigIntegerField('Telegram ID')
-    tg_username = models.CharField('Имя пользователя',null=True, max_length=300, blank=True)
-    photo = models.ImageField('Аватарка пользователя',null=True, upload_to='static/media/users/')
-     """

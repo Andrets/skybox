@@ -10,6 +10,7 @@ from .views import (
     StatusNewViewSet,
     CommentsViewSet,
     HistoryViewSet,
+    SeriesViewSet
 )
 
 router = DefaultRouter()
@@ -19,6 +20,7 @@ router.register('country', CountryViewSet)
 router.register('genre', GenreViewSet)
 router.register('admins', AdminsViewSet)
 router.register('serail', SerailViewSet)
+router.register('series', SeriesViewSet)
 router.register('status-new', StatusNewViewSet)
 router.register('comments', CommentsViewSet)
 router.register('history', HistoryViewSet)
