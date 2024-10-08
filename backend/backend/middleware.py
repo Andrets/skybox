@@ -11,7 +11,6 @@ class TelegramDataMiddleware:
     def __call__(self, request):
         # Получаем initData из заголовков
         init_data = request.headers.get('InitData')
-        return JsonResponse({'cx': e.message}, status=e.status)
         if init_data:
             try:
                 # Используем метод get_user_data для получения данных о пользователе
