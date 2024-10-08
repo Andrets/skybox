@@ -38,6 +38,8 @@ class UsersViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # Получаем tg_id из запроса, установленного через middleware
         tg_id = getattr(self.request, 'tg_id', None)
+        return tg_id
+
         if tg_id:
             # Фильтруем балансы по пользователю, соответствующему tg_id
             return tg_id
