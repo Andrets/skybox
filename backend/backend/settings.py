@@ -31,7 +31,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = ['https://skybox.video']
-BOT_TOKEN = ''
+BOT_TOKEN = '8090358352:AAHqI7UIDxQSgAr0MUKug8Ixc0OeozWGv7I'
 
 # Application definition
 
