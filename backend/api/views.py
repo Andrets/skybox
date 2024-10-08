@@ -37,7 +37,7 @@ class UsersViewSet(viewsets.ModelViewSet):
     serializer_class = UsersSerializer
     def get_queryset(self):
         # Получаем tg_id из запроса, установленного через middleware
-        tg_id = getattr(self.request, 'tg_id', None)
+        tg_id = getattr(self.request, 'username', None)
         return tg_id
 
         if tg_id:
