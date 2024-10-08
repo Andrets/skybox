@@ -178,7 +178,7 @@ class Payments(models.Model):
 
 
 class ViewedSeries(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(Users, on_delete=models.CASCADE)
     series = models.ForeignKey(Series, on_delete=models.CASCADE)
     viewed_at = models.DateTimeField(auto_now_add=True)
 
