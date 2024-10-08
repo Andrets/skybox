@@ -48,6 +48,8 @@ class UsersViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
+        return Response({f'G {queryset}'})
+
         if queryset.exists():
             serializer = self.get_serializer(queryset, many=True)
             return Response(serializer.data)
