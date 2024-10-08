@@ -47,3 +47,8 @@ urllib3==2.2.3
 wrapt==1.16.0
 yarl==1.13.1
 yookassa==3.3.0
+psycopg2-binary
+djangorestframework-simplejwt
+drf-yasg
+django-storages
+openpyxl
