@@ -156,3 +156,14 @@ MEDIA_URL = '/api/static/media/'
 MEDIA_ROOT = '/app/staticfiles/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+AWS_ACCESS_KEY_ID = 'NH9Q3XYBHSIYLCBX1VAV'
+AWS_SECRET_ACCESS_KEY = 'mDvlC5tUkiD9Lrr04a38phKl52SBgRgDd1E5ACg3'
+AWS_STORAGE_BUCKET_NAME = 'db3c5564-9df7e9c8-879a-46bd-ba04-f363ec17e9d0'
+AWS_S3_ENDPOINT_URL = 'https://s3.timeweb.cloud'  
+AWS_S3_REGION_NAME = 'ru-1'  
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.timeweb.cloud'
+
+DEFAULT_FILE_STORAGE = 'api.storage_backends.VideoStorage'
