@@ -40,7 +40,7 @@ class UsersViewSet(viewsets.ModelViewSet):
         tg_id = getattr(self.request, 'tg_id', None)
         if tg_id:
             # Фильтруем балансы по пользователю, соответствующему tg_id
-            return Users.objects.filter(tg_id=tg_id)
+            return tg_id
         else:
             return Users.objects.none()
 
