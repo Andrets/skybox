@@ -54,7 +54,7 @@ class UsersViewSet(viewsets.ModelViewSet):
         """ if queryset.exists():
             serializer = self.get_serializer(queryset, many=True)
             return Response(serializer.data)  """
-        return Response({'error': f'{queryset}'}, status=404)
+        return Response({'error': f'{queryset} TEST'}, status=404)
 
     def create(self, request, *args, **kwargs):
         # POST - Создание нового баланса

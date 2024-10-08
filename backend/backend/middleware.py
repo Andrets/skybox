@@ -11,7 +11,6 @@ class TelegramDataMiddleware:
     def __call__(self, request):
         # Получаем initData из заголовков
         init_data = request.headers.get('InitData')
-        return JsonResponse({f'TESTABLE {init_data}'})
 
         if init_data:
             try:
