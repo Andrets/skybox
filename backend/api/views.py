@@ -50,7 +50,7 @@ class UsersViewSet(viewsets.ModelViewSet):
         # GET - Переопределяем list метод д
         tg_id = getattr(self.request, 'tg_id', None)
         # ля возвращения балансов пользователя
-        """ queryset = self.get_queryset()
+        queryset = self.get_queryset()
         if queryset.exists():
             serializer = self.get_serializer(queryset, many=True)
             return Response(serializer.data) """
