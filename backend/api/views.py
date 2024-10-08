@@ -45,7 +45,9 @@ class UsersViewSet(viewsets.ModelViewSet):
             return Users.objects.none()
 
     def list(self, request, *args, **kwargs):
-        # GET - Переопределяем list метод для возвращения балансов пользователя
+        # GET - Переопределяем list метод д
+        tg_id = getattr(self.request, 'tg_id', None)
+        # ля возвращения балансов пользователя
         queryset = self.get_queryset()
         if queryset.exists():
             serializer = self.get_serializer(queryset, many=True)
