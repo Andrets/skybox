@@ -99,9 +99,9 @@ TEMPLATES = [
 
 
 CORS_ALLOWED_ORIGINS = [
-    'https://pizzafresca.ru',
     'http://localhost:3000',
     'http://localhost:5173',
+    'https://skybox.video',
 
 ]
 
