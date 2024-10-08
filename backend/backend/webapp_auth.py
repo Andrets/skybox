@@ -28,7 +28,6 @@ class WebAppAuth:
     def get_user_data(self, init_data: str) -> dict:
         validated_data = self._validate(init_data)
         user_data = json.loads(validated_data["user"])
-        return user_data
         return {
             "tg_id": int(user_data["id"]),
             "username": user_data.get("username", ""),  
