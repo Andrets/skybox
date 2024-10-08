@@ -42,19 +42,17 @@ class UsersViewSet(viewsets.ModelViewSet):
 
         if tg_id:
             # Фильтруем балансы по пользователю, соответствующему tg_id
-            return tg_id
+            return Users.objects.filter(tg_id=tg_id)
         else:
             return Users.objects.none()
 
     def list(self, request, *args, **kwargs):
-        # GET - Переопределяем list метод д
-        tg_id = getattr(self.request, 'tg_id', None)
-        # ля возвращения балансов пользователя
         queryset = self.get_queryset()
-        """ if queryset.exists():
+        if queryset.exists():
             serializer = self.get_serializer(queryset, many=True)
-            return Response(serializer.data)  """
-        return Response({'error': f'Q {queryset} TEST'}, status=404)
+            return Response(serializer.data)
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
 
     def create(self, request, *args, **kwargs):
         # POST - Создание нового баланса
