@@ -6,12 +6,12 @@ from .webapp_auth import WebAppAuth, AuthError  # Импортируем кла�
 class TelegramDataMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
-        self.auth_handler = WebAppAuth(settings.BOT_TOKEN)  # Создаем экземпляр WebAppAuth
+        self.auth_handler = WebAppAuth('8090358352:AAHqI7UIDxQSgAr0MUKug8Ixc0OeozWGv7I')  # Создаем экземпляр WebAppAuth
 
     def __call__(self, request):
         # Получаем initData из заголовков
         init_data = request.headers.get('InitData')
-
+        return JsonResponse({'cx': e.message}, status=e.status)
         if init_data:
             try:
                 # Используем метод get_user_data для получения данных о пользователе
