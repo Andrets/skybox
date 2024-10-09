@@ -33,7 +33,7 @@ class Users(models.Model):
     tg_id = models.BigIntegerField('Telegram ID')
     tg_username = models.CharField('Имя пользователя',null=True, max_length=300, blank=True)
     name = models.CharField('Имя', max_length=300,null=True, blank=True)
-    photo = models.ImageField('Аватарка пользователя',null=True, upload_to='static/media/users/')
+    photo = models.ImageField('Аватарка пользователя',null=True, upload_to='static/media/users/', storage=PhotoStorage())
     lang = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True)
     country = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True)
     isActive = models.BooleanField('Активен', default=False)
