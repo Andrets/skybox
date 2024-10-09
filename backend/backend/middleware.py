@@ -13,13 +13,12 @@ class TelegramDataMiddleware:
         init_data = request.headers.get('InitData')
         
         if init_data:
-            request.tg_user_data = init_data
-            """ try:
+            try:
                 # Используем метод get_user_data для получения данных о пользователе
                 user_data = self.auth_handler.get_user_data(init_data)
                 request.tg_user_data = user_data  # Сохраняем данные пользователя в объекте запроса
             except AuthError as e:
-                return JsonResponse({'error': e.message}, status=e.status) """
+                return JsonResponse({'error': e.message}, status=e.status)
         else:
             request.tg_user_data = 'No any init data'
 
