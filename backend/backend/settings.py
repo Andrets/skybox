@@ -34,6 +34,22 @@ CSRF_TRUSTED_ORIGINS = ['https://skybox.video']
 BOT_TOKEN = '8090358352:AAHqI7UIDxQSgAr0MUKug8Ixc0OeozWGv7I'
 
 # Application definition
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_METHODS = (
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+)
+
+CORS_ALLOW_HEADERS = ('content-disposition', 'accept-encoding',
+                      'content-type', 'accept', 'origin', 'Authorization',
+                      'access-control-allow-methods', 'initData')
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -99,14 +115,6 @@ TEMPLATES = [
 
 
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'https://skybox.video',
-
-]
-
-CORS_ALLOW_CREDENTIALS = True
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
