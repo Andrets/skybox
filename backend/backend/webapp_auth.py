@@ -40,7 +40,7 @@ class WebAppAuth:
 
     def _validate(self, init_data: str) -> dict[str, Any]:
         try:
-            parsed_data = parse_qsl(init_data, strict_parsing=True)
+            parsed_data = dict(parse_qsl(init_data, strict_parsing=True))
         except ValueError as err:
             raise AuthError(detail="invalid init data") from err
         if "hash" not in parsed_data:
