@@ -38,7 +38,7 @@ class UsersViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # Получаем tg_id из запроса, установленного через middleware
         tg_id = self.request.tg_user_data
-        return tg_id
+        #return tg_id
 
         if tg_id:
             # Фильтруем балансы по пользователю, соответствующему tg_id
@@ -48,7 +48,7 @@ class UsersViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        return Response({f'G {queryset}'})
+        #return Response({f'G {queryset}'})
 
         if queryset.exists():
             serializer = self.get_serializer(queryset, many=True)
