@@ -4,7 +4,7 @@ import json
 from dataclasses import dataclass
 from operator import itemgetter
 from typing import Any
-from urllib.parse import parse_qsl
+from urllib.parse import unquote, parse_qsl
 
 
 @dataclass(eq=False)
@@ -40,6 +40,7 @@ class WebAppAuth:
 
     def _validate(self, init_data: str) -> dict[str, Any]:
         try:
+            init_data = unquote(init_data)
             parsed_data = dict(parse_qsl(init_data, strict_parsing=True))
         except ValueError as err:
             raise AuthError(detail="invalid init data") from err
