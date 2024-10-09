@@ -42,9 +42,9 @@ class WebAppAuth:
         try:
             parsed_data = dict(parse_qsl(init_data, strict_parsing=True))
         except ValueError as err:
-            raise AuthError(detail=f"invalid init data {parsed_data}") from err
+            raise AuthError(detail="invalid init data") from err
         if "hash" not in parsed_data:
-            raise AuthError(detail="missing hash")
+            raise AuthError(detail=f"missing hash {parsed_data}")
         hash_ = parsed_data.pop("hash")
         data_check_string = "\n".join(f"{k}={v}" for k, v in sorted(parsed_data.items(), key=itemgetter(0)))
         calculated_hash = hmac.new(
