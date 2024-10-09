@@ -37,7 +37,9 @@ class UsersViewSet(viewsets.ModelViewSet):
     serializer_class = UsersSerializer
     def get_queryset(self):
         # Получаем tg_id из запроса, установленного через middleware
-        tg_id = getattr(self.request, 'tg_id', None)
+        tg_id = self.request.tg_user_data['tg_id']
+        #return tg_id
+
         if tg_id:
             # Фильтруем балансы по пользователю, соответствующему tg_id
             return Users.objects.filter(tg_id=tg_id)
@@ -45,12 +47,14 @@ class UsersViewSet(viewsets.ModelViewSet):
             return Users.objects.none()
 
     def list(self, request, *args, **kwargs):
-        # GET - Переопределяем list метод для возвращения балансов пользователя
         queryset = self.get_queryset()
+        #return Response({f'G {queryset}'})
+
         if queryset.exists():
             serializer = self.get_serializer(queryset, many=True)
             return Response(serializer.data)
-        return Response({'error': 'No User found for this user'}, status=404)
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
 
     def create(self, request, *args, **kwargs):
         # POST - Создание нового баланса
