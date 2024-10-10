@@ -7,7 +7,7 @@ from aiogram.types import InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardBut
 from aiogram import Bot
 from aiogram.client.bot import DefaultBotProperties
 from aiogram.enums import ParseMode
-from aiogram.types import InputFile
+from aiogram.types import InputFile, FSInputFile
 
 from api.models import Users
 from api.tg_bot.database import *
@@ -21,31 +21,28 @@ from PIL import Image
 import aiofiles
 import openpyxl
 import os
-from os import getenv, environ
-from dotenv import load_dotenv
-
-
 
 admin_private = Router()
-load_dotenv()
-bot = Bot(getenv('BOT_TOKEN'), default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+
+bot = Bot('8090358352:AAHqI7UIDxQSgAr0MUKug8Ixc0OeozWGv7I', default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+
+async def get_users_by_subscription(segment):
+    if segment == 'paid':
+        return await sync_to_async(list)(Users.objects.filter(paid=True))
+    elif segment == 'free':
+        return await sync_to_async(list)(Users.objects.filter(paid=False))
 
 async def send_users_xlsx(chat_id):
-    # Создаем новый рабочий файл
     workbook = Workbook()
     sheet = workbook.active
     sheet.title = "Users Data"
 
-    # Заголовки столбцов
     headers = ["Telegram ID", "Имя пользователя", "Имя", "Страна", "Платная подписка"]
     sheet.append(headers)
 
-    # Получаем данные пользователей
     users = await sync_to_async(list)(Users.objects.all())
 
-    # Заполняем данные пользователей
     for user in users:
-        # Получаем страну через sync_to_async
         country_name = await sync_to_async(lambda: user.country.country_name if user.country else "Нет")()
         
         sheet.append([
@@ -56,23 +53,18 @@ async def send_users_xlsx(chat_id):
             "Да" if user.paid else "Нет"
         ])
 
-    # Путь для сохранения файла
     file_path = 'users_data.xlsx'
     workbook.save(file_path)
 
-    # Создаем InputFile для отправки файла, передаем путь к файлу
-    input_file = InputFile(path_or_bytesio=file_path)
+    input_file = FSInputFile(path=file_path)
 
-    # Отправляем файл в Telegram
     await bot.send_document(chat_id=chat_id, document=input_file)
 
-    # Удаляем файл после отправки
     os.remove(file_path)
 
 @admin_private.message(Command('admin'))
 async def admin_panel(message: Message):
     is_admin = await check_admin(message.from_user.id)
-    await send_users_xlsx(message.from_user.id)
     if is_admin:
         await message.answer('🔒 Админ-панель', reply_markup=kb.admin_panel())
 
@@ -102,8 +94,17 @@ async def statistics(callback: CallbackQuery):
 @admin_private.callback_query(F.data == 'mailing')
 async def post_mailing(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
+    await state.set_state(Admin.mailing_state_type)
+    await callback.message.answer('Выберите тип рассылки',reply_markup=kb.post_type2())
+
+@admin_private.message(Admin.mailing_state_type)
+async def choose_mailing_segment(message: Message, state: FSMContext):
+    if message.text == "Платные подписчики":
+        await state.update_data(segment='paid')
+    elif message.text == "Бесплатные подписчики":
+        await state.update_data(segment='free')
     await state.set_state(Admin.mailing_state)
-    await callback.message.answer('Выберите тип рассылки',reply_markup=kb.post_type())
+    await message.answer('Выберите тип поста для рассылки', reply_markup=kb.post_type())
 
 @admin_private.message(Admin.mailing_state)
 async def proccess_text1(message: Message, state: FSMContext):
@@ -182,15 +183,17 @@ async def procces_post_yes(message: Message, state: FSMContext):
     await state.update_data(confirm_yes=message.text)
     data = await state.get_data()
     text = data['confirm_yes']
-
+    segment = data.get('segment')
     if text == 'Да, выполнить':
         z = await state.get_data()
 
-        users = await get_all_users_tg_id()
+        users = await get_users_by_subscription(segment)
         if 'mailing_photo' in data:
             counter = 0
             caption = data['mailing_text']
             photo = data['mailing_photo']
+            paid_stype = data['segment']
+
             for user in users:
                 await message.bot.send_photo(user['tg_id'], photo=data['mailing_photo'], caption=caption, reply_markup=kb.get_order_post())
                 ccounter += 1
@@ -216,14 +219,17 @@ async def procces_post_yes(message: Message, state: FSMContext):
 
 @admin_private.message(Admin.confirm_no)
 async def procces_post_no(message: Message, state: FSMContext):
+
     await state.update_data(confirm_yes=message.text)
     data = await state.get_data()
     text = data['confirm_yes']
+    segment = data.get('segment')
 
     if text == 'Да, выполнить':
         z = await state.get_data()
 
-        users = await get_all_users_tg_id()
+        users = await get_users_by_subscription(segment)
+
 
         
         if 'mailing_photo' in data:
@@ -252,3 +258,38 @@ async def procces_post_no(message: Message, state: FSMContext):
     if text == 'Нет, вернуться':
         await message.answer('Вы вернулись в меню', reply_markup=ReplyKeyboardRemove())
         await message.answer('🔒 Админ-панель', reply_markup=kb.admin_panel())
+
+
+@admin_private.callback_query(F.data == 'download_db')
+async def download_db(callback: CallbackQuery):
+    await callback.answer()
+    is_admin = await check_admin(callback.from_user.id)
+    if is_admin:
+        await send_users_xlsx(callback.from_user.id)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -11,6 +11,7 @@ from aiogram.client.bot import DefaultBotProperties
 from aiogram.enums import ParseMode
 
 from asgiref.sync import sync_to_async
+from googletrans import Translator
 
 from api.models import Users
 from api.tg_bot.database import  *
@@ -33,6 +34,24 @@ import os
 
 user_private = Router()
 load_dotenv()
+
+""" from googletrans import Translator
+
+# Создаем экземпляр переводчика
+translator = Translator()
+
+# Текст для перевода
+text = "Hello, how are you?"
+
+# Определение языка текста
+detected_lang = translator.detect(text)
+print(f"Определённый язык: {detected_lang.lang}")
+
+# Перевод текста на русский
+translated = translator.translate(text, dest='ru')
+
+print(f"Исходный текст: {text}")
+print(f"Перевод на русский: {translated.text}") """
 
 bot = Bot(getenv('BOT_TOKEN'), default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 

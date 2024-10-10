@@ -38,7 +38,7 @@ class Users(models.Model):
     country = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True)
     isActive = models.BooleanField('Активен', default=False)
     paid = models.BooleanField('Имел/Имеет платную подписку', default=False)
-
+    search_history = models.JSONField(default=list, verbose_name='История поиска')
 
     list_per_page = 500
 

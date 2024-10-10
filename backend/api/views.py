@@ -31,8 +31,10 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from datetime import timedelta
 from django.db.models import Count, F, Min, OuterRef, Prefetch, Q, Subquery
-
-class UsersViewSet(viewsets.ModelViewSet):
+from django.http import StreamingHttpResponse
+from django.shortcuts import get_object_or_404
+import boto3
+class UsersViewSet(viewsets.ModelViewSet): 
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
     def get_queryset(self):
@@ -93,7 +95,52 @@ class UsersViewSet(viewsets.ModelViewSet):
             user.delete()
             return Response({'message': 'User deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
         return Response({'error': 'User not found'}, status=404)
+    @action(detail=False, methods=['get'], url_path='search-history')
+    def get_search_history(self, request):
+        # Получаем tg_id из middleware
+        tg_id = self.request.tg_user_data.get('tg_id', None)
 
+        # Проверяем наличие tg_id
+        if tg_id:
+            # Ищем пользователя по tg_id
+            user = get_object_or_404(Users, tg_id=tg_id)
+
+            # Если пользователь найден, возвращаем историю поиска
+            return Response({'search_history': user.search_history}, status=status.HTTP_200_OK)
+        
+        return Response({'error': 'Пользователь не найден'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Эндпоинт для добавления элемента в историю поиска
+    @action(detail=False, methods=['post'], url_path='add-search-history')
+    def add_search_history(self, request):
+        # Получаем tg_id из middleware
+        tg_id = self.request.tg_user_data.get('tg_id', None)
+
+        # Проверяем наличие tg_id
+        if tg_id:
+            # Ищем пользователя по tg_id
+            user = get_object_or_404(Users, tg_id=tg_id)
+
+            # Получаем новое значение для добавления в историю поиска
+            new_search_item = request.data.get('search_item')
+            if not new_search_item:
+                return Response({'error': 'Отсутствует параметр search_item'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Добавляем новое значение в начало истории поиска
+            search_history = user.search_history or []
+            search_history.insert(0, new_search_item)
+
+            # Если количество элементов больше 10, удаляем последний
+            if len(search_history) > 10:
+                search_history = search_history[:10]
+
+            # Обновляем поле search_history и сохраняем пользователя
+            user.search_history = search_history
+            user.save()
+
+            return Response({'message': 'Элемент добавлен в историю поиска', 'search_history': user.search_history}, status=status.HTTP_200_OK)
+        
+        return Response({'error': 'Пользователь не найден'}, status=status.HTTP_404_NOT_FOUND)
 
 class CountryViewSet(viewsets.ModelViewSet):
     queryset = Country.objects.all()
@@ -212,6 +259,30 @@ class HistoryViewSet(viewsets.ModelViewSet):
 class SeriesViewSet(viewsets.ModelViewSet):
     queryset = Series.objects.all()
     serializer_class = SeriesSerializer
+
+    def stream_video(self, request, pk=None):
+        # Получаем серию по первичному ключу (pk)
+        series = self.get_object()
+
+        # Создаем клиент S3
+        s3_client = boto3.client('s3')
+
+        # Получаем информацию об объекте
+        bucket_name = series.video.storage.bucket_name
+        video_key = series.video.name
+
+        # Получаем объект из S3
+        s3_object = s3_client.get_object(Bucket=bucket_name, Key=video_key)
+        
+        # Создаем StreamingHttpResponse для потоковой передачи
+        response = StreamingHttpResponse(
+            s3_object['Body'].iter_chunks(chunk_size=8192),  # Размер чанка можно изменить по вашему усмотрению
+            content_type='video/mp4'
+        )
+        response['Content-Disposition'] = f'inline; filename="{series.name}.mp4"'
+        response['Accept-Ranges'] = 'bytes'
+
+        return response
 
     def get_queryset(self):
         tg_id = getattr(self.request, 'tg_id', None)
