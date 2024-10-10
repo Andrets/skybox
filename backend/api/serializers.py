@@ -48,8 +48,8 @@ class SerailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Serail
-        fields = ['id', 'name', 'vertical_photo', 'genre', 'rating']
-
+        fields = ['id', 'name', 'vertical_photo', 'genre', 'rating', 'description']
+        
 class StatusNewSerializer(serializers.ModelSerializer):
     class Meta:
         model = StatusNew

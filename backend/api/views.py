@@ -242,6 +242,32 @@ class SerailViewSet(viewsets.ModelViewSet):
         serializer = SerailSerializer(result_data, many=True)
         return Response(serializer.data)
     
+    @action(detail=False, methods=['get'], url_path='search')
+    def search_serails(self, request):
+        search_query = request.query_params.get('query', None)
+
+        if not search_query:
+            return Response({'error': 'Не указан параметр query'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Поиск сериалов по названию или описанию
+        serails = Serail.objects.filter(name__icontains=search_query) | Serail.objects.filter(description__icontains=search_query)
+        serializer = self.get_serializer(serails, many=True)
+
+        # Сохранение истории поиска
+        tg_id = request.tg_user_data.get('tg_id', None)
+        if tg_id:
+            user = get_object_or_404(Users, tg_id=tg_id)
+            search_history = user.search_history or []
+            search_history.insert(0, search_query)
+
+            # Удаляем последний элемент, если больше 10
+            if len(search_history) > 10:
+                search_history = search_history[:10]
+
+            user.search_history = search_history
+            user.save()
+
+        return Response({'results': serializer.data}, status=status.HTTP_200_OK)
 class StatusNewViewSet(viewsets.ModelViewSet):
     queryset = StatusNew.objects.all()
     serializer_class = StatusNewSerializer
