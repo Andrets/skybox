@@ -215,6 +215,8 @@ class SerailViewSet(viewsets.ModelViewSet):
 
         result_data = []
         for serail in serails:
+            return Response(user_lang)
+
             name_translated = self.translate_it(serail.name, user_lang)
             description_translated = self.translate_it(serail.description, user_lang)
             genre_translated = str(self.translate_it(str(serail.genre), user_lang)) if serail.genre else None
