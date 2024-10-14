@@ -176,7 +176,7 @@ class SerailViewSet(viewsets.ModelViewSet):
         tg_id = int(self.request.tg_user_data.get('tg_id', 0))
         user = Users.objects.filter(tg_id=tg_id).first()
         if user and user.lang:
-            return user.lang.lang_name  # Возвращаем имя языка пользователя (например, 'ru', 'en', и т.д.)
+            return str(user.lang.lang_name)  # Возвращаем имя языка пользователя (например, 'ru', 'en', и т.д.)
         return 'en'  # Если язык не указан, используем английский по умолчанию
 
     def translate_it(self, text, target_lang):
