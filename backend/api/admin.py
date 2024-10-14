@@ -34,7 +34,7 @@ class UsersAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         if obj:  
-            return ['tg_id', 'tg_username', 'name', 'photo', 'paid']
+            return ['tg_id','paid']
         return []
 
     class Meta:
@@ -111,8 +111,11 @@ class SerailAdmin(admin.ModelAdmin):
         'genre',
         'rating',
         'description',
+        'is_original',
+        'views',
     )
     inlines = [SeriesInline]
+
 
     class Meta:
         model = Serail

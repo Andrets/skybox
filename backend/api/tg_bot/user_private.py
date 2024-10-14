@@ -33,7 +33,6 @@ import json
 import os
 
 user_private = Router()
-load_dotenv()
 
 """ from googletrans import Translator
 
@@ -53,10 +52,37 @@ translated = translator.translate(text, dest='ru')
 print(f"Исходный текст: {text}")
 print(f"Перевод на русский: {translated.text}") """
 
-bot = Bot(getenv('BOT_TOKEN'), default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+
+bot = Bot('8090358352:AAHqI7UIDxQSgAr0MUKug8Ixc0OeozWGv7I', default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
 @user_private.message(CommandStart())
 async def start_message(message: Message, bot: Bot):
+    UserProfilePhotos = await bot.get_user_profile_photos(user_id=message.from_user.id)
+    file_id = 0
+    photo = ''
+    if UserProfilePhotos.total_count > 0:
+        first_photo = UserProfilePhotos.photos[0][0]
+        file_id = first_photo.file_id
+        
+        file = await bot.get_file(file_id=file_id)
+        file_path = file.file_path
+        file_url = f'https://api.telegram.org/file/bot{bot.token}/{file_path}'
+        if file_id == 0:
+            photo = ''
+        else: 
+            photo=f'{file_id}.webp'
+        save_path = Path('static/media/users') / f'{file_id}.webp'
+        save_path.parent.mkdir(parents=True, exist_ok=True)  
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.get(file_url) as response:
+                if response.status == 200:
+                    with open(save_path, 'wb') as f:
+                        f.write(await response.read())
+
+        
+    user_reg = await add_user_data(user_id=message.from_user.id, photo=photo, username=message.from_user.username, first_name=message.from_user.first_name )
+    print(message.from_user.language_code)
     await message.answer('🎬 Добро пожаловать в SKYBOX!\n'
                          '\n'
                          'Ваш идеальный помощник для просмотра сериалов.\n'

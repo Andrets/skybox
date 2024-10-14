@@ -1,5 +1,6 @@
 from django.db import models
 from .storage_backends import VideoStorage, PhotoStorage
+from django.utils.translation import gettext_lazy as _
 
 class Language(models.Model):
     lang_name = models.CharField('Имя языка на анг.', null=True, max_length=300, blank=True)
@@ -79,6 +80,7 @@ class Genre(models.Model):
 class Serail(models.Model):
     
     name = models.CharField('Имя', max_length=500, null=True, blank=True)
+    lang = models.ForeignKey(Language, on_delete=models.CASCADE, null=True)
     vertical_photo = models.ImageField('Вертикальная обложка', null=True, storage=PhotoStorage(), upload_to='serail/', blank=True)
     horizontal_photo0 = models.ImageField('Горизонтальная обложка',null=True, upload_to='static/media/serail/', blank=True)
     horizontal_photo1 = models.ImageField('Горизонтальная обложка 2', null=True, upload_to='static/media/serail/', blank=True)
@@ -90,10 +92,12 @@ class Serail(models.Model):
     horizontal_photo7 = models.ImageField('Горизонтальная обложка 8', null=True, upload_to='static/media/serail/', blank=True)
     horizontal_photo8 = models.ImageField('Горизонтальная обложка 9', null=True, upload_to='static/media/serail/', blank=True)
     horizontal_photo9 = models.ImageField('Горизонтальная обложка 10', null=True, upload_to='static/media/serail/', blank=True)
-    
     genre = models.ForeignKey(Genre, on_delete=models.SET_NULL, null=True, related_name='serails')
     rating = models.IntegerField('Рейтинг', default=0, null=False, blank=True)
     description = models.TextField('Описание', null=True, blank=True)
+    is_original = models.BooleanField('Является оригиналом', default=False)
+    views = models.BigIntegerField('Просмотры', default=0)
+
 
     list_per_page = 500
 
@@ -106,7 +110,7 @@ class Serail(models.Model):
 
 class StatusNew(models.Model):
     serail = models.ForeignKey(Serail, on_delete=models.SET_NULL, null=True, related_name='statusnew')
-
+    added_date = models.DateField('Дата добавления статуса', auto_now_add=True)
     list_per_page = 500
 
     def __str__(self):
@@ -187,3 +191,23 @@ class ViewedSeries(models.Model):
 
 
 
+
+class DocsTexts(models.Model):
+    class StatusEnum(models.TextChoices):
+        TERMS_OF_USE = 'TERMS_OF_USE', _('TERMS_OF_USE')
+        PRIVACY_POLICY = 'PRIVACY_POLICY', _('PRIVACY_POLICY')
+        DMCA = 'DMCA', _('DMCA')
+
+    name = models.CharField('Статус', choices=StatusEnum.choices, max_length=250)
+    lang = models.ForeignKey(Language, on_delete=models.CASCADE, null=True)
+    text = models.TextField('Текст документа', null=True, blank=True)
+
+    list_per_page = 500
+
+    def __str__(self):
+
+        return f'{self.lang} - {self.name} '
+
+    class Meta:
+        verbose_name = 'Документ'
+        verbose_name_plural = 'Документы'
