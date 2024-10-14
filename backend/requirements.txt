@@ -51,4 +51,4 @@ djangorestframework-simplejwt
 drf-yasg
 django-storages
 openpyxl
-googletrans
+googletrans==4.0.0-rc1
