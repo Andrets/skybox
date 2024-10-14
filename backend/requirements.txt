@@ -20,7 +20,7 @@ drf-yasg==1.21.7
 et-xmlfile==1.1.0
 frozenlist==1.4.1
 gunicorn==23.0.0
-idna==3.10
+idna==3.4
 inflection==0.5.1
 jmespath==1.0.1
 magic-filter==1.0.12
