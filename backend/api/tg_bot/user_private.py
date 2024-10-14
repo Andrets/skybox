@@ -81,7 +81,7 @@ async def start_message(message: Message, bot: Bot):
                         f.write(await response.read())
 
         
-    user_reg = await add_user_data(user_id=message.from_user.id, photo=photo, username=message.from_user.username, first_name=message.from_user.first_name )
+    user_reg = await add_user_data(user_id=message.from_user.id, photo=photo, username=message.from_user.username, first_name=message.from_user.first_name, lang=str(message.from_user.language_code))
     print(message.from_user.language_code)
     await message.answer('🎬 Добро пожаловать в SKYBOX!\n'
                          '\n'

@@ -217,19 +217,30 @@ class SerailViewSet(viewsets.ModelViewSet):
         for serail in serails:
             name_translated = self.translate_it(serail.name, user_lang)
             description_translated = self.translate_it(serail.description, user_lang)
-            comments_translated = [self.translate_it(comment.text, user_lang) for comment in serail.comments.all()]
             genre_translated = str(self.translate_it(str(serail.genre), user_lang)) if serail.genre else None
+
+            # Собираем информацию о комментариях
+            comments_data = []
+            for comment in serail.comments.all():
+                comment_data = {
+                    'text': self.translate_it(comment.text, user_lang),
+                    'user_avatar': comment.user.photo.url if comment.user.photo else None,
+                    'tg_username': comment.user.tg_username
+                }
+                comments_data.append(comment_data)
+
             serail_data = {
                 'name': name_translated,
                 'genre': genre_translated,
                 'rating': serail.rating,
                 'description': description_translated,
-                'comments': comments_translated,
+                'comments': comments_data,  # Добавляем собранные данные о комментариях
                 'is_new': serail.statusnew.exists(),  # Проверка наличия статуса "новый"
                 'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,  # Вертикальная фотография
                 'horizontal_photos': []  # Инициализируем список горизонтальных фотографий
             }
 
+            # Добавляем горизонтальные фотографии
             for i in range(10):  # 10 - количество горизонтальных фотографий
                 photo_field = getattr(serail, f'horizontal_photo{i}', None)
                 if photo_field:
