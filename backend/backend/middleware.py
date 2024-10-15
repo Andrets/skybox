@@ -18,7 +18,7 @@ class TelegramDataMiddleware:
                 init_data = str(init_data)
                 output_string = init_data.replace('%3D', '=').replace('%26', '&')
 
-                user_data = self.auth_handler.get_user_data(init_data)
+                user_data = self.auth_handler.get_user_data(output_string)
                 #return JsonResponse({'data': user_data})
                 request.tg_user_data = user_data  # Сохраняем данные пользователя в объекте запроса
             except AuthError as e:
