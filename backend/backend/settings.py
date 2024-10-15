@@ -167,7 +167,6 @@ USE_TZ = True
 
 STATIC_URL = '/api/staticfiles/'
 STATIC_ROOT = '/app/staticfiles/'
-# Настройки хранения медиафайлов
 MEDIA_URL = '/api/static/media/'
 MEDIA_ROOT = '/app/staticfiles/media/'
 

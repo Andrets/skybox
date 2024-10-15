@@ -8,7 +8,8 @@ from .models import (
     StatusNew,
     Comments,
     History,
-    Series
+    Series,
+    DocsTexts,
 )
 from .serializers import (
     UsersSerializer,
@@ -20,7 +21,8 @@ from .serializers import (
     StatusNewSerializer,
     CommentsSerializer,
     HistorySerializer,
-    SeriesSerializer
+    SeriesSerializer,
+    DocsTextsSerializer,
 )
 import requests
 import random
@@ -40,26 +42,22 @@ import boto3
 class UsersViewSet(viewsets.ModelViewSet): 
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
+
     def get_queryset(self):
-        # Получаем tg_id из запроса, установленного через middleware
         tg_id = self.request.tg_user_data['tg_id']
-        #return tg_id
 
         if tg_id:
-            # Фильтруем балансы по пользователю, соответствующему tg_id
             return Users.objects.filter(tg_id=tg_id)
         else:
             return Users.objects.none()
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        #return Response({f'G {queryset}'})
 
         if queryset.exists():
             serializer = self.get_serializer(queryset, many=True)
             return Response(serializer.data)
         return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-
 
     def create(self, request, *args, **kwargs):
         # POST - Создание нового баланса
@@ -98,6 +96,7 @@ class UsersViewSet(viewsets.ModelViewSet):
             user.delete()
             return Response({'message': 'User deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
         return Response({'error': 'User not found'}, status=404)
+    
     @action(detail=False, methods=['get'], url_path='search-history')
     def get_search_history(self, request):
         # Получаем tg_id из middleware
@@ -113,7 +112,6 @@ class UsersViewSet(viewsets.ModelViewSet):
         
         return Response({'error': 'Пользователь не найден'}, status=status.HTTP_404_NOT_FOUND)
 
-    # Эндпоинт для добавления элемента в историю поиска
     @action(detail=False, methods=['post'], url_path='add-search-history')
     def add_search_history(self, request):
         # Получаем tg_id из middleware
@@ -145,7 +143,6 @@ class UsersViewSet(viewsets.ModelViewSet):
         
         return Response({'error': 'Пользователь не найден'}, status=status.HTTP_404_NOT_FOUND)
 
-    
 
 class CountryViewSet(viewsets.ModelViewSet):
     queryset = Country.objects.all()
@@ -172,12 +169,11 @@ class SerailViewSet(viewsets.ModelViewSet):
     serializer_class = SerailSerializer
 
     def get_user_language(self):
-        # Получаем текущего пользователя по его tg_id
         tg_id = int(self.request.tg_user_data.get('tg_id', 0))
         user = Users.objects.filter(tg_id=tg_id).first()
         if user and user.lang:
-            return str(user.lang.lang_name)  # Возвращаем имя языка пользователя (например, 'ru', 'en', и т.д.)
-        return 'en'  # Если язык не указан, используем английский по умолчанию
+            return str(user.lang.lang_name)
+        return 'en'
 
     def translate_it(self, text, target_lang):
         if not text:
@@ -189,7 +185,6 @@ class SerailViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def get_serail_details(self, request, url_path='serail-details'):
-        # Получаем язык пользователя
         user_lang = self.get_user_language()
         data = request.query_params.get('data', None)
         
@@ -199,13 +194,13 @@ class SerailViewSet(viewsets.ModelViewSet):
                     'comments', 
                     'genre', 
                     'statusnew'
-                ).filter(id=int(data))  # Фильтрация по id
+                ).filter(id=int(data))  
             except ValueError:
                 serails = Serail.objects.prefetch_related(
                     'comments', 
                     'genre', 
                     'statusnew'
-                ).filter(name__icontains=data)  # Фильтрация по имени (не чувствительно к регистру)
+                ).filter(name__icontains=data)  
         else:
             serails = Serail.objects.prefetch_related(
                 'comments', 
@@ -220,7 +215,6 @@ class SerailViewSet(viewsets.ModelViewSet):
             description_translated = self.translate_it(serail.description, user_lang)
             genre_translated = str(self.translate_it(str(serail.genre), user_lang)) if serail.genre else None
 
-            # Собираем информацию о комментариях
             comments_data = []
             for comment in serail.comments.all():
                 comment_data = {
@@ -235,49 +229,20 @@ class SerailViewSet(viewsets.ModelViewSet):
                 'genre': genre_translated,
                 'rating': serail.rating,
                 'description': description_translated,
-                'comments': comments_data,  # Добавляем собранные данные о комментариях
-                'is_new': serail.statusnew.exists(),  # Проверка наличия статуса "новый"
-                'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,  # Вертикальная фотография
-                'horizontal_photos': []  # Инициализируем список горизонтальных фотографий
+                'comments': comments_data,  
+                'is_new': serail.statusnew.exists(),  
+                'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,  
+                'horizontal_photos': []  
             }
 
-            # Добавляем горизонтальные фотографии
-            for i in range(10):  # 10 - количество горизонтальных фотографий
+            for i in range(10):  
                 photo_field = getattr(serail, f'horizontal_photo{i}', None)
                 if photo_field:
-                    serail_data['horizontal_photos'].append(photo_field.url)  # Добавляем URL фотографии
+                    serail_data['horizontal_photos'].append(photo_field.url)  
 
             result_data.append(serail_data)
 
         return Response(result_data)
-
-    @action(detail=False, methods=['get'])
-    def get_recommends(self, request):
-        # 1. 60% сериалов с наивысшим рейтингом
-        total_serails = Serail.objects.count()
-        top_60_percent = int(total_serails * 0.6)
-        top_by_rating = Serail.objects.order_by('-rating')[:top_60_percent]
-
-        # 2. 20% сериалов с наибольшим количеством комментариев
-        top_20_percent = int(total_serails * 0.2)
-        top_by_comments = Serail.objects.annotate(
-            comment_count=Count('comments__id')
-        ).order_by('-comment_count')[:top_20_percent]
-
-        # 3. 20% случайных сериалов
-        random_20_percent = int(total_serails * 0.2)
-        random_serails = Serail.objects.order_by('?')[:random_20_percent]
-
-        # Сериалы со статусом "новый"
-        status_new_serails = Serail.objects.filter(statusnew__isnull=False)
-
-        # Собираем все уникальные сериалы в результат
-        result_data = list(top_by_rating) + list(top_by_comments) + list(random_serails) + list(status_new_serails)
-        result_data = list(set(result_data))  # Удаляем дубликаты
-
-        # Используем кастомный сериализатор
-        serializer = SerailSerializer(result_data, many=True)
-        return Response(serializer.data)
 
 
     @action(detail=False, methods=['get'])
@@ -419,32 +384,24 @@ class SerailViewSet(viewsets.ModelViewSet):
 
         return Response({'you_might_like': result_data})
 
-
     @action(detail=False, methods=['get'])
     def get_category_serials(self, request):
-        # Получаем параметр data из запроса
         data = request.query_params.get('data')
 
-        # Определяем количество сериалов для выборки
         count = 18
 
-        # Если data равен popular, возвращаем 18 сериалов с наибольшим количеством просмотров
         if data == 'popular':
             serials = Serail.objects.order_by('-views')[:count]
 
-        # Если data равен new, возвращаем 18 сериалов, которые имеют статус "новый"
         elif data == 'new':
             serials = Serail.objects.filter(statusnew__isnull=False).order_by('-statusnew__added_date')[:count]
 
-        # Если data равен original, возвращаем 18 оригинальных сериалов
         elif data == 'original':
             serials = Serail.objects.filter(is_original=True)[:count]
 
         else:
-            # Если параметр data отсутствует или не распознан, возвращаем пустой результат
             return Response({'error': 'Invalid or missing data parameter'}, status=400)
 
-        # Формируем результат для сериалов
         result_data = []
         for serail in serials:
             serail_data = {
@@ -458,7 +415,6 @@ class SerailViewSet(viewsets.ModelViewSet):
             }
             result_data.append(serail_data)
 
-        # Возвращаем сериализированные данные
         return Response({'serials': result_data})
     
     @action(detail=False, methods=['get'], url_path='search')
@@ -468,18 +424,15 @@ class SerailViewSet(viewsets.ModelViewSet):
         if not search_query:
             return Response({'error': 'Не указан параметр query'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Поиск сериалов по названию или описанию
         serails = Serail.objects.filter(name__icontains=search_query) | Serail.objects.filter(description__icontains=search_query)
         serializer = self.get_serializer(serails, many=True)
 
-        # Сохранение истории поиска
         tg_id = request.tg_user_data.get('tg_id', None)
         if tg_id:
             user = get_object_or_404(Users, tg_id=tg_id)
             search_history = user.search_history or []
             search_history.insert(0, search_query)
 
-            # Удаляем последний элемент, если больше 10
             if len(search_history) > 10:
                 search_history = search_history[:10]
 
@@ -506,30 +459,6 @@ class SeriesViewSet(viewsets.ModelViewSet):
     queryset = Series.objects.all()
     serializer_class = SeriesSerializer
 
-    def stream_video(self, request, pk=None):
-        # Получаем серию по первичному ключу (pk)
-        series = self.get_object()
-
-        # Создаем клиент S3
-        s3_client = boto3.client('s3')
-
-        # Получаем информацию об объекте
-        bucket_name = series.video.storage.bucket_name
-        video_key = series.video.name
-
-        # Получаем объект из S3
-        s3_object = s3_client.get_object(Bucket=bucket_name, Key=video_key)
-        
-        # Создаем StreamingHttpResponse для потоковой передачи
-        response = StreamingHttpResponse(
-            s3_object['Body'].iter_chunks(chunk_size=8192),  # Размер чанка можно изменить по вашему усмотрению
-            content_type='video/mp4'
-        )
-        response['Content-Disposition'] = f'inline; filename="{series.name}.mp4"'
-        response['Accept-Ranges'] = 'bytes'
-
-        return response
-
     def get_queryset(self):
         tg_id = getattr(self.request, 'tg_id', None)
         if tg_id:
@@ -539,22 +468,34 @@ class SeriesViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def get_shorts(self, request):
-        user = self.get_queryset().first()
-        if not user:
-            return Response({'error': 'User not found'}, status=404)
+        tg_id = getattr(self.request, 'tg_id', None)
+        if tg_id:
+            user = Users.objects.filter(tg_id=tg_id).first()
+        else:
+            return Response({"detail": "User not found."}, status=404)
 
         viewed_series_ids = ViewedSeries.objects.filter(user=user).values_list('series_id', flat=True)
 
-        random_series = Series.objects.exclude(id__in=viewed_series_ids).order_by('?')[:10]
+        queryset = Series.objects.exclude(id__in=viewed_series_ids)
 
-        if not random_series.exists():
-            return Response({'message': 'No more unseen series available'}, status=404)
+        if not queryset.exists():
+            return Response({"detail": "No series available."}, status=404)
 
-        for series in random_series:
-            ViewedSeries.objects.create(user=user, series=series)
+        count = queryset.count()
+        top_20_percent_count = max(1, int(count * 0.2))  
+        random_80_percent_count = 10 - top_20_percent_count
 
-        serializer = SeriesSerializer(random_series, many=True)
-        return Response(serializer.data, status=200)
+        top_20_percent = queryset.order_by('-likes')[:top_20_percent_count]
+
+        remaining_series = queryset.exclude(id__in=top_20_percent.values_list('id', flat=True))
+        random_80_percent = remaining_series.order_by('?')[:random_80_percent_count]
+
+        result_series = list(top_20_percent) + list(random_80_percent)
+        random.shuffle(result_series)  
+
+        serialized_data = self.get_serializer(result_series, many=True).data
+
+        return Response(serialized_data)
 
     @action(detail=False, methods=['get'])
     def get_series_by_serail(self, request):
@@ -622,3 +563,8 @@ class SeriesViewSet(viewsets.ModelViewSet):
 
         serializer = SeriesSerializer(all_series_from_serail, many=True)
         return Response(serializer.data)
+
+
+class DocsTextsViewSet(viewsets.ModelViewSet):
+    queryset = DocsTexts.objects.all()
+    serializer_class = DocsTextsSerializer

@@ -10,6 +10,7 @@ from .models import (
     Comments,
     History,
     Series,
+    DocsTexts
 )
 
 class UsersSerializer(serializers.ModelSerializer):
@@ -73,3 +74,8 @@ class SeriesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Series
         fields = ['id', 'serail_name', 'episode', 'name', 'likes', 'video']
+
+class DocsTextsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DocsTexts
+        fields = '__all__'

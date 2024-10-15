@@ -6,7 +6,7 @@ from api.tg_bot.database import *
 def start_inline() -> InlineKeyboardMarkup:
 
     keyboard = InlineKeyboardBuilder()
-    keyboard.button(text=f'👉 Начать', web_app=WebAppInfo(text='Начать', url='https://viking62.ru/'))
+    keyboard.button(text=f'👉 Начать', web_app=WebAppInfo(text='Начать', url='https://skybox.video/'))
 
     return keyboard.adjust(1).as_markup()
 

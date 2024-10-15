@@ -198,7 +198,7 @@ class DocsTexts(models.Model):
         PRIVACY_POLICY = 'PRIVACY_POLICY', _('PRIVACY_POLICY')
         DMCA = 'DMCA', _('DMCA')
 
-    name = models.CharField('Статус', choices=StatusEnum.choices, max_length=250)
+    name = models.CharField('Имя', choices=StatusEnum.choices, max_length=250)
     lang = models.ForeignKey(Language, on_delete=models.CASCADE, null=True)
     text = models.TextField('Текст документа', null=True, blank=True)
 
@@ -206,7 +206,7 @@ class DocsTexts(models.Model):
 
     def __str__(self):
 
-        return f'{self.lang} - {self.name} '
+        return f'{self.name} на {self.lang}'
 
     class Meta:
         verbose_name = 'Документ'

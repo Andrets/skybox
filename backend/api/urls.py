@@ -10,7 +10,8 @@ from .views import (
     StatusNewViewSet,
     CommentsViewSet,
     HistoryViewSet,
-    SeriesViewSet
+    SeriesViewSet,
+    DocsTextsViewSet,
 )
 
 router = DefaultRouter()
@@ -24,6 +25,8 @@ router.register('series', SeriesViewSet)
 router.register('status-new', StatusNewViewSet)
 router.register('comments', CommentsViewSet)
 router.register('history', HistoryViewSet)
+router.register('documents', DocsTextsViewSet)
+
 
 urlpatterns = [
     path('', include(router.urls)),

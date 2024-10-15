@@ -3,6 +3,7 @@ from api.models import Users, Admins, Payments
 from datetime import timedelta, datetime
 from django.utils import timezone
 from django.db.models import Count
+from django.core.exceptions import ObjectDoesNotExist
 import json
 
 # ---------------------
@@ -55,11 +56,45 @@ def get_month_payments():
     month_start = today.replace(day=1)
     return Payments.objects.filter(create_date__date__gte=month_start, create_date__date__lte=today).count()
 
+@sync_to_async
+def get_language(language_code):
+    try:
+        lang = Language.objects.get(lang_name__iexact=language_code)
+        return lang
+    except ObjectDoesNotExist:
+        return None  
+
 # ---------------------
 # POST
 # ---------------------
 
+@sync_to_async
+def add_user_data(tg_id, tg_username, name, photo, lang_code):
+    LANGUAGE_COUNTRY_MAP = {
+        "ru": "Россия",
+        "en": "США",
+        "zh": "Китай",
+        "ko": "Южная Корея",
+        "tr": "Турция",
+        "ar": "Арабские страны"
+    }
+    country_name = LANGUAGE_COUNTRY_MAP.get(lang_code, None) 
+    if country_name:
+        country = Country.objects.filter(country_name=country_name).first() 
+    else:
+        country = None 
 
+    if not Users.objects.filter(tg_id=tg_id).exists():
+        Users.objects.create(
+            tg_id=tg_id,
+            tg_username=tg_username,
+            name=name,
+            photo=photo,
+            lang=lang_code,  
+            country=country,
+        )
+        return False
+    return True
 
 # ---------------------
 # PUT
