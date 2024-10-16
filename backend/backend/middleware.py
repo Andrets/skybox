@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.http import JsonResponse
 from .webapp_auth import WebAppAuth, AuthError  # Импортируем класс WebAppAuth
-
+from urllib.parse import unquote
 
 class TelegramDataMiddleware:
     def __init__(self, get_response):
@@ -16,8 +16,8 @@ class TelegramDataMiddleware:
             try:
                 # Используем метод get_user_data для получения данных о пользователе
                 init_data = str(init_data)
-                output_string = init_data.replace('%3D', '=').replace('%26', '&')
-
+                #output_string = init_data.replace('%3D', '=').replace('%26', '&')
+                output_string = unquote(init_data)
                 user_data = self.auth_handler.get_user_data(output_string)
                 #return JsonResponse({'data': user_data})
                 request.tg_user_data = user_data  # Сохраняем данные пользователя в объекте запроса

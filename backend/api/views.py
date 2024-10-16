@@ -10,6 +10,7 @@ from .models import (
     History,
     Series,
     DocsTexts,
+    Payments,
 )
 from .serializers import (
     UsersSerializer,
@@ -23,6 +24,7 @@ from .serializers import (
     HistorySerializer,
     SeriesSerializer,
     DocsTextsSerializer,
+    PaymentsSerializer,
 )
 import requests
 import random
@@ -568,3 +570,37 @@ class SeriesViewSet(viewsets.ModelViewSet):
 class DocsTextsViewSet(viewsets.ModelViewSet):
     queryset = DocsTexts.objects.all()
     serializer_class = DocsTextsSerializer
+
+class PaymentsViewSet(viewsets.ModelViewSet):
+    queryset = Payments.objects.all()
+    serializer_class = PaymentsSerializer
+
+    @action(detail=False, methods=['get'])
+    def get_payment(self, request):
+        try:
+            # Данные для запроса к YooKassa API
+            headers = {
+                'Authorization': 'Basic qtHat2h6NW4V2Y3lsRmfFBtapATvT7Vf6s',
+                'Content-Type': 'application/json',
+            }
+
+            # Пример ID платежа
+            payment_id = request.query_params.get('payment_id', None)
+
+            if not payment_id:
+                return Response({'error': 'Payment ID is required'}, status=400)
+
+            # Запрос к API YooKassa для получения информации о платеже
+            response = requests.get(
+                f'https://api.yookassa.ru/v3/payments/{payment_id}',
+                headers=headers
+            )
+
+            # Если запрос успешен, возвращаем данные платежа
+            if response.status_code == 200:
+                return Response(response.json(), status=200)
+            else:
+                return Response(response.json(), status=response.status_code)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)

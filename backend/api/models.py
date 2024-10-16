@@ -170,7 +170,7 @@ class Series(models.Model):
 class Payments(models.Model):
     user = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True)
     summa = models.BigIntegerField('Сумма оплаты', default=0, null=True)
-
+    done_date = models.DateField(auto_now_add=True)
     list_per_page = 500
 
     def __str__(self):

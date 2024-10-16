@@ -12,6 +12,7 @@ from .views import (
     HistoryViewSet,
     SeriesViewSet,
     DocsTextsViewSet,
+    PaymentsViewSet,
 )
 
 router = DefaultRouter()
@@ -26,6 +27,8 @@ router.register('status-new', StatusNewViewSet)
 router.register('comments', CommentsViewSet)
 router.register('history', HistoryViewSet)
 router.register('documents', DocsTextsViewSet)
+router.register('payments', PaymentsViewSet)
+
 
 
 urlpatterns = [

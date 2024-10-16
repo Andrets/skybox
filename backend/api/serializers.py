@@ -10,7 +10,8 @@ from .models import (
     Comments,
     History,
     Series,
-    DocsTexts
+    DocsTexts,
+    Payments,
 )
 
 class UsersSerializer(serializers.ModelSerializer):
@@ -78,4 +79,9 @@ class SeriesSerializer(serializers.ModelSerializer):
 class DocsTextsSerializer(serializers.ModelSerializer):
     class Meta:
         model = DocsTexts
+        fields = '__all__'
+
+class PaymentsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payments
         fields = '__all__'
