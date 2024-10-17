@@ -143,7 +143,7 @@ class History(models.Model):
 
     def __str__(self):
         
-        return f'{self.user.name}/{self.user.tg_username} - {self.serailerail.name}'
+        return f'{self.user.name}/{self.user.tg_username} - {self.serail.name}'
 
     class Meta:
         verbose_name = 'История просмотра'
@@ -211,3 +211,16 @@ class DocsTexts(models.Model):
     class Meta:
         verbose_name = 'Документ'
         verbose_name_plural = 'Документы'
+
+
+class Favorite(models.Model):
+    serail = models.ForeignKey(Serail, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(Users, on_delete=models.CASCADE)
+
+    def __str__(self):
+        
+        return f'{self.serail.name} - {self.user.username}'
+
+    class Meta:
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранные'

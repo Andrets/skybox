@@ -16,6 +16,7 @@ from .models import (
     History,
     Series,
     Payments,
+    DocsTexts
 )
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
@@ -185,3 +186,14 @@ class PaymentsAdmin(admin.ModelAdmin):
         model = Payments
 
 admin.site.register(Payments, PaymentsAdmin)
+
+class DocsTextsAdmin(admin.ModelAdmin):
+    list_per_page = 500
+    fields = ('name', 'lang', 'text')
+
+    
+
+    class Meta:
+        model = DocsTexts
+
+admin.site.register(DocsTexts, DocsTextsAdmin)

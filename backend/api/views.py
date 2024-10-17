@@ -11,6 +11,7 @@ from .models import (
     Series,
     DocsTexts,
     Payments,
+    Favorite,
 )
 from .serializers import (
     UsersSerializer,
@@ -25,6 +26,8 @@ from .serializers import (
     SeriesSerializer,
     DocsTextsSerializer,
     PaymentsSerializer,
+    RatingUpdateSerializer,
+    FavoriteSerializer
 )
 import requests
 import random
@@ -443,6 +446,26 @@ class SerailViewSet(viewsets.ModelViewSet):
 
         return Response({'results': serializer.data}, status=status.HTTP_200_OK)
 
+
+    @action(detail=False, methods=['post'])
+    def update_rating(self, request):
+        serializer = RatingUpdateSerializer(data=request.data)
+        if serializer.is_valid():
+            serail_id = serializer.validated_data['serail_id']
+            new_rating = serializer.validated_data['rating']
+
+            serail = get_object_or_404(Serail, id=serail_id)
+
+            current_rating = serail.rating
+            updated_rating = (current_rating + new_rating) / 2
+
+            serail.rating = updated_rating
+            serail.save()
+
+            return Response({"message": "Рейтинг успешно обновлен", "new_rating": updated_rating}, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class StatusNewViewSet(viewsets.ModelViewSet):
     queryset = StatusNew.objects.all()
     serializer_class = StatusNewSerializer
@@ -451,6 +474,36 @@ class StatusNewViewSet(viewsets.ModelViewSet):
 class CommentsViewSet(viewsets.ModelViewSet):
     queryset = Comments.objects.all()
     serializer_class = CommentsSerializer
+
+    def get_queryset(self):
+        tg_id = self.request.tg_user_data['tg_id']
+
+        if tg_id:
+            return Users.objects.filter(tg_id=tg_id)
+        else:
+            return Users.objects.none()
+
+    @action(detail=False, methods=['post'])
+    def create_comment(self, request):
+        data = request.data
+        serial_id = data.get('serial_id')
+        comment_text = data.get('text')
+        tg_id = request.tg_user_data['tg_id']
+
+        try:
+            serial = Serail.objects.get(id=serial_id)
+        except Serail.DoesNotExist:
+            return Response({'error': 'Сериал не найден'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            user = Users.objects.get(tg_id=tg_id)
+        except Users.DoesNotExist:
+            return Response({'error': 'Пользователь не найден'}, status=status.HTTP_404_NOT_FOUND)
+
+        comment = Comments.objects.create(serail=serial, text=comment_text, user=user)
+
+        serializer = CommentsSerializer(comment)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class HistoryViewSet(viewsets.ModelViewSet):
@@ -571,12 +624,45 @@ class DocsTextsViewSet(viewsets.ModelViewSet):
     queryset = DocsTexts.objects.all()
     serializer_class = DocsTextsSerializer
 
+    
+    def get_user_language(self):
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        user = Users.objects.filter(tg_id=tg_id).first()
+        if user and user.lang:
+            return str(user.lang.lang_name)
+        return 'en'
+
+    def translate_it(self, text, target_lang):
+        if not text:
+            return '' 
+
+        translator = Translator()
+        translated = translator.translate(text, dest=target_lang)
+        return translated.text
+
+    @action(detail=False, methods=['get'])
+    def get_docs(self, request):
+        doc_type = request.query_params.get('type', None)
+        if not doc_type:
+            return Response({"error": "Document type is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user_lang = self.get_user_language()
+
+        document = DocsTexts.objects.filter(name=doc_type, lang__lang_name=user_lang).first()
+
+        if document:
+            serializer = self.get_serializer(document)
+            return Response(serializer.data)
+        else:
+            return Response({"error": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
+
 class PaymentsViewSet(viewsets.ModelViewSet):
     queryset = Payments.objects.all()
     serializer_class = PaymentsSerializer
 
     @action(detail=False, methods=['get'])
     def get_payment(self, request):
+
         try:
             # Данные для запроса к YooKassa API
             headers = {
@@ -604,3 +690,44 @@ class PaymentsViewSet(viewsets.ModelViewSet):
 
         except Exception as e:
             return Response({'error': str(e)}, status=500)
+
+
+class FavoriteViewSet(viewsets.ModelViewSet):
+    queryset = Favorite.objects.all()
+    serializer_class = FavoriteSerializer
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

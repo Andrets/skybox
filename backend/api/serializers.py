@@ -12,6 +12,7 @@ from .models import (
     Series,
     DocsTexts,
     Payments,
+    Favorite,
 )
 
 class UsersSerializer(serializers.ModelSerializer):
@@ -85,3 +86,12 @@ class PaymentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payments
         fields = '__all__'
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Favorite
+        fields = '__all__'
+
+class RatingUpdateSerializer(serializers.Serializer):
+    rating = serializers.IntegerField(min_value=1, max_value=5)
+    serail_id = serializers.IntegerField()

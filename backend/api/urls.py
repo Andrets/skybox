@@ -13,6 +13,7 @@ from .views import (
     SeriesViewSet,
     DocsTextsViewSet,
     PaymentsViewSet,
+    FavoriteViewSet,
 )
 
 router = DefaultRouter()
@@ -28,6 +29,8 @@ router.register('comments', CommentsViewSet)
 router.register('history', HistoryViewSet)
 router.register('documents', DocsTextsViewSet)
 router.register('payments', PaymentsViewSet)
+router.register('favorite', FavoriteViewSet)
+
 
 
 
