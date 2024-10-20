@@ -12,6 +12,7 @@ from .models import (
     DocsTexts,
     Payments,
     Favorite,
+    ViewedSeries,
 )
 from .serializers import (
     UsersSerializer,
@@ -466,6 +467,7 @@ class SerailViewSet(viewsets.ModelViewSet):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class StatusNewViewSet(viewsets.ModelViewSet):
     queryset = StatusNew.objects.all()
     serializer_class = StatusNewSerializer
@@ -510,6 +512,7 @@ class HistoryViewSet(viewsets.ModelViewSet):
     queryset = History.objects.all()
     serializer_class = HistorySerializer
 
+
 class SeriesViewSet(viewsets.ModelViewSet):
     queryset = Series.objects.all()
     serializer_class = SeriesSerializer
@@ -523,7 +526,7 @@ class SeriesViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def get_shorts(self, request):
-        tg_id = getattr(self.request, 'tg_id', None)
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
         if tg_id:
             user = Users.objects.filter(tg_id=tg_id).first()
         else:
@@ -546,7 +549,10 @@ class SeriesViewSet(viewsets.ModelViewSet):
         random_80_percent = remaining_series.order_by('?')[:random_80_percent_count]
 
         result_series = list(top_20_percent) + list(random_80_percent)
-        random.shuffle(result_series)  
+        random.shuffle(result_series)
+
+        for series in result_series:
+            ViewedSeries.objects.get_or_create(user=user, series=series)
 
         serialized_data = self.get_serializer(result_series, many=True).data
 
@@ -656,6 +662,7 @@ class DocsTextsViewSet(viewsets.ModelViewSet):
         else:
             return Response({"error": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
 
+
 class PaymentsViewSet(viewsets.ModelViewSet):
     queryset = Payments.objects.all()
     serializer_class = PaymentsSerializer
@@ -696,6 +703,32 @@ class FavoriteViewSet(viewsets.ModelViewSet):
     queryset = Favorite.objects.all()
     serializer_class = FavoriteSerializer
 
+
+    @action(detail=False, methods=['get'])
+    def get_my_list(self, request):
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        if not tg_id:
+            return Response({"detail": "User not found."}, status=404)
+        
+        user = Users.objects.filter(tg_id=tg_id).first()
+        if not user:
+            return Response({"detail": "User not found."}, status=404)
+
+        favorite_series = Favorite.objects.filter(user=user).select_related('serail')
+
+        if not favorite_series.exists():
+            return Response({"detail": "No favorites found."}, status=404)
+
+        serialized_data = [
+            {
+                "id": favorite.serail.id,
+                "name": favorite.serail.name,
+                "cover": favorite.serail.vertical_photo.url if favorite.serail.vertical_photo else None
+            }
+            for favorite in favorite_series
+        ]
+
+        return Response(serialized_data)
 
 
 

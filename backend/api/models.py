@@ -1,4 +1,5 @@
 from django.db import models
+import rest_framework
 from .storage_backends import VideoStorage, PhotoStorage
 from django.utils.translation import gettext_lazy as _
 
@@ -167,6 +168,18 @@ class Series(models.Model):
         verbose_name_plural = 'Серии'
 
 
+class PermissionsModel(models.Model):
+    series = models.ForeignKey(Series, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(Users, on_delete=models.CASCADE)
+    list_per_page = 500
+
+    def __str__(self):
+        return f'{self.serail.name} - {self.user.username}'
+
+    class Meta:
+        verbose_name = 'Доступ'
+        verbose_name_plural = 'Доступы'
+
 class Payments(models.Model):
     user = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True)
     summa = models.BigIntegerField('Сумма оплаты', default=0, null=True)
@@ -219,7 +232,7 @@ class Favorite(models.Model):
 
     def __str__(self):
         
-        return f'{self.serail.name} - {self.user.username}'
+        return f'{self.serail.name} - {self.user.tg_username}'
 
     class Meta:
         verbose_name = 'Избранное'

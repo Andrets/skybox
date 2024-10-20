@@ -1,12 +1,27 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 from aiogram.types import InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton,WebAppInfo
 from api.tg_bot.database import *
+from googletrans import Translator
 
 
-def start_inline() -> InlineKeyboardMarkup:
+def translate_it(text, target_lang):
+        if not text:
+            return '' 
+
+        translator = Translator()
+        translated = translator.translate(text, dest=target_lang)
+        return translated.text
+
+
+
+
+
+
+def start_inline(lang) -> InlineKeyboardMarkup:
 
     keyboard = InlineKeyboardBuilder()
-    keyboard.button(text=f'👉 Начать', web_app=WebAppInfo(text='Начать', url='https://skybox.video/'))
+    text = translate_it('Начать', lang)
+    keyboard.button(text=f'👉 {text}', web_app=WebAppInfo(text='Начать', url='https://skybox.video/'))
 
     return keyboard.adjust(1).as_markup()
 

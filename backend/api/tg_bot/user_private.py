@@ -4,6 +4,7 @@ from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import LabeledPrice, PreCheckoutQuery, SuccessfulPayment, ContentType
+from aiogram.types.birthdate import Birthdate 
 from aiogram.utils.i18n import gettext as _
 from aiogram import Bot
 from aiogram.methods.get_user_profile_photos import GetUserProfilePhotos
@@ -11,6 +12,7 @@ from aiogram.client.bot import DefaultBotProperties
 from aiogram.enums import ParseMode
 
 from asgiref.sync import sync_to_async
+import django.contrib
 from googletrans import Translator
 
 from api.models import Users
@@ -37,8 +39,86 @@ user_private = Router()
 
 bot = Bot('8090358352:AAHqI7UIDxQSgAr0MUKug8Ixc0OeozWGv7I', default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
+
+
+
+
 @user_private.message(CommandStart())
 async def start_message(message: Message, bot: Bot):
+    language_code = str(message.from_user.language_code)
+    if language_code == "ru":
+        await message.answer('🎬 Добро пожаловать в SKYBOX!\n'
+                            '\n'
+                            'Ваш идеальный помощник для просмотра сериалов.\n'
+                            '\n'
+                            '📺 Здесь вы можете:\n'
+                            '— Искать и находить любимые сериалы\n'
+                            '— Узнавать последние новинки\n'
+                            '— Сохранять и смотреть короткие видео\n'
+                            '\n'
+                            'Нажмите «Начать», чтобы открыть приложение и насладиться просмотром сериалов!', 
+                            reply_markup=kb.start_inline(language_code))
+    elif language_code == "en":
+        await message.answer('🎬 Welcome to SKYBOX!\n'
+                     '\n'
+                     'Your perfect assistant for watching TV shows.\n'
+                     '\n'
+                     '📺 Here you can:\n'
+                     '— Search and find your favorite TV shows\n'
+                     '— Discover the latest releases\n'
+                     '— Save and watch short videos\n'
+                     '\n'
+                     'Click "Start" to open the app and enjoy watching TV shows!', 
+                     reply_markup=kb.start_inline(language_code))
+    elif language_code == "zh":
+        await message.answer('🎬 欢迎来到SKYBOX！\n'
+                     '\n'
+                     '您的最佳电视剧观看助手。\n'
+                     '\n'
+                     '📺 在这里你可以：\n'
+                     '— 搜索并找到你喜欢的电视剧\n'
+                     '— 发现最新的剧集\n'
+                     '— 保存并观看短视频\n'
+                     '\n'
+                     '点击“开始”打开应用程序，享受观看电视剧的乐趣！', 
+                     reply_markup=kb.start_inline(language_code))
+    elif language_code == "ko":
+        await message.answer('🎬 SKYBOX에 오신 것을 환영합니다!\n'
+                     '\n'
+                     '당신의 완벽한 드라마 시청 도우미입니다.\n'
+                     '\n'
+                     '📺 여기서 할 수 있는 것:\n'
+                     '— 좋아하는 드라마를 검색하고 찾기\n'
+                     '— 최신 드라마를 알아보기\n'
+                     '— 짧은 동영상을 저장하고 보기\n'
+                     '\n'
+                     '앱을 열고 드라마를 즐기려면 "시작"을 누르세요!', 
+                     reply_markup=kb.start_inline(language_code))
+    elif language_code == "tr":
+        await message.answer('🎬 SKYBOX\'a hoş geldiniz!\n'
+                     '\n'
+                     'Dizileri izlemek için mükemmel asistanınız.\n'
+                     '\n'
+                     '📺 Burada şunları yapabilirsiniz:\n'
+                     '— Favori dizilerinizi arayın ve bulun\n'
+                     '— En son çıkanları keşfedin\n'
+                     '— Kısa videoları kaydedin ve izleyin\n'
+                     '\n'
+                     'Uygulamayı açmak ve dizilerin keyfini çıkarmak için "Başlat"a tıklayın!', 
+                     reply_markup=kb.start_inline(language_code))
+    elif language_code == "ar":
+        await message.answer('🎬 مرحباً بك في SKYBOX!\n'
+                     '\n'
+                     'مساعدك المثالي لمشاهدة المسلسلات.\n'
+                     '\n'
+                     '📺 هنا يمكنك:\n'
+                     '— البحث والعثور على مسلسلاتك المفضلة\n'
+                     '— اكتشاف أحدث الإصدارات\n'
+                     '— حفظ ومشاهدة الفيديوهات القصيرة\n'
+                     '\n'
+                     'اضغط على "ابدأ" لفتح التطبيق والاستمتاع بمشاهدة المسلسلات!', 
+                     reply_markup=kb.start_inline(language_code))
+
     UserProfilePhotos = await bot.get_user_profile_photos(user_id=message.from_user.id)
     file_id = 0
     photo = ''
@@ -62,8 +142,6 @@ async def start_message(message: Message, bot: Bot):
                         with open(save_path, 'wb') as f:
                             f.write(await response.read())
 
-    language_code = str(message.from_user.language_code)
-    
     user_reg = await add_user_data(
         tg_id=message.from_user.id, 
         tg_username=message.from_user.username, 
@@ -71,15 +149,11 @@ async def start_message(message: Message, bot: Bot):
         photo=photo, 
         lang_code=language_code  
     )
+    if not user_reg:
+        text = "Хотите указать дату рождения?\n Напишите /birthday {Ваш день рождения в формате 13.06}"
+        text = await translate_it(text, language_code)
+        await message.answer(text)
+
+
     
-    await message.answer('🎬 Добро пожаловать в SKYBOX!\n'
-                         '\n'
-                         'Ваш идеальный помощник для просмотра сериалов.\n'
-                         '\n'
-                         '📺 Здесь вы можете:\n'
-                         '— Искать и находить любимые сериалы\n'
-                         '— Узнавать последние новинки\n'
-                         '— Сохранять и смотреть короткие видео\n'
-                         '\n'
-                         'Нажмите «Начать», чтобы открыть приложение и насладиться просмотром сериалов!', 
-                         reply_markup=kb.start_inline())
+    

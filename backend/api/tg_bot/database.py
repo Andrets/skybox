@@ -1,14 +1,26 @@
 from asgiref.sync import sync_to_async
-from api.models import Users, Admins, Payments
+from api.models import Users, Admins, Payments, Country, Language
 from datetime import timedelta, datetime
 from django.utils import timezone
 from django.db.models import Count
 from django.core.exceptions import ObjectDoesNotExist
+from googletrans import Translator
+
 import json
 
 # ---------------------
 # GET
 # ---------------------
+
+
+@sync_to_async
+def translate_it(text, target_lang):
+        if not text:
+            return '' 
+
+        translator = Translator()
+        translated = translator.translate(text, dest=target_lang)
+        return translated.text
 
 @sync_to_async
 def check_admin(user_id):
@@ -78,19 +90,16 @@ def add_user_data(tg_id, tg_username, name, photo, lang_code):
         "tr": "Турция",
         "ar": "Арабские страны"
     }
-    country_name = LANGUAGE_COUNTRY_MAP.get(lang_code, None) 
-    if country_name:
-        country = Country.objects.filter(country_name=country_name).first() 
-    else:
-        country = None 
-
+    country = Country.objects.filter(country_name__iexact=lang_code).first() 
+    language = Language.objects.filter(lang_name__iexact=lang_code).first()
+    
     if not Users.objects.filter(tg_id=tg_id).exists():
         Users.objects.create(
             tg_id=tg_id,
             tg_username=tg_username,
             name=name,
             photo=photo,
-            lang=lang_code,  
+            lang=language,  
             country=country,
         )
         return False

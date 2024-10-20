@@ -16,7 +16,10 @@ from .models import (
     History,
     Series,
     Payments,
-    DocsTexts
+    DocsTexts,
+    ViewedSeries,
+    Favorite,
+    PermissionsModel,
 )
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
@@ -197,3 +200,38 @@ class DocsTextsAdmin(admin.ModelAdmin):
         model = DocsTexts
 
 admin.site.register(DocsTexts, DocsTextsAdmin)
+
+class ViewedSeriesAdmin(admin.ModelAdmin):
+    list_per_page = 500
+    fields = ('user', 'series', 'viewed_at')
+
+    
+
+    class Meta:
+        model = ViewedSeries
+
+admin.site.register(ViewedSeries, ViewedSeriesAdmin)
+
+
+class PermissionsModelAdmin(admin.ModelAdmin):
+    list_per_page = 500
+    fields = ('series', 'user')
+
+    
+
+    class Meta:
+        model = PermissionsModel
+
+admin.site.register(PermissionsModel, PermissionsModelAdmin)
+
+
+class FavoriteAdmin(admin.ModelAdmin):
+    list_per_page = 500
+    fields = ('serail', 'user')
+
+    
+
+    class Meta:
+        model = Favorite
+
+admin.site.register(Favorite, FavoriteAdmin)
