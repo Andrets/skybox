@@ -12,12 +12,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='payments',
-            name='done_date',
-            field=models.DateField(auto_now_add=True, default=django.utils.timezone.now),
-            preserve_default=False,
-        ),
+        
         migrations.AlterField(
             model_name='docstexts',
             name='name',

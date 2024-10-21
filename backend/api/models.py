@@ -183,7 +183,6 @@ class PermissionsModel(models.Model):
 class Payments(models.Model):
     user = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True)
     summa = models.BigIntegerField('Сумма оплаты', default=0, null=True)
-    done_date = models.DateField()
     list_per_page = 500
 
     def __str__(self):
