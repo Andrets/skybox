@@ -35,7 +35,7 @@ class Users(models.Model):
     tg_id = models.BigIntegerField('Telegram ID')
     tg_username = models.CharField('Имя пользователя',null=True, max_length=300, blank=True)
     name = models.CharField('Имя', max_length=300,null=True, blank=True)
-    photo = models.ImageField('Аватарка пользователя',null=True, upload_to='static/media/users/', storage=PhotoStorage())
+    photo = models.ImageField('Аватарка пользователя',null=True, upload_to='static/media/users/')
     lang = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True)
     country = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True)
     isActive = models.BooleanField('Активен', default=False)
@@ -82,7 +82,7 @@ class Serail(models.Model):
     
     name = models.CharField('Имя', max_length=500, null=True, blank=True)
     lang = models.ForeignKey(Language, on_delete=models.CASCADE, null=True)
-    vertical_photo = models.ImageField('Вертикальная обложка', null=True, storage=PhotoStorage(), upload_to='serail/', blank=True)
+    vertical_photo = models.ImageField('Вертикальная обложка', null=True, upload_to='static/media/serail/',  blank=True)
     horizontal_photo0 = models.ImageField('Горизонтальная обложка',null=True, upload_to='static/media/serail/', blank=True)
     horizontal_photo1 = models.ImageField('Горизонтальная обложка 2', null=True, upload_to='static/media/serail/', blank=True)
     horizontal_photo2 = models.ImageField('Горизонтальная обложка 3', null=True, upload_to='static/media/serail/', blank=True)

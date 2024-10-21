@@ -8,3 +8,6 @@ class Admin(StatesGroup):
     ask = State()
     confirm_yes = State()
     confirm_no = State()
+    name = State()
+    genre = State()
+    video = State()
