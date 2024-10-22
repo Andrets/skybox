@@ -15,10 +15,7 @@ from .models import (
     Favorite,
 )
 
-class UsersSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Users
-        fields = '__all__'
+
 
 
 class LanguageSerializer(serializers.ModelSerializer):
@@ -31,6 +28,14 @@ class CountrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
         fields = '__all__'
+
+class UsersSerializer(serializers.ModelSerializer):
+    lang = LanguageSerializer(read_only=True) 
+    country = CountrySerializer(read_only=True)
+    class Meta:
+        model = Users
+        fields = ['tg_id', 'tg_username', 'name', 'photo', 'lang', 'country', 'isActive', 'paid', 'search_history']
+
 
 
 class AdminsSerializer(serializers.ModelSerializer):

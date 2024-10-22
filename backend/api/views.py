@@ -150,6 +150,28 @@ class UsersViewSet(viewsets.ModelViewSet):
         return Response({'error': 'Пользователь не найден'}, status=status.HTTP_404_NOT_FOUND)
 
 
+    @action(detail=False, methods=['post'])
+    def change_lang(self, request):
+        user = self.get_queryset().first()  
+        lang_name = request.data.get('lang_name')
+
+        if not lang_name:
+            return Response({"error": "Language name is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not user:
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            new_lang = Language.objects.get(lang_name=lang_name)
+        except Language.DoesNotExist:
+            return Response({"error": "Language not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        user.lang = new_lang
+        user.save()
+
+        return Response({"message": f"Language changed to {new_lang.lang_name}"}, status=status.HTTP_200_OK)
+
+
 class CountryViewSet(viewsets.ModelViewSet):
     queryset = Country.objects.all()
     serializer_class = CountrySerializer
