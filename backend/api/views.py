@@ -32,7 +32,7 @@ from .serializers import (
 )
 import requests
 import random
-from rest_framework import status, viewsets, permissions
+from rest_framework import status, viewsets, permissions, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils import timezone
@@ -43,11 +43,15 @@ from django.http import StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from googletrans import Translator
 from django.db.models.functions import Coalesce
+from drf_yasg.utils import swagger_auto_schema
 
 import boto3
 class UsersViewSet(viewsets.ModelViewSet): 
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
+
+
+    http_method_names = ['get', 'post']
 
     def get_queryset(self):
         tg_id = self.request.tg_user_data['tg_id']
@@ -65,12 +69,13 @@ class UsersViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
         return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    def create(self, request, *args, **kwargs):
-        # POST - Создание нового баланса
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    @swagger_auto_schema(auto_schema=None)
+    def create(self, request):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    @swagger_auto_schema(auto_schema=None)  
+    def retrieve(self, request, *args, **kwargs):
+        return Response({"detail": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def update(self, request, *args, **kwargs):
         # PUT - Обновление существующего баланса
@@ -175,17 +180,23 @@ class UsersViewSet(viewsets.ModelViewSet):
 class CountryViewSet(viewsets.ModelViewSet):
     queryset = Country.objects.all()
     serializer_class = CountrySerializer
+    http_method_names = ['get']
 
 
 class LanguageViewSet(viewsets.ModelViewSet):
     queryset = Language.objects.all()
     serializer_class = LanguageSerializer
+    http_method_names = ['get']
 
 
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    http_method_names = ['get']
 
+    @swagger_auto_schema(auto_schema=None)  
+    def retrieve(self, request, *args, **kwargs):
+        return Response({"detail": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 class AdminsViewSet(viewsets.ModelViewSet):
     queryset = Admins.objects.all()
@@ -195,6 +206,13 @@ class AdminsViewSet(viewsets.ModelViewSet):
 class SerailViewSet(viewsets.ModelViewSet):
     queryset = Serail.objects.all()
     serializer_class = SerailSerializer
+
+    http_method_names = ['get', 'post']
+
+    @swagger_auto_schema(auto_schema=None)
+    def create(self, request):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
 
     def get_user_language(self):
         tg_id = int(self.request.tg_user_data.get('tg_id', 0))
@@ -493,11 +511,18 @@ class SerailViewSet(viewsets.ModelViewSet):
 class StatusNewViewSet(viewsets.ModelViewSet):
     queryset = StatusNew.objects.all()
     serializer_class = StatusNewSerializer
+    http_method_names = ['get']
 
 
 class CommentsViewSet(viewsets.ModelViewSet):
     queryset = Comments.objects.all()
     serializer_class = CommentsSerializer
+
+    http_method_names = ['post']
+
+    @swagger_auto_schema(auto_schema=None)
+    def create(self, request):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def get_queryset(self):
         tg_id = self.request.tg_user_data['tg_id']
@@ -538,6 +563,9 @@ class HistoryViewSet(viewsets.ModelViewSet):
 class SeriesViewSet(viewsets.ModelViewSet):
     queryset = Series.objects.all()
     serializer_class = SeriesSerializer
+
+    http_method_names = ['get']
+
 
     def get_queryset(self):
         tg_id = getattr(self.request, 'tg_id', None)
@@ -652,7 +680,13 @@ class DocsTextsViewSet(viewsets.ModelViewSet):
     queryset = DocsTexts.objects.all()
     serializer_class = DocsTextsSerializer
 
-    
+    http_method_names = ['get']
+
+
+    @swagger_auto_schema(auto_schema=None)  
+    def retrieve(self, request, *args, **kwargs):
+        return Response({"detail": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
     def get_user_language(self):
         tg_id = int(self.request.tg_user_data.get('tg_id', 0))
         user = Users.objects.filter(tg_id=tg_id).first()
@@ -688,6 +722,9 @@ class DocsTextsViewSet(viewsets.ModelViewSet):
 class PaymentsViewSet(viewsets.ModelViewSet):
     queryset = Payments.objects.all()
     serializer_class = PaymentsSerializer
+
+
+    http_method_names = ['get']
 
     @action(detail=False, methods=['get'])
     def get_payment(self, request):
@@ -725,6 +762,19 @@ class FavoriteViewSet(viewsets.ModelViewSet):
     queryset = Favorite.objects.all()
     serializer_class = FavoriteSerializer
 
+    http_method_names = ['get', 'post']
+
+    @swagger_auto_schema(auto_schema=None)
+    def create(self, request):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    @swagger_auto_schema(auto_schema=None)
+    def list(self, request):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    @swagger_auto_schema(auto_schema=None)  
+    def retrieve(self, request, *args, **kwargs):
+        return Response({"detail": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @action(detail=False, methods=['get'])
     def get_my_list(self, request):

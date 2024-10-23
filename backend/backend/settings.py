@@ -32,7 +32,7 @@ SECRET_KEY = 'zxcsadfdfadfl3mr2340ijd'
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ['https://skybox.video']
+CSRF_TRUSTED_ORIGINS = ['https://skybox.video', ' http://127.0.0.1:8000']
 BOT_TOKEN = '8090358352:AAHqI7UIDxQSgAr0MUKug8Ixc0OeozWGv7I'
 
 # Application definition
