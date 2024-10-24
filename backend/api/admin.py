@@ -172,18 +172,17 @@ admin.site.register(StatusNew, StatusNewAdmin)
 
 class PaymentsAdmin(admin.ModelAdmin):
     list_per_page = 500
-    fields = ('user', 'summa')
+    fields = ('user', 'summa', 'status')
 
     def get_readonly_fields(self, request, obj=None):
         if obj:  
-            return ['user', 'summa']
+            return ['user', 'summa', ]
         return []
 
     def has_delete_permission(self, request, obj=None):
         return False
 
-    def has_add_permission(self, request):
-        return False 
+    
 
     class Meta:
         model = Payments
@@ -203,7 +202,7 @@ admin.site.register(DocsTexts, DocsTextsAdmin)
 
 class ViewedSeriesAdmin(admin.ModelAdmin):
     list_per_page = 500
-    fields = ('user', 'series', 'viewed_at')
+    fields = ('user', 'series')
 
     
 

@@ -13,6 +13,8 @@ from .models import (
     Payments,
     Favorite,
     ViewedSeries,
+    PermissionsModel,
+    Payments,
 )
 from .serializers import (
     UsersSerializer,
@@ -44,7 +46,7 @@ from django.shortcuts import get_object_or_404
 from googletrans import Translator
 from django.db.models.functions import Coalesce
 from drf_yasg.utils import swagger_auto_schema
-
+from rest_framework import status as rest_status
 import boto3
 class UsersViewSet(viewsets.ModelViewSet): 
     queryset = Users.objects.all()
@@ -584,25 +586,52 @@ class SeriesViewSet(viewsets.ModelViewSet):
 
         viewed_series_ids = ViewedSeries.objects.filter(user=user).values_list('series_id', flat=True)
 
-        queryset = Series.objects.exclude(id__in=viewed_series_ids)
+        # Проверка подписки пользователя
+        one_month_ago = timezone.now() - timedelta(days=30)
+        one_year_ago = timezone.now() - timedelta(days=365)
+
+        active_payment = Payments.objects.filter(
+            user=user
+        ).filter(
+            Q(status=Payments.StatusEnum.ALWAYS) |  
+            (Q(status=Payments.StatusEnum.TEMPORARILY_YEAR) & Q(created_date__gte=one_year_ago)) |  
+            (Q(status=Payments.StatusEnum.TEMPORARILY_MONTH) & Q(created_date__gte=one_month_ago))  
+        ).exists()
+
+        # Если есть активная подписка, выбираем все серии, иначе только серии с эпизодами <= 10
+        if active_payment:
+            queryset = Series.objects.exclude(id__in=viewed_series_ids)
+        else:
+            queryset = Series.objects.exclude(id__in=viewed_series_ids).filter(episode__lte=10)
 
         if not queryset.exists():
             return Response({"detail": "No series available."}, status=404)
 
         count = queryset.count()
-        top_20_percent_count = max(1, int(count * 0.2))  
+        top_20_percent_count = max(1, int(count * 0.2))
         random_80_percent_count = 10 - top_20_percent_count
 
         top_20_percent = queryset.order_by('-likes')[:top_20_percent_count]
-
         remaining_series = queryset.exclude(id__in=top_20_percent.values_list('id', flat=True))
         random_80_percent = remaining_series.order_by('?')[:random_80_percent_count]
 
         result_series = list(top_20_percent) + list(random_80_percent)
         random.shuffle(result_series)
 
+        # Проверка доступа к сериям
         for series in result_series:
-            ViewedSeries.objects.get_or_create(user=user, series=series)
+            has_access = False
+
+            # Проверка доступа по PermissionsModel
+            if PermissionsModel.objects.filter(user=user, series=series).exists():
+                has_access = True
+
+            # Если эпизод <= 10 или пользователь имеет доступ или активную подписку
+            if series.episode <= 10 or has_access or active_payment:
+                # Добавляем в историю просмотра
+                ViewedSeries.objects.get_or_create(user=user, series=series)
+            else:
+                result_series.remove(series)  # Удаляем серию, если нет доступа
 
         serialized_data = self.get_serializer(result_series, many=True).data
 
@@ -650,9 +679,31 @@ class SeriesViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
+    def has_active_subscription(self, user):
+        now = timezone.now()
+        one_year_ago = now - timedelta(days=365)
+        one_month_ago = now - timedelta(days=30)  
+
+        active_payment = Payments.objects.filter(
+            user=user
+        ).filter(
+            Q(status=Payments.StatusEnum.ALWAYS) |  # Бессрочная подписка
+            (Q(status=Payments.StatusEnum.TEMPORARILY_YEAR) & Q(created_date__gte=one_year_ago)) |  # Подписка на год
+            (Q(status=Payments.StatusEnum.TEMPORARILY_MONTH) & Q(created_date__gte=one_month_ago))  # Подписка на месяц
+        ).exists()
+        return active_payment
+
     @action(detail=False, methods=['get'])
     def get_all_series_from_serail(self, request):
         data = request.query_params.get('data', None)
+
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        if not tg_id:
+            return Response({"detail": "User not found."}, status=404)
+
+        user = Users.objects.filter(tg_id=tg_id).first()
+        if not user:
+            return Response({"detail": "User not found."}, status=404)
 
         if data is not None:
             try:
@@ -672,8 +723,31 @@ class SeriesViewSet(viewsets.ModelViewSet):
 
         all_series_from_serail = Series.objects.filter(serail=serail)
 
-        serializer = SeriesSerializer(all_series_from_serail, many=True)
-        return Response(serializer.data)
+        result = []
+        has_subscription = self.has_active_subscription(user) 
+
+        for series_item in all_series_from_serail:
+            has_permission = PermissionsModel.objects.filter(user=user, series=series_item).exists()
+
+            status = True if has_subscription or has_permission or series_item.episode <= 10 else False
+
+            if status:
+                result.append({
+                    "id": series_item.id,
+                    "name": series_item.name,
+                    "episode": series_item.episode,
+                    "video": series_item.video.url if series_item.video else None,
+                    "status": status  
+                })
+            else:
+                result.append({
+                    "id": series_item.id,
+                    "name": series_item.name,
+                    "episode": series_item.episode,
+                    "status": status  
+                })
+
+        return Response(result)
 
 
 class DocsTextsViewSet(viewsets.ModelViewSet):

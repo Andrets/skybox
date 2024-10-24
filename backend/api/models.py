@@ -181,8 +181,17 @@ class PermissionsModel(models.Model):
         verbose_name_plural = 'Доступы'
 
 class Payments(models.Model):
+    class StatusEnum(models.TextChoices):
+        TEMPORARILY_YEAR = 'TEMPORARILY_YEAR', _('TEMPORARILY_YEAR')
+        TEMPORARILY_MONTH = 'TEMPORARILY_MONTH', _('TEMPORARILY_MONTH')
+        ALWAYS = 'ALWAYS', _('ALWAYS')
+        ONCE = 'ONCE', _('ONCE')
+        
     user = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True)
     summa = models.BigIntegerField('Сумма оплаты', default=0, null=True)
+    status = models.CharField('Тип', choices=StatusEnum.choices, max_length=250)
+
+    created_date = models.DateTimeField(auto_now_add=True)
     list_per_page = 500
 
     def __str__(self):
@@ -198,8 +207,15 @@ class ViewedSeries(models.Model):
     series = models.ForeignKey(Series, on_delete=models.CASCADE)
     viewed_at = models.DateTimeField(auto_now_add=True)
 
+
+    def __str__(self):
+
+        return f'{self.user.tg_username} уже посмотрел {self.series.name}'
+
     class Meta:
         unique_together = ('user', 'series') 
+        verbose_name = 'Просмотр'
+        verbose_name_plural = 'Просмотры'
 
 
 
