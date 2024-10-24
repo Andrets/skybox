@@ -566,7 +566,7 @@ class SeriesViewSet(viewsets.ModelViewSet):
     queryset = Series.objects.all()
     serializer_class = SeriesSerializer
 
-    http_method_names = ['get']
+    http_method_names = ['get', 'post']
 
 
     def get_queryset(self):
@@ -575,6 +575,28 @@ class SeriesViewSet(viewsets.ModelViewSet):
             return Users.objects.filter(tg_id=tg_id)
         else:
             return Users.objects.none()
+
+    @action(detail=False, methods=['post'])
+    def make_viewed(self, request):
+        # Получаем tg_id пользователя из request или возвращаем ошибку, если не найден
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        if tg_id:
+            user = Users.objects.filter(tg_id=tg_id).first()
+        else:
+            return Response({"detail": "User not found."}, status=404)
+
+        # Получаем series_id из тела запроса (POST)
+        series_id = request.data.get('series_id')
+        if not series_id:
+            return Response({"detail": "Series ID is required."}, status=400)
+
+        # Проверяем, существует ли серия с таким id
+        series = get_object_or_404(Series, id=series_id)
+
+        # Добавляем серию в просмотренные
+        ViewedSeries.objects.get_or_create(user=user, series=series)
+
+        return Response({"detail": "Series marked as viewed."}, status=200)
 
     @action(detail=False, methods=['get'])
     def get_shorts(self, request):
@@ -628,8 +650,7 @@ class SeriesViewSet(viewsets.ModelViewSet):
 
             # Если эпизод <= 10 или пользователь имеет доступ или активную подписку
             if series.episode <= 10 or has_access or active_payment:
-                # Добавляем в историю просмотра
-                ViewedSeries.objects.get_or_create(user=user, series=series)
+                pass
             else:
                 result_series.remove(series)  # Удаляем серию, если нет доступа
 
