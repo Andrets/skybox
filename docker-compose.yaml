@@ -33,6 +33,9 @@ services:
       - 8000:8000
     volumes:
       - './backend/staticfiles:/app/staticfiles'
+      - './backend/adminka/migrations:/app/adminka/migrations'
+      - './backend/api/migrations:/app/api/migrations'
+      - './backend/main/migrations:/app/main/migrations'
     depends_on:
       - postgresql
 
