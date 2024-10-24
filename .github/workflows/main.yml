@@ -31,7 +31,7 @@ jobs:
       - name: Apply migrations
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
-            sudo docker compose -f docker-compose.yaml -p skybox exec sh -c 'python manage.py migrate'
+            sudo docker compose -f docker-compose.yaml -p skybox exec backend sh -c 'python manage.py migrate'
           "
 
       - name: Clean up
