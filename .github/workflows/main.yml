@@ -28,5 +28,11 @@ jobs:
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git checkout main && git pull && sudo docker compose -f docker-compose.yaml -p skybox down && sudo docker compose -f docker-compose.yaml -p skybox up -d --build"
 
+      - name: Apply migrations
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+            sudo docker compose -f docker-compose.yaml -p skybox exec sh -c 'python manage.py migrate'
+          "
+
       - name: Clean up
         run: rm -rf ~/.ssh
