@@ -105,10 +105,20 @@ def add_user_data(tg_id, tg_username, name, photo, lang_code):
         return False
     return True
 
+
 # ---------------------
 # PUT
 # ---------------------
 
+@sync_to_async
+def update_user_birthday(tg_id, date):
+    try:
+        user = User.objects.get(tg_id=tg_id)
+        user.birthday = date
+        user.save()
+        return True
+    except User.DoesNotExist:
+        return False
 
 
 # ---------------------

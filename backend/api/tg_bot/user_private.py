@@ -31,7 +31,7 @@ from datetime import datetime, timedelta
 import requests
 import aiohttp
 import json
-
+import re
 import os
 
 user_private = Router()
@@ -155,5 +155,29 @@ async def start_message(message: Message, bot: Bot):
         await message.answer(text)
 
 
+
+
+
     
     
+
+@user_private.message(Command(commands="birthday"))
+async def set_birthday(message: Message):
+    birthday_text = message.text.split("/birthday ")[-1].strip()
+    
+    # Translation messages
+    success_message = "🎉 Дата рождения успешно сохранена!"
+    format_error_message = "⛔ Пожалуйста, введите дату рождения в формате DD.MM (например, 13.06)."
+    invalid_format_message = "⛔ Неверный формат. Введите дату рождения в формате DD.MM."
+
+    if re.match(r"\d{2}\.\d{2}", birthday_text):
+        try:
+            await update_user_birthday(message.from_user.id, birthday_text)
+            translated_success = await translate_it(success_message, message.from_user.language_code)
+            await message.answer(translated_success)
+        except ValueError:
+            translated_format_error = await translate_it(format_error_message, message.from_user.language_code)
+            await message.answer(translated_format_error)
+    else:
+        translated_invalid_format = await translate_it(invalid_format_message, message.from_user.language_code)
+        await message.answer(translated_invalid_format)

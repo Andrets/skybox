@@ -21,6 +21,7 @@ from .models import (
     Favorite,
     PermissionsModel,
     Subscriptions,
+    Feasts,
 )
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
@@ -247,3 +248,6 @@ class SubscriptionsAdmin(admin.ModelAdmin):
         model = Subscriptions
 
 admin.site.register(Subscriptions, SubscriptionsAdmin)
+
+
+admin.site.register(Feasts)

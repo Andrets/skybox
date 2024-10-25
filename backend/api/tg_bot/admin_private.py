@@ -270,6 +270,11 @@ async def download_db(callback: CallbackQuery):
 
 
 
+@admin_private.callback_query(F.data == 'controll')
+async def controll(callback: CallbackQuery):
+    await callback.answer()
+    
+
 
 
 

@@ -271,3 +271,15 @@ class Subscriptions(models.Model):
     class Meta:
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
+
+class Feasts(models.Model):
+    name = models.CharField('Название', max_length=300)
+    date = models.DateField('День праздника')
+    percent = models.CharField('Процент скидки', default='0', max_length=300)
+
+    def __str__(self):
+        return f'{name} - {date} c {percent}%'
+
+    class Meta:
+        verbose_name = 'Праздник'
+        verbose_name_plural = 'Праздник'
