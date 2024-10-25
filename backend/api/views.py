@@ -547,8 +547,8 @@ class SerailViewSet(viewsets.ModelViewSet):
         else:
             return Response({'error': 'Parameter "data" is required'}, status=400)
 
-        # Получаем все серии этого сериала
-        all_series_from_serail = Series.objects.filter(serail=serail)
+        # Получаем все серии этого сериала и сортируем их по эпизоду
+        all_series_from_serail = Series.objects.filter(serail=serail).order_by('episode')
 
         result = []
         has_subscription = self.has_active_subscription(user)
