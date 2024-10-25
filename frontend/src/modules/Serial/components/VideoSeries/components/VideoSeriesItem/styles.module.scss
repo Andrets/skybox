@@ -1,0 +1,11 @@
+.video {
+  position: relative;
+  width: 100%;
+  height: calc(100% - 48px);
+
+  video {
+    top: 0;
+    left: 0;
+    height: 100%;
+  }
+}

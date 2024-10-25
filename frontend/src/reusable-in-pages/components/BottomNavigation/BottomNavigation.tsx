@@ -6,13 +6,11 @@ import styles from "./styles.module.scss";
 import { createPortal } from "react-dom";
 import { ReactComponent as BookmarkIcon } from "@icons/BookmarkWidth.svg";
 import { ReactComponent as ProfileIcon } from "@icons/Human.svg";
-import { useNavigate } from "react-router-dom";
-import { useCurrentPath } from "@/shared/hooks/useCurrentPath";
+import { useLocation, useNavigate } from "react-router-dom";
 const BottomNavigationComponent = () => {
   const navigate = useNavigate();
-  const curLocation = useCurrentPath();
+  const location = useLocation();
 
-  console.log("ccc", curLocation);
   return (
     <>
       {createPortal(
@@ -25,7 +23,7 @@ const BottomNavigationComponent = () => {
             icon={
               <EarthIcon
                 className={`${styles.icon} ${styles.home} ${
-                  curLocation === "" && styles.active
+                  location.pathname === "/" && styles.active
                 }`}
               />
             }
@@ -38,7 +36,7 @@ const BottomNavigationComponent = () => {
             icon={
               <ClipsIcon
                 className={`${styles.clips} ${
-                  curLocation?.includes("shorts") && styles.active
+                  location.pathname?.includes("shorts") && styles.active
                 }`}
               />
             }
@@ -52,7 +50,7 @@ const BottomNavigationComponent = () => {
             icon={
               <BookmarkIcon
                 className={`${styles.icon} ${styles.bookmark} ${
-                  curLocation === "likes" && styles.active
+                  location.pathname.includes("likes") && styles.active
                 }`}
               />
             }
@@ -66,7 +64,7 @@ const BottomNavigationComponent = () => {
             icon={
               <ProfileIcon
                 className={`${styles.icon}  ${styles.profile} ${
-                  curLocation === "profile" && styles.active
+                  location.pathname.includes("profile") && styles.active
                 }`}
               />
             }

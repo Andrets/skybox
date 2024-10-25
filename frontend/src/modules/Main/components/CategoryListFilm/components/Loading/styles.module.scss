@@ -1,0 +1,19 @@
+.swiper {
+  width: 100%;
+  border-radius: 5px;
+
+  .slide {
+    width: 33%;
+    @media (max-width: 767px) {
+      width: 50%;
+    }
+
+    @media (max-width: 450px) {
+      width: 87%;
+    }
+
+    img {
+      width: 100%;
+    }
+  }
+}

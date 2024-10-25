@@ -1,0 +1,14 @@
+.swiper {
+  margin: 16px 0 0 0;
+  .slide {
+    width: 40%;
+
+    @media (min-width: 767px) {
+      width: 33%;
+    }
+
+    @media (min-width: 1024px) {
+      width: 25%;
+    }
+  }
+}

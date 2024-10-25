@@ -36,8 +36,6 @@ export const AddCardProvider = ({ children }: AddCardProviderProps) => {
 
       mask = `${maskMonth}${part2.length === 0 ? "" : `/${part2}`}`;
 
-      console.log(part2);
-
       if (dateCardRef?.current) {
         dateCardRef.current.value = mask;
       }

@@ -11,6 +11,7 @@ export const ShortsItemProvider = ({ children }: ShortsItemProviderProps) => {
   const [curTime, setCurTime] = useState(0);
   const [viewPlay, setViewPlay] = useState(false);
   const [isChangingTime, setIsChangingTime] = useState(false);
+  const [userIsView, setUserIsView] = useState<boolean>(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   return (
@@ -27,6 +28,8 @@ export const ShortsItemProvider = ({ children }: ShortsItemProviderProps) => {
         videoRef,
         isChangingTime,
         setIsChangingTime,
+        userIsView,
+        setUserIsView,
       }}
     >
       {children}

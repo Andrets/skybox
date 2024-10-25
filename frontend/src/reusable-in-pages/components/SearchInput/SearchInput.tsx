@@ -2,6 +2,7 @@ import { FC } from "react";
 import styles from "./styles.module.scss";
 import SearchIcon from "@mui/icons-material/Search";
 import { SearchInputProps } from "./interface";
+import { useTranslation } from "react-i18next";
 const SearchInput: FC<SearchInputProps> = ({
   className,
   iconClassName,
@@ -9,7 +10,10 @@ const SearchInput: FC<SearchInputProps> = ({
   onFocus,
   onBlur,
   onClick,
+  onChange,
+  value,
 }) => {
+  const { t } = useTranslation();
   return (
     <label className={`${styles.container} ${className}`}>
       <SearchIcon
@@ -17,11 +21,14 @@ const SearchInput: FC<SearchInputProps> = ({
         className={`${iconClassName}`}
       />
       <input
+        type={"input"}
         onFocus={onFocus}
         onBlur={onBlur}
         onClick={onClick}
-        placeholder="Search..."
+        placeholder={`${t("search")}...`}
         className={`${inputClassName}`}
+        onChange={onChange}
+        value={value}
       />
     </label>
   );

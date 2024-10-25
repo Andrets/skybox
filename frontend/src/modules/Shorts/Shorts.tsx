@@ -1,21 +1,30 @@
 import { Swiper, SwiperSlide } from "swiper/react";
 import styles from "./styles.module.scss";
 import useBlockScroll from "@/shared/hooks/useBlockScroll";
-
-import { ShortsItem } from "./components/ShortsItem/ShortsItem";
 import { Mousewheel } from "swiper/modules";
-import { useState } from "react";
+import { useContext } from "react";
 import { useShortsStyleRoot } from "./helpers/useShortsStyleRoot";
 import { ShortsItemProvider } from "@/reusable-in-pages/contexts/ShortsContext/provider";
-
-const ARRAY = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+import { useGetShortsQuery } from "@/api/ShortsApi";
+import ShortsListContext from "@/reusable-in-pages/contexts/ShortsListContext/context";
+import { useInfinityShorts } from "./helpers/useInfinityShorts";
+import { ShortsSlide } from "./components/ShortsSlide/ShortsSlide";
 
 const Shorts = () => {
   useBlockScroll(true);
   useShortsStyleRoot();
+  useInfinityShorts();
 
-  const [activeSwiperIndex, setActiveSwiperIndex] = useState(0);
-  const [slideIgnoreTouches, setSlideIgnoreTouches] = useState(false);
+  const { activeSlideIndex, setActiveSlideIndex, setSlideIgnoreTouches } =
+    useContext(ShortsListContext);
+
+  const { data, isLoading } = useGetShortsQuery();
+
+  console.log(data, isLoading);
+
+  if (isLoading) {
+    return <></>;
+  }
 
   return (
     <Swiper
@@ -28,29 +37,29 @@ const Shorts = () => {
       onSliderMove={() => {
         setSlideIgnoreTouches(true);
       }}
-      onBeforeSlideChangeStart={() => {
+      onSlideChangeTransitionEnd={() => {
         setSlideIgnoreTouches(false);
       }}
       onSlideChange={(swiper) => {
-        setActiveSwiperIndex(swiper.activeIndex);
+        setActiveSlideIndex(swiper.activeIndex);
       }}
       direction="vertical"
     >
       {
         /* eslint-disable */
-        ARRAY.map((el, index) => {
-          console.log(el);
-          return (
-            <SwiperSlide className={styles.slide}>
-              <ShortsItemProvider>
-                <ShortsItem
-                  ignoreTouches={slideIgnoreTouches}
-                  isActive={index === activeSwiperIndex}
-                />
-              </ShortsItemProvider>
-            </SwiperSlide>
-          );
-        })
+        data &&
+          data.map((el, index) => {
+            return (
+              <SwiperSlide key={index} className={styles.slide}>
+                <ShortsItemProvider>
+                  <ShortsSlide
+                    isActive={index === activeSlideIndex}
+                    data={el}
+                  />
+                </ShortsItemProvider>
+              </SwiperSlide>
+            );
+          })
         /* eslint-enable */
       }
     </Swiper>

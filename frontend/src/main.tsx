@@ -10,8 +10,8 @@ import { RouterProvider } from "react-router-dom";
 import { router } from "./app/router.tsx";
 import { TelegramProvider } from "./shared/hooks/useTelegram.tsx";
 import { Provider } from "react-redux";
-import { store } from "./app/store.ts";
-
+import store from "./app/store/store.ts";
+import "./app/locales/i18n.ts";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -19,7 +19,6 @@ createRoot(document.getElementById("root")!).render(
       <TelegramProvider>
         <ThemeProvider theme={theme}>
           <>
-        
             <RouterProvider router={router} />
           </>
         </ThemeProvider>

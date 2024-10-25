@@ -1,96 +1,28 @@
-import { Swiper, SwiperSlide } from "swiper/react";
-import styles from "./styles.module.scss";
-import "swiper/css";
-import posterIMG from "@images/poster.png";
-import lazyIMG from "@images/image.jpg";
-import { ExclusiveFilmCard } from "../../ui";
+import { useAppSelector } from "@/shared/hooks/reduxTypes";
+import { useGetExclusiveQuery } from "../../../../api/MainPageApi";
+
+import { ExclusiveList, ExclusiveLoading } from "./components";
+import { ExclusiveOriginalsSearchParams } from "@/shared/models/MainPageApi";
 
 export const ExclusiveOriginals = () => {
-  return (
-    <Swiper className={styles.swiper} slidesPerView={"auto"} spaceBetween={8}>
-      <SwiperSlide className={styles.slide}>
-        <ExclusiveFilmCard
-          to="/filmInfo"
-          poster={posterIMG}
-          name={`In The Name of Motherhood`}
-          category={"Family"}
-          status={"New"}
-        />
-      </SwiperSlide>
-      <SwiperSlide className={styles.slide}>
-        <ExclusiveFilmCard
-          to="/filmInfo"
-          poster={posterIMG}
-          name={`In The Name of Motherhood`}
-          category={"Family"}
-          status={"New"}
-        />
-      </SwiperSlide>
-      <SwiperSlide className={styles.slide}>
-        <ExclusiveFilmCard
-          to="/filmInfo"
-          poster={posterIMG}
-          name={`In The Name of Motherhood`}
-          category={"Family"}
-          status={"New"}
-        />
-      </SwiperSlide>
-
-      <SwiperSlide className={styles.slide}>
-        <ExclusiveFilmCard
-          to="/filmInfo"
-          poster={posterIMG}
-          name={`In The Name of Motherhood`}
-          category={"Family"}
-          status={"New"}
-        />
-      </SwiperSlide>
-      <SwiperSlide className={styles.slide}>
-        <ExclusiveFilmCard
-          to="/filmInfo"
-          poster={posterIMG}
-          name={`In The Name of Motherhood`}
-          category={"Family"}
-          status={"New"}
-        />
-      </SwiperSlide>
-      <SwiperSlide className={styles.slide}>
-        <ExclusiveFilmCard
-          to="/filmInfo"
-          poster={posterIMG}
-          name={`In The Name of Motherhood`}
-          category={"Family"}
-          status={"New"}
-        />
-      </SwiperSlide>
-
-      <SwiperSlide className={styles.slide}>
-        <ExclusiveFilmCard
-          to="/filmInfo"
-          poster={posterIMG}
-          name={`In The Name of Motherhood`}
-          category={"Family"}
-          status={"New"}
-        />
-      </SwiperSlide>
-      <SwiperSlide className={styles.slide}>
-        <ExclusiveFilmCard
-          to="/filmInfo"
-          poster={posterIMG}
-          name={`In The Name of Motherhood`}
-          category={"Family"}
-          status={"New"}
-        />
-      </SwiperSlide>
-      <SwiperSlide className={styles.slide}>
-        <ExclusiveFilmCard
-          to="/filmInfo"
-          poster={lazyIMG}
-          name={`In The Name of Motherhood`}
-          category={"Family"}
-          status={"New"}
-        />
-      </SwiperSlide>
-    </Swiper>
+  const activeCategory = useAppSelector(
+    (state) => state.mainSlice.activeCategory
   );
+  const { data, isLoading, isError } = useGetExclusiveQuery(
+    ExclusiveOriginalsSearchParams[activeCategory]
+  );
+
+  if (isLoading) {
+    return <ExclusiveLoading />;
+  }
+
+  if (isError) {
+    return <ExclusiveLoading />;
+  }
+
+  if (data) {
+    return <ExclusiveList data={data} />;
+  }
+
+  return <></>;
 };

@@ -1,40 +1,36 @@
-import { SectionHeader } from "@/ui/SectionHeader";
-import styles from "./styles.module.scss";
+import { useSearchQuery } from "@/api/SearchApi";
+import { useAppSelector } from "@/shared/hooks/reduxTypes";
+import { List, Loading, Unitializated } from "./components";
 
-import posterIMG from "@images/poster.png";
-import { ResultItem } from "../../ui";
-import { IPeopleSearchingItem } from "../../ui/PeopleSerchingItem/interface";
-
-const psi: IPeopleSearchingItem = {
-  poster: posterIMG,
-  status: "New",
-  category: "Family",
-  description: `Single mom Caroline dumped her first love Easton Black eight years ago... But she never told him he got herpregnant!...`,
-  header: `In The Name of Motherhood`,
-};
-
-const LIST = [psi, psi, psi];
 export const Result = () => {
-  return (
-    <>
-      <SectionHeader className={`${styles.header} ${styles.section} container`}>
-        Results
-      </SectionHeader>
-
-      <div className={styles.list}>
-        {LIST.map((el, index) => {
-          return (
-            <ResultItem
-              key={index}
-              poster={el.poster}
-              header={el.header}
-              category={el.category}
-              status={el.status}
-              description={el.description}
-            />
-          );
-        })}
-      </div>
-    </>
+  const searchQueryValue = useAppSelector(
+    (state) => state.searchInput.searchQueryValue
   );
+
+  const {
+    data: currentData,
+    isError,
+    isFetching,
+    isUninitialized,
+  } = useSearchQuery(searchQueryValue ? searchQueryValue : "", {
+    skip: searchQueryValue ? false : true,
+  });
+
+  if (isUninitialized) {
+    return <Unitializated />;
+  }
+
+  if (isFetching) {
+    return <Loading />;
+  }
+
+  if (isError) {
+    return <></>;
+  }
+
+  if (currentData) {
+    return <List data={currentData} />;
+  }
+
+  return <></>;
 };

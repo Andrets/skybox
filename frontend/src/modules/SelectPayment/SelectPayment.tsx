@@ -33,10 +33,10 @@ export const SelectPayment = () => {
 
       <LinkButton
         onClick={() => {
-            navigate('/addCard')
+          navigate("/addCard");
         }}
         className={styles.link}
-        name="Добавить карту"
+        children="Добавить карту"
       />
     </div>
   );

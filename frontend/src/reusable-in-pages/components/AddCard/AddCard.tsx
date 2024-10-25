@@ -8,13 +8,14 @@ import {
 } from "./components";
 import { AddCardContext } from "@/reusable-in-pages/contexts/AddCardContext/context";
 import { Controller } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 export const AddCardForm = ({
   className,
   onSubmit,
   children,
   ...restProps
-}: HTMLAttributes<HTMLFormElement>) => {
+}: HTMLAttributes<HTMLDivElement>) => {
   const {
     numberCardRef,
     dateCardRef,
@@ -25,22 +26,17 @@ export const AddCardForm = ({
     },
   } = useContext(AddCardContext);
 
+  const { t } = useTranslation();
+
   return (
-    <form
-      onChange={() => {}}
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (onSubmit) onSubmit(e);
-      }}
-      className={`${styles.form} ${className}`}
-      {...restProps}
-    >
-      <div className={`container ${styles.formContainer}`}>
+    <div className={`${styles.form} ${className}`} {...restProps}>
+      <div className={`${styles.formContainer}`}>
         <Controller
           name="number"
           control={control}
           render={({ field }) => (
             <NumberCardInput
+              placeholder={t("cardNumber")}
               className={styles.input}
               {...field}
               ref={numberCardRef}
@@ -53,11 +49,11 @@ export const AddCardForm = ({
             </NumberCardInput>
           )}
           rules={{
-            required: "Введите номер карты",
+            required: t("error.cardNumberRequired"),
 
             pattern: {
               value: /^(\d{4}\s?){4}$/,
-              message: "Неверный формат номера карты",
+              message: t("error.cardNumberPattern"),
             },
           }}
         />
@@ -71,7 +67,7 @@ export const AddCardForm = ({
                 {...field}
                 className={styles.input}
                 ref={dateCardRef}
-                placeholder="Срок действия"
+                placeholder={t("validityPeriod")}
               >
                 {errors.date?.message && (
                   <span
@@ -81,8 +77,8 @@ export const AddCardForm = ({
               </DateCardInput>
             )}
             rules={{
-              required: "Введите срок действия",
-              minLength: { value: 5, message: "Неверный формат даты" },
+              required: t("error.dateRequired"),
+              minLength: { value: 5, message: t("error.dateMinLength") },
             }}
           />
           <Controller
@@ -102,21 +98,17 @@ export const AddCardForm = ({
               </CVVCardInput>
             )}
             rules={{
-              required: "Введите CVV",
+              required: t("error.cvvRequired"),
               minLength: {
                 value: 3,
-                message: "Неверный формат cvv",
+                message: t("error.cvvMinLength"),
               },
             }}
           />
         </div>
       </div>
 
-      {/* <div className="container">
-        <SaveCardCheckbox />
-      </div> */}
-
       {children}
-    </form>
+    </div>
   );
 };

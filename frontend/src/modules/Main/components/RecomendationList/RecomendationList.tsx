@@ -1,65 +1,29 @@
 import styles from "./styles.module.scss";
-import posterIMG from "@images/image.jpg";
-import { RecomendationCard } from "../../ui";
-import { LazyLoadComponent } from "react-lazy-load-image-component";
+import { useGetRecomendationsQuery } from "../../../../api/MainPageApi";
+import { List, Loading } from "./components";
 
 export const RecomendationList = () => {
-  return (
-    <div className={`container ${styles.container}`}>
-      <LazyLoadComponent threshold={-20}>
-        <RecomendationCard
-          to={"/filmInfo"}
-          poster={posterIMG}
-          name="My Son, The Richest Tycoon"
-        />
-      </LazyLoadComponent>
+  const { data, isLoading, isError } = useGetRecomendationsQuery();
 
-      <LazyLoadComponent threshold={-20}>
-        <RecomendationCard
-          to={"/filmInfo"}
-          poster={posterIMG}
-          name="My Son, The Richest Tycoon"
-        />
-      </LazyLoadComponent>
+  if (isLoading) {
+    return (
+      <div className={`container ${styles.container}`}>
+        <Loading />
+      </div>
+    );
+  }
 
-      <LazyLoadComponent threshold={-20}>
-        <RecomendationCard
-          to={"/filmInfo"}
-          poster={posterIMG}
-          name="My Son, The Richest Tycoon"
-        />
-      </LazyLoadComponent>
+  if (isError) {
+    return <></>;
+  }
 
-      <LazyLoadComponent threshold={-20}>
-        <RecomendationCard
-          to={"/filmInfo"}
-          poster={posterIMG}
-          name="My Son, The Richest Tycoon"
-        />
-      </LazyLoadComponent>
-      <LazyLoadComponent threshold={-20}>
-        <RecomendationCard
-          to={"/filmInfo"}
-          poster={posterIMG}
-          name="My Son, The Richest Tycoon"
-        />
-      </LazyLoadComponent>
+  if (data) {
+    return (
+      <div className={`container ${styles.container}`}>
+        <List data={data} />
+      </div>
+    );
+  }
 
-      <LazyLoadComponent threshold={-20}>
-        <RecomendationCard
-          to={"/filmInfo"}
-          poster={posterIMG}
-          name="My Son, The Richest Tycoon"
-        />
-      </LazyLoadComponent>
-
-      <LazyLoadComponent threshold={-20}>
-        <RecomendationCard
-          to={"/filmInfo"}
-          poster={posterIMG}
-          name="My Son, The Richest Tycoon"
-        />
-      </LazyLoadComponent>
-    </div>
-  );
+  return null;
 };

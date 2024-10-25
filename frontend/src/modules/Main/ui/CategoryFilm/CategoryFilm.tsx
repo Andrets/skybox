@@ -4,12 +4,18 @@ import { FC } from "react";
 import { ReactComponent as PlaySVG } from "@icons/Play.svg";
 import Poster from "@/ui/Poster/Poster";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { Button } from "@mui/material";
+
 export const CategoryFilm: FC<CategoryFilmProps> = ({ poster, to }) => {
+  const { t } = useTranslation();
   return (
-    <Poster poster={poster} className={styles.container}>
-      <Link to={to} className={styles.playBtn}>
-        <PlaySVG /> <span className={styles.txt}>Play</span>
-      </Link>
-    </Poster>
+    <Link to={to}>
+      <Poster poster={poster} className={styles.container}>
+        <Button className={styles.playBtn}>
+          <PlaySVG /> <span className={styles.txt}>{t("startPlay")}</span>
+        </Button>
+      </Poster>
+    </Link>
   );
 };

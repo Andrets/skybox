@@ -1,30 +1,36 @@
+import { useTranslation } from "react-i18next";
 import { SettingsLinkButton } from "../../ui";
 import styles from "./styles.module.scss";
 import { ReactComponent as ArrowRight } from "@icons/ArrowRight.svg";
 
 export const SettingsLinkList = () => {
+  const { t } = useTranslation();
   return (
     <div className={`container ${styles.container}`}>
-      <SettingsLinkButton className={styles.link} name="Language" to="/lang">
+      <SettingsLinkButton
+        className={styles.link}
+        name={t("language")}
+        to="/lang"
+      >
         <span className={styles.language}>
           English <ArrowRight />
         </span>
       </SettingsLinkButton>
       <SettingsLinkButton
         className={styles.link}
-        name="Terms of Use"
+        name={t("termsOfUse")}
         to="/termsofuse"
       >
         <ArrowRight />
       </SettingsLinkButton>
       <SettingsLinkButton
         className={styles.link}
-        name="Privacy policy"
+        name={t("privacyPolicy")}
         to="/privacyPolicy"
       >
         <ArrowRight />
       </SettingsLinkButton>
-      <SettingsLinkButton className={styles.link} name="DMCA" to="/dmca">
+      <SettingsLinkButton className={styles.link} name={t("dmca")} to="/dmca">
         <ArrowRight />
       </SettingsLinkButton>
     </div>

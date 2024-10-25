@@ -7,18 +7,21 @@ import {
   RecomendationList,
 } from "./components";
 import { SectionHeader } from "@/ui/SectionHeader";
+import { useTranslation } from "react-i18next";
 
 const Main: FC = () => {
+  const { t } = useTranslation();
   return (
     <>
       <div className={`${styles.container}`}>
         <div style={{ padding: 0 }} className="container">
           <CategoryToggler />
-          <CategoryListFilm films={[]} />
+
+          <CategoryListFilm />
         </div>
 
         <SectionHeader className={`${styles.originalsSectHeader} container`}>
-          Exclusive originals
+          {t("exclusiveOriginals")}
         </SectionHeader>
 
         <div style={{ padding: "0 0 0 12px" }} className="container">
@@ -26,7 +29,7 @@ const Main: FC = () => {
         </div>
 
         <SectionHeader className={`${styles.originalsSectHeader} container`}>
-          You might like
+          {t("youMightLike")}
         </SectionHeader>
 
         <RecomendationList />

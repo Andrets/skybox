@@ -4,12 +4,16 @@ import styles from "./styles.module.scss";
 import { WatchHistoryItem } from "../../ui";
 import posterIMG from "@images/poster.png";
 import HorizontalScrollContainer from "@/reusable-in-pages/components/HorizontalScrollContainer/HorizontalScrollContainer";
+import { useTranslation } from "react-i18next";
 
 export const WatchHistory = () => {
+  const { t } = useTranslation();
   return (
     <>
       <div className={`container ${styles.container}`}>
-        <SectionHeader className={styles.header}>Watch history</SectionHeader>
+        <SectionHeader className={styles.header}>
+          {t("watchHistory")}
+        </SectionHeader>
       </div>
 
       <HorizontalScrollContainer

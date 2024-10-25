@@ -3,7 +3,7 @@ import { ReactComponent as ArrowRight } from "@icons/ArrowRight.svg";
 import styles from "./styles.module.scss";
 import { LinkButtonProps } from "./interface";
 
-export const LinkButton = ({ name, className, onClick }: LinkButtonProps) => {
+export const LinkButton = ({ children, className, onClick }: LinkButtonProps) => {
   return (
     <Button
       sx={{
@@ -16,7 +16,7 @@ export const LinkButton = ({ name, className, onClick }: LinkButtonProps) => {
       onClick={onClick}
       className={`${styles.container} ${className}`}
     >
-      <span>{name}</span> <ArrowRight />
+      {children} <ArrowRight />
     </Button>
   );
 };

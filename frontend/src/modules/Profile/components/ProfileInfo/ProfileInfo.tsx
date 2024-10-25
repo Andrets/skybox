@@ -1,15 +1,18 @@
 import { Avatar } from "@mui/material";
 import styles from "./styles.module.scss";
-import posterIMG from "@images/poster.png";
+import { WebApp } from "@/shared/constants/constants";
 export const ProfileInfo = () => {
   return (
-    <div >
+    <div>
       <div className={`${styles.container} container `}>
-        <Avatar src={posterIMG} className={styles.avatar} />
+        <Avatar src={""} className={styles.avatar} />
 
         <div className={styles.info}>
-          <p className={styles.name}>Konstantin Konstantinopolsky</p>
-          <p className={styles.id}>ID 88183192</p>
+          <p className={styles.name}>
+            {WebApp.initDataUnsafe.user?.first_name}{" "}
+            {WebApp.initDataUnsafe.user?.last_name}
+          </p>
+          <p className={styles.id}>ID {WebApp.initDataUnsafe.user?.id}</p>
         </div>
       </div>
     </div>

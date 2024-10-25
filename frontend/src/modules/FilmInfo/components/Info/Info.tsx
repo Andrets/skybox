@@ -1,27 +1,47 @@
 import styles from "./styles.module.scss";
-import MainInfo from "../../MainInfo/MainInfo";
+import MainInfo from "./components/MainInfo/MainInfo";
 import { SectionHeader } from "@/ui/SectionHeader";
-import CommentsBlock from "@/modules/FilmInfo/Comments/Comments";
-import AddComment from "@/modules/FilmInfo/AddComment/AddComment";
+import CommentsBlock from "@/modules/FilmInfo/components/Info/components/Comments/Comments";
+import AddComment from "@/modules/FilmInfo/components/Info/components/AddComment/AddComment";
 import { ReactComponent as PlaySVG } from "@icons/Play.svg";
 import { Link } from "react-router-dom";
+import { FilmInfoProps } from "../../model/models";
+import { useTranslation } from "react-i18next";
 
-const Info = () => {
+const Info = ({
+  description,
+  comments,
+  name,
+  is_new,
+  genre,
+  rating,
+}: FilmInfoProps) => {
+  const { t } = useTranslation();
   return (
     <div className={`${styles.info}`}>
       <div className={styles.container}>
-        <MainInfo />
+        <MainInfo
+          description={description}
+          name={name}
+          is_new={is_new}
+          genre={genre}
+          rating={rating}
+        />
 
-        <SectionHeader className={styles.sectHeader}>Comments</SectionHeader>
+        <SectionHeader className={styles.sectHeader}>
+          {t("comments")}
+        </SectionHeader>
 
-        <CommentsBlock />
+        <CommentsBlock comments={comments} />
 
-        <SectionHeader className={styles.sectHeader}>Add comment</SectionHeader>
+        <SectionHeader className={styles.sectHeader}>
+          {t("addComment")}
+        </SectionHeader>
 
         <AddComment />
 
-        <Link to={"/filmVideo"} className={` ${styles.link}`}>
-          <PlaySVG /> Watch
+        <Link to={"/filmVideo"} className={`${styles.link}`}>
+          <PlaySVG /> {t("startPlay")}
         </Link>
       </div>
     </div>

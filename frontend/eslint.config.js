@@ -23,6 +23,8 @@ export default tseslint.config(
         "warn",
         { allowConstantExport: true },
       ],
+      "react/jsx-uses-react": "warning",
+      "react/jsx-uses-vars": "warning",
     },
   }
 );

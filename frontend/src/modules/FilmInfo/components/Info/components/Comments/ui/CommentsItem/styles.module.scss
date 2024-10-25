@@ -1,0 +1,14 @@
+.userInfo {
+  display: flex;
+  align-items: center;
+
+  .name {
+    display: block;
+    margin-left: 8px;
+  }
+}
+
+.text {
+  margin: 8px 0 0 48px;
+  overflow-wrap: break-word;
+}

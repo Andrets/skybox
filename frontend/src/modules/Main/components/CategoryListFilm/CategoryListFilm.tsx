@@ -1,39 +1,21 @@
-import { Swiper, SwiperSlide } from "swiper/react";
-
-import "swiper/css";
-import "swiper/css/pagination";
-import styles from "./styles.module.scss";
-import { Pagination } from "swiper/modules";
-
-import { CategoryListFilmProps } from "./interface";
-import { FC } from "react";
-
-import posterIMG from "@images/poster.png";
 import "./styles.scss";
-import { CategoryFilm } from "../../ui";
+import { useGetTopSerialsQuery } from "../../../../api/MainPageApi";
+import { List, Loading } from "./components";
 
-export const CategoryListFilm: FC<CategoryListFilmProps> = () => {
-  return (
-    <Swiper
-      className={`${styles.swiper} category-list__swiper`}
-      slidesPerView={"auto"}
-      spaceBetween={15}
-      modules={[Pagination]}
-      pagination={{ dynamicBullets: true, dynamicMainBullets: 3 }}
-      centeredSlides={true}
-      initialSlide={1}
-    >
-      <SwiperSlide className={styles.slide}>
-        <CategoryFilm to="/filmVideo" poster={posterIMG} />
-      </SwiperSlide>
+export const CategoryListFilm = () => {
+  const { data, isLoading, isError } = useGetTopSerialsQuery();
 
-      <SwiperSlide className={styles.slide}>
-        <CategoryFilm to="/filmVideo" poster={posterIMG} />
-      </SwiperSlide>
+  if (isLoading) {
+    return <Loading />;
+  }
 
-      <SwiperSlide className={styles.slide}>
-        <CategoryFilm to="/filmVideo" poster={posterIMG} />
-      </SwiperSlide>
-    </Swiper>
-  );
+  if (isError) {
+    return <></>;
+  }
+
+  if (data) {
+    return <List data={data} />;
+  }
+
+  return <></>;
 };

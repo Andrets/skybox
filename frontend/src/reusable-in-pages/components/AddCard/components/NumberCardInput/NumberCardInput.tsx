@@ -11,7 +11,7 @@ export const NumberCardInput = forwardRef<
     React.InputHTMLAttributes<HTMLInputElement>,
     HTMLInputElement
   >
->(({ className, value, ...restProps }, ref) => {
+>(({ className, value, placeholder, ...restProps }, ref) => {
   const [cardType, setCardType] = useState<string | null>(null);
 
   const SwitchIcon = useMemo(() => {
@@ -60,7 +60,7 @@ export const NumberCardInput = forwardRef<
 
   return (
     <AddCardInput
-      placeholder="Номер карты"
+      placeholder={placeholder}
       maxLength={19}
       className={`${styles.input} ${className}`}
       ref={ref}

@@ -1,7 +1,11 @@
+import { ShortsItemModel } from "@/shared/models/ShortsApi";
 import { HTMLAttributes } from "react";
 
-export interface ShortsItemProps extends HTMLAttributes<HTMLVideoElement> {
+export interface ShortsItemProps
+  extends HTMLAttributes<HTMLVideoElement>,
+    Omit<ShortsItemModel, "id"> {
   isActive: boolean;
   autoPlay?: boolean;
-  ignoreTouches: boolean;
+  serial_id: ShortsItemModel["id"];
+  video: string;
 }

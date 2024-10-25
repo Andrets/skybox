@@ -13,6 +13,7 @@ export const ExclusiveFilmCard: FC<ExclusiveCardProps> = ({
   status,
   to,
 }) => {
+
   return (
     <Link to={to}>
       <Poster poster={poster} className={styles.poster}>

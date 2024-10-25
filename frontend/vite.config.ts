@@ -22,4 +22,7 @@ export default defineConfig({
       "@images": `${path.resolve(__dirname, "./src/shared/assets/images")}`,
     },
   },
+  server: {
+    port: 5173, // Установил порт 3000
+  },
 });

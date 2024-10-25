@@ -11,7 +11,13 @@ export const Video: FC<VideoInterfaceProps> = ({
 }) => {
   return (
     <div className={`${styles.container} ${className}`}>
-      <video ref={videoRef} onClick={onClick} {...restProps} playsInline />
+      <video
+        onContextMenu={(e) => e.preventDefault()}
+        ref={videoRef}
+        onClick={onClick}
+        {...restProps}
+        playsInline
+      />
       {children}
     </div>
   );

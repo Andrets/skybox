@@ -6,3 +6,13 @@ declare module "*.svg" {
   >;
   export default ReactComponent;
 }
+
+interface CustomSliderEventDetail {
+  value: number | number[];
+}
+
+declare global {
+  interface WindowEventMap {
+    sliderUserChangeEvent: CustomEvent<CustomSliderEventDetail>;
+  }
+}

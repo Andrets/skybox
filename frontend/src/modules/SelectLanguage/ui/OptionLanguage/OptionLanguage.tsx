@@ -8,6 +8,7 @@ export const OptionLanguage = ({
   title,
   subtitle,
   onClick,
+  ...restProps
 }: OptionLanguageProps) => {
   return (
     <Button
@@ -21,6 +22,7 @@ export const OptionLanguage = ({
       }}
       onClick={onClick}
       className={`${styles.container} ${className}`}
+      {...restProps}
     >
       <span className={styles.lang}>
         <span className={styles.title}>{title}</span>
