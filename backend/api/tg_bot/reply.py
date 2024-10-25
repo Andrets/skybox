@@ -70,3 +70,5 @@ def post_type2() -> ReplyKeyboardMarkup:
     keyboard.button(text='Платные подписчики')
     keyboard.button(text='Бесплатные подписчики')
     return keyboard.as_markup(resize_keyboard=True)
+
+

@@ -576,6 +576,33 @@ class SerailViewSet(viewsets.ModelViewSet):
             result.append(series_data)
 
         return Response(result)
+
+    @action(detail=False, methods=['get'])
+    def like_it(self, request):
+        # Получаем ID серии из запроса
+        series_id = request.query_params.get('series_id')
+        if not series_id:
+            return Response({'error': 'Parameter "series_id" is required'}, status=400)
+
+        # Проверяем, что у пользователя есть Telegram ID
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        if not tg_id:
+            return Response({"detail": "User not found."}, status=404)
+
+        # Получаем пользователя по его Telegram ID
+        user = get_object_or_404(Users, tg_id=tg_id)
+
+        # Получаем серию и сериал, к которому она относится
+        series = get_object_or_404(Series, id=series_id)
+        serail = series.serail  # Сериал, к которому относится серия
+
+        # Добавляем сериал в избранное пользователя, если его там еще нет
+        favorite, created = Favorite.objects.get_or_create(user=user, serail=serail)
+
+        if created:
+            return Response({"detail": f'Serial "{serail.name}" added to favorites.'}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"detail": f'Serial "{serail.name}" is already in favorites.'}, status=status.HTTP_200_OK)
 class StatusNewViewSet(viewsets.ModelViewSet):
     queryset = StatusNew.objects.all()
     serializer_class = StatusNewSerializer
