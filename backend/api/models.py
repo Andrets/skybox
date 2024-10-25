@@ -41,7 +41,7 @@ class Users(models.Model):
     isActive = models.BooleanField('Активен', default=False)
     paid = models.BooleanField('Имел/Имеет платную подписку', default=False)
     search_history = models.JSONField(default=list, verbose_name='История поиска')
-
+    birthday = models.CharField('Дата рождения', max_length=250, null=True)
     list_per_page = 500
 
     def __str__(self):
@@ -252,3 +252,22 @@ class Favorite(models.Model):
     class Meta:
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные'
+
+
+class Subscriptions(models.Model):
+    class StatusEnum(models.TextChoices):
+        TEMPORARILY_YEAR = 'TEMPORARILY_YEAR', _('TEMPORARILY_YEAR')
+        TEMPORARILY_MONTH = 'TEMPORARILY_MONTH', _('TEMPORARILY_MONTH')
+        ALWAYS = 'ALWAYS', _('ALWAYS')
+        ONCE = 'ONCE', _('ONCE')
+
+    subtype = models.CharField('Тип подписки', choices=StatusEnum.choices, max_length=300)
+    price = models.CharField('Цена', default=0, max_length=300)
+    percent = models.CharField('Скидка', default='0', max_length=250)
+    def __str__(self):
+        
+        return f'{self.subtype} - {self.price}'
+
+    class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'

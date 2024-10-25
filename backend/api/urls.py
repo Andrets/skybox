@@ -14,6 +14,7 @@ from .views import (
     DocsTextsViewSet,
     PaymentsViewSet,
     FavoriteViewSet,
+    SubscriptionsViewSet,
 )
 
 router = DefaultRouter()
@@ -29,6 +30,8 @@ router.register('comments', CommentsViewSet)
 router.register('documents', DocsTextsViewSet)
 router.register('payments', PaymentsViewSet)
 router.register('favorite', FavoriteViewSet)
+router.register('subscriptions', SubscriptionsViewSet)
+
 
 
 

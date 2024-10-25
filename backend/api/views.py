@@ -15,6 +15,7 @@ from .models import (
     ViewedSeries,
     PermissionsModel,
     Payments,
+    Subscriptions,
 )
 from .serializers import (
     UsersSerializer,
@@ -30,7 +31,8 @@ from .serializers import (
     DocsTextsSerializer,
     PaymentsSerializer,
     RatingUpdateSerializer,
-    FavoriteSerializer
+    FavoriteSerializer,
+    SubscriptionsSerializer,
 )
 import requests
 import random
@@ -510,6 +512,70 @@ class SerailViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+    def has_active_subscription(self, user):
+        now = timezone.now()
+        one_year_ago = now - timedelta(days=365)
+        one_month_ago = now - timedelta(days=30)
+
+        active_payment = Payments.objects.filter(
+            user=user
+        ).filter(
+            Q(status=Payments.StatusEnum.ALWAYS) |  
+            (Q(status=Payments.StatusEnum.TEMPORARILY_YEAR) & Q(created_date__gte=one_year_ago)) |  
+            (Q(status=Payments.StatusEnum.TEMPORARILY_MONTH) & Q(created_date__gte=one_month_ago))  
+        ).exists()
+        return active_payment
+
+    @action(detail=False, methods=['get'])
+    def view_searil(self, request):
+        data = request.query_params.get('data', None)  # Здесь ID сериала
+
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        if not tg_id:
+            return Response({"detail": "User not found."}, status=404)
+
+        user = Users.objects.filter(tg_id=tg_id).first()
+        if not user:
+            return Response({"detail": "User not found."}, status=404)
+
+        # Проверка наличия параметра data
+        if data is not None:
+            try:
+                serail = Serail.objects.get(id=int(data))  # Получаем сериал по его ID
+            except (ValueError, Serail.DoesNotExist):
+                return Response({'error': 'Invalid serial ID or not found'}, status=404)
+        else:
+            return Response({'error': 'Parameter "data" is required'}, status=400)
+
+        # Получаем все серии этого сериала
+        all_series_from_serail = Series.objects.filter(serail=serail)
+
+        result = []
+        has_subscription = self.has_active_subscription(user)
+
+        for series_item in all_series_from_serail:
+            has_permission = PermissionsModel.objects.filter(user=user, series=series_item).exists()
+            # Пользователь может просматривать серию, если:
+            # - у него активная подписка
+            # - есть явное разрешение
+            # - эпизод <= 10 (бесплатные серии)
+            status = has_subscription or has_permission or series_item.episode <= 10
+
+            # Формируем данные для каждой серии
+            series_data = {
+                "id": series_item.id,
+                "name": series_item.name,
+                "episode": series_item.episode,
+                "status": status
+            }
+
+            # Если доступ есть, добавляем URL видео
+            if status:
+                series_data["video"] = series_item.video.url if series_item.video else None
+
+            result.append(series_data)
+
+        return Response(result)
 class StatusNewViewSet(viewsets.ModelViewSet):
     queryset = StatusNew.objects.all()
     serializer_class = StatusNewSerializer
@@ -898,6 +964,10 @@ class FavoriteViewSet(viewsets.ModelViewSet):
         return Response(serialized_data)
 
 
+class SubscriptionsViewSet(viewsets.ModelViewSet):
+    queryset = Subscriptions.objects.all()
+    serializer_class = SubscriptionsSerializer
+    http_method_names = ['get']
 
 
 

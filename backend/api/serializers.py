@@ -13,6 +13,7 @@ from .models import (
     DocsTexts,
     Payments,
     Favorite,
+    Subscriptions,
 )
 
 
@@ -100,3 +101,8 @@ class FavoriteSerializer(serializers.ModelSerializer):
 class RatingUpdateSerializer(serializers.Serializer):
     rating = serializers.IntegerField(min_value=1, max_value=5)
     serail_id = serializers.IntegerField()
+
+class SubscriptionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subscriptions
+        fields = '__all__'
