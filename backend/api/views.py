@@ -596,13 +596,18 @@ class SerailViewSet(viewsets.ModelViewSet):
         series = get_object_or_404(Series, id=series_id)
         serail = series.serail  # Сериал, к которому относится серия
 
-        # Добавляем сериал в избранное пользователя, если его там еще нет
-        favorite, created = Favorite.objects.get_or_create(user=user, serail=serail)
+        # Проверяем, есть ли сериал в избранном пользователя
+        favorite = Favorite.objects.filter(user=user, serail=serail).first()
 
-        if created:
-            return Response({"detail": f'Serial "{serail.name}" added to favorites.'}, status=status.HTTP_201_CREATED)
+        if favorite:
+            # Если сериал уже в избранном, удаляем его
+            favorite.delete()
+            return Response({"detail": f'Serial "{serail.name}" removed from favorites.'}, status=status.HTTP_200_OK)
         else:
-            return Response({"detail": f'Serial "{serail.name}" is already in favorites.'}, status=status.HTTP_200_OK)
+            # Если нет — добавляем сериал в избранное
+            Favorite.objects.create(user=user, serail=serail)
+            return Response({"detail": f'Serial "{serail.name}" added to favorites.'}, status=status.HTTP_201_CREATED)
+
 class StatusNewViewSet(viewsets.ModelViewSet):
     queryset = StatusNew.objects.all()
     serializer_class = StatusNewSerializer
@@ -699,12 +704,12 @@ class SeriesViewSet(viewsets.ModelViewSet):
         else:
             return Response({"detail": "User not found."}, status=404)
 
+        # Получаем просмотренные серии пользователя
         viewed_series_ids = ViewedSeries.objects.filter(user=user).values_list('series_id', flat=True)
 
         # Проверка подписки пользователя
         one_month_ago = timezone.now() - timedelta(days=30)
         one_year_ago = timezone.now() - timedelta(days=365)
-
         active_payment = Payments.objects.filter(
             user=user
         ).filter(
@@ -713,7 +718,7 @@ class SeriesViewSet(viewsets.ModelViewSet):
             (Q(status=Payments.StatusEnum.TEMPORARILY_MONTH) & Q(created_date__gte=one_month_ago))  
         ).exists()
 
-        # Если есть активная подписка, выбираем все серии, иначе только серии с эпизодами <= 10
+        # Если активная подписка есть, выбираем все серии, иначе только эпизоды <= 10
         if active_payment:
             queryset = Series.objects.exclude(id__in=viewed_series_ids)
         else:
@@ -722,6 +727,7 @@ class SeriesViewSet(viewsets.ModelViewSet):
         if not queryset.exists():
             return Response({"detail": "No series available."}, status=404)
 
+        # Подбираем 20% с топа и 80% случайных
         count = queryset.count()
         top_20_percent_count = max(1, int(count * 0.2))
         random_80_percent_count = 10 - top_20_percent_count
@@ -730,24 +736,27 @@ class SeriesViewSet(viewsets.ModelViewSet):
         remaining_series = queryset.exclude(id__in=top_20_percent.values_list('id', flat=True))
         random_80_percent = remaining_series.order_by('?')[:random_80_percent_count]
 
+        # Комбинируем и перемешиваем серии
         result_series = list(top_20_percent) + list(random_80_percent)
         random.shuffle(result_series)
 
         # Проверка доступа к сериям
+        filtered_series = []
         for series in result_series:
-            has_access = False
+            has_access = active_payment or PermissionsModel.objects.filter(user=user, series=series).exists() or series.episode <= 10
 
-            # Проверка доступа по PermissionsModel
-            if PermissionsModel.objects.filter(user=user, series=series).exists():
-                has_access = True
+            if has_access:
+                filtered_series.append(series)
 
-            # Если эпизод <= 10 или пользователь имеет доступ или активную подписку
-            if series.episode <= 10 or has_access or active_payment:
-                pass
-            else:
-                result_series.remove(series)  # Удаляем серию, если нет доступа
-
-        serialized_data = self.get_serializer(result_series, many=True).data
+        # Сериализация данных с добавлением serail_id и is_liked
+        serialized_data = [
+            {
+                **self.get_serializer(series).data,
+                "serail_id": series.serail.id,  # Добавляем ID сериала
+                "is_liked": Favorite.objects.filter(user=user, serail=series.serail).exists()  # Проверка, добавлен ли сериал в избранное
+            }
+            for series in filtered_series
+        ]
 
         return Response(serialized_data)
 
