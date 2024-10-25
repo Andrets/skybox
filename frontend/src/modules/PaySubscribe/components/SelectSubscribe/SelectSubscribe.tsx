@@ -7,7 +7,7 @@ export const SelectSubscribe = () => {
     <div className={styles.container}>
       <TypeSubscribeBanner
         className={styles.subItem}
-        header={t("annualSubscription")}
+        header={t("monthlySubscription")}
         description={t("subscribeServiceMonthDescription")}
         price={
           <span>
@@ -19,11 +19,11 @@ export const SelectSubscribe = () => {
 
       <TypeSubscribeBanner
         className={styles.subItem}
-        header={t("monthlySubscription")}
+        header={t("annualSubscription")}
         description={t("subscribeServiceYearDescription")}
         price={
           <span>
-            3500 ₽ <span>{t("year")}</span>
+            3500 ₽ <span>/{t("year")}</span>
           </span>
         }
         isActive={true}
