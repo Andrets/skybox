@@ -602,11 +602,15 @@ class SerailViewSet(viewsets.ModelViewSet):
         if favorite:
             # Если сериал уже в избранном, удаляем его
             favorite.delete()
+            series.likes -= 1  # Уменьшаем количество лайков
+            series.save()  # Сохраняем изменения
             return Response({"detail": f'Serial "{serail.name}" removed from favorites.'}, status=status.HTTP_200_OK)
         else:
             # Если нет — добавляем сериал в избранное
             Favorite.objects.create(user=user, serail=serail)
-            return Response({"detail": f'Serial "{serail.name}" added to favorites.'}, status=status.HTTP_201_CREATED)
+            series.likes += 1  # Увеличиваем количество лайков
+            series.save()  # Сохраняем изменения
+            return Response({"detail": f'Serial "{serail.name}" added to favorites.'}, status=status.HTTP_201_CREATED) 
 
 class StatusNewViewSet(viewsets.ModelViewSet):
     queryset = StatusNew.objects.all()
