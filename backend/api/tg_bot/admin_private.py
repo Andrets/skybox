@@ -16,6 +16,7 @@ import api.tg_bot.reply as kb
 
 from asgiref.sync import sync_to_async
 from decimal import Decimal 
+import django.contrib
 from openpyxl import Workbook
 from PIL import Image
 import aiofiles
@@ -273,11 +274,31 @@ async def download_db(callback: CallbackQuery):
 @admin_private.callback_query(F.data == 'controll')
 async def controll(callback: CallbackQuery):
     await callback.answer()
-    is_admin = await check_admin(message.from_user.id)
+    is_admin = await check_admin(callback.from_user.id)
     if is_admin:
-        await message.answer('🔒 Админ-панель', reply_markup=kb.admin_panel())
+        await callback.message.answer('Выберите вариант', reply_markup=kb.price_controll())
     
 
+
+
+@admin_private.callback_query(F.data == 'user_present')
+async def user_present(callback: CallbackQuery):
+    await callback.answer()
+    await callback.message.answer('Напишите сообщение /update_price ТИП TELEGRAM_ID или ИМЯ ПОЛЬЗОВАТЕЛЯ'
+                        '\n\n'
+                        'Например: \n/update_price month 5128389615\n/update_price year @username', reply_markup=kb.admin_panel())
+    
+
+@admin_private.message(Command('update_price'))
+async def user_present_func(message: Message):
+    is_admin = await check_admin(message.from_user.id)
+    if is_admin:
+        text = message.text
+        text2 = text.split(' ')
+        if len(text2) > 3 or len(text2) <3:
+            await message.answer(f'Непральный формат update_price, повторите попытку', reply_markup=kb.admin_panel())
+        else:
+            
 
 
 

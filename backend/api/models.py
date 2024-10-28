@@ -283,3 +283,23 @@ class Feasts(models.Model):
     class Meta:
         verbose_name = 'Праздник'
         verbose_name_plural = 'Праздник'
+
+class Newprice(models.Model):
+    class StatusEnum(models.TextChoices):
+        PERSONAL = 'PERSONAL', _('PERSONAL')
+        GROUP = 'GROUP', _('GROUP')
+        
+    data = models.JSONField(default=list, verbose_name='Список')
+    updtype = models.CharField('Тип изменения', choices=StatusEnum.choices, max_length=300)
+    month = models.CharField('За месяц', default=0, max_length=300)
+    year = models.CharField('За год', default=0, max_length=300)
+
+    list_per_page = 500
+
+    def __str__(self):
+        return f'Изменения цен {self.id} - {self.updtype}'
+
+    class Meta:
+        verbose_name = 'Акции'
+        verbose_name_plural = 'Акции'
+

@@ -734,7 +734,31 @@ class HistoryViewSet(viewsets.ModelViewSet):
         else:
             return Response({"message": "Serail already in history"}, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['get'])
+    def get_history(self, request):
+        # Получаем tg_id пользователя из request
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        if not tg_id:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
+        # Ищем пользователя по tg_id
+        user = Users.objects.filter(tg_id=tg_id).first()
+        if not user:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Получаем записи истории для данного пользователя
+        history_entries = History.objects.filter(user=user).select_related('serail')
+
+        # Формируем ответные данные
+        history_data = []
+        for entry in history_entries:
+            history_data.append({
+                "id": entry.serail.id,
+                "name": entry.serail.name,
+                "cover": entry.serail.vertical_photo.url if entry.serail.vertical_photo else None,
+            })
+
+        return Response(history_data, status=status.HTTP_200_OK)
 class SeriesViewSet(viewsets.ModelViewSet):
     queryset = Series.objects.all()
     serializer_class = SeriesSerializer

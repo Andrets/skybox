@@ -72,10 +72,11 @@ def post_type2() -> ReplyKeyboardMarkup:
     return keyboard.as_markup(resize_keyboard=True)
 
 
-def admin_panel() -> InlineKeyboardMarkup:
+def price_controll() -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     keyboard.button(text='Подарок пользователю', callback_data='user_present')
     keyboard.button(text='Акции группе', callback_data='group_present')
     keyboard.button(text='Изменить цены/Акции', callback_data='update_price')
+
     return keyboard.adjust(1).as_markup()

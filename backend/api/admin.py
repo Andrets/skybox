@@ -22,6 +22,7 @@ from .models import (
     PermissionsModel,
     Subscriptions,
     Feasts,
+    Newprice,
 )
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
@@ -251,3 +252,5 @@ admin.site.register(Subscriptions, SubscriptionsAdmin)
 
 
 admin.site.register(Feasts)
+admin.site.register(Newprice)
+
