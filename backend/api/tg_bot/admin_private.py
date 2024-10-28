@@ -273,6 +273,9 @@ async def download_db(callback: CallbackQuery):
 @admin_private.callback_query(F.data == 'controll')
 async def controll(callback: CallbackQuery):
     await callback.answer()
+    is_admin = await check_admin(message.from_user.id)
+    if is_admin:
+        await message.answer('🔒 Админ-панель', reply_markup=kb.admin_panel())
     
 
 

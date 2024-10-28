@@ -50,6 +50,8 @@ from django.db.models.functions import Coalesce
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status as rest_status
 import boto3
+from yookassa import Payment
+from yookassa import Configuration
 class UsersViewSet(viewsets.ModelViewSet): 
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
@@ -202,6 +204,7 @@ class GenreViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         return Response({"detail": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+
 class AdminsViewSet(viewsets.ModelViewSet):
     queryset = Admins.objects.all()
     serializer_class = AdminsSerializer
@@ -320,12 +323,13 @@ class SerailViewSet(viewsets.ModelViewSet):
             if serail is not None:  # Проверяем, что сериал существует
                 if serail.id not in unique_series_ids:  # Проверяем, уникален ли сериал
                     name_translated = self.translate_it(serail.name, user_lang) if serail.name else ''
-                    description_translated = self.translate_it(serail.description, user_lang) if serail.description else ''
+                    description_translated = self.translate_it(serail.description, user_lang) if serail.description else ''                
+                    genre_translated = str(self.translate_it(str(serail.genre), user_lang)) if serail.genre else None
 
                     serail_data = {
                         'id': serail.id,
                         'name': name_translated,
-                        'genre': str(serail.genre) if serail.genre else None,
+                        'genre': str(genre_translated) if genre_translated else None,
                         'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,
                         'rating': serail.rating,
                         'description': description_translated
@@ -347,11 +351,11 @@ class SerailViewSet(viewsets.ModelViewSet):
                 for serail in random_series:
                     name_translated = self.translate_it(serail.name, user_lang) if serail.name else ''
                     description_translated = self.translate_it(serail.description, user_lang) if serail.description else ''
-
+                    genre_translated = str(self.translate_it(str(serail.genre), user_lang)) if serail.genre else None
                     serail_data = {
                         'id': serail.id,
                         'name': name_translated,
-                        'genre': str(serail.genre) if serail.genre else None,
+                        'genre': str(genre_translated) if genre_translated else None,
                         'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,
                         'rating': serail.rating,
                         'description': description_translated
@@ -436,6 +440,8 @@ class SerailViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def get_category_serials(self, request):
+        user_lang = self.get_user_language()
+
         data = request.query_params.get('data')
 
         count = 18
@@ -454,13 +460,16 @@ class SerailViewSet(viewsets.ModelViewSet):
 
         result_data = []
         for serail in serials:
+            name_translated = self.translate_it(serail.name, user_lang)
+            description_translated = self.translate_it(serail.description, user_lang)
+            genre_translated = str(self.translate_it(str(serail.genre), user_lang)) if serail.genre else None
             serail_data = {
                 'id': serail.id,
-                'name': serail.name,
-                'genre': str(serail.genre) if serail.genre else None,
+                'name': name_translated,
+                'genre': str(genre_translated) if genre_translated else None,
                 'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,
                 'rating': serail.rating,
-                'description': serail.description,
+                'description': description_translated,
                 'views': serail.views
             }
             result_data.append(serail_data)
@@ -474,9 +483,36 @@ class SerailViewSet(viewsets.ModelViewSet):
         if not search_query:
             return Response({'error': 'Не указан параметр query'}, status=status.HTTP_400_BAD_REQUEST)
 
-        serails = Serail.objects.filter(name__icontains=search_query) | Serail.objects.filter(description__icontains=search_query)
-        serializer = self.get_serializer(serails, many=True)
+        user_lang = self.get_user_language()
 
+        # Переводим поисковый запрос на английский (если язык пользователя не английский)
+        if user_lang != 'en':
+            search_query_translated = self.translate_it(search_query, 'en')
+        else:
+            search_query_translated = search_query
+        # Выполняем поиск по переведенному запросу
+        serails = Serail.objects.filter(
+            Q(name__icontains=search_query_translated) | Q(description__icontains=search_query_translated)
+        )
+
+        result_data = []
+        for serail in serails:
+            name_translated = self.translate_it(serail.name, user_lang)
+            description_translated = self.translate_it(serail.description, user_lang)
+            genre_translated = str(self.translate_it(str(serail.genre), user_lang)) if serail.genre else None
+            
+            serail_data = {
+                'id': serail.id,
+                'name': name_translated,
+                'genre': genre_translated,
+                'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,
+                'rating': serail.rating,
+                'description': description_translated,
+                'views': serail.views
+            }
+            result_data.append(serail_data)
+
+        # Сохраняем историю поиска для пользователя
         tg_id = request.tg_user_data.get('tg_id', None)
         if tg_id:
             user = get_object_or_404(Users, tg_id=tg_id)
@@ -489,7 +525,7 @@ class SerailViewSet(viewsets.ModelViewSet):
             user.search_history = search_history
             user.save()
 
-        return Response({'results': serializer.data}, status=status.HTTP_200_OK)
+        return Response({'results': result_data}, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['post'])
@@ -511,7 +547,6 @@ class SerailViewSet(viewsets.ModelViewSet):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
     def has_active_subscription(self, user):
         now = timezone.now()
         one_year_ago = now - timedelta(days=365)
@@ -529,6 +564,7 @@ class SerailViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def view_searil(self, request):
         data = request.query_params.get('data', None)  # Здесь ID сериала
+        user_lang = self.get_user_language()  # Определяем язык пользователя
 
         tg_id = int(self.request.tg_user_data.get('tg_id', 0))
         if not tg_id:
@@ -555,16 +591,17 @@ class SerailViewSet(viewsets.ModelViewSet):
 
         for series_item in all_series_from_serail:
             has_permission = PermissionsModel.objects.filter(user=user, series=series_item).exists()
-            # Пользователь может просматривать серию, если:
-            # - у него активная подписка
-            # - есть явное разрешение
-            # - эпизод <= 10 (бесплатные серии)
+            
+            # Проверяем доступ к серии
             status = has_subscription or has_permission or series_item.episode <= 10
+
+            # Переводим название серии
+            name_translated = self.translate_it(series_item.name, user_lang)
 
             # Формируем данные для каждой серии
             series_data = {
                 "id": series_item.id,
-                "name": series_item.name,
+                "name": name_translated,
                 "episode": series_item.episode,
                 "status": status
             }
@@ -576,6 +613,7 @@ class SerailViewSet(viewsets.ModelViewSet):
             result.append(series_data)
 
         return Response(result)
+
 
     @action(detail=False, methods=['get'])
     def like_it(self, request):
@@ -611,6 +649,7 @@ class SerailViewSet(viewsets.ModelViewSet):
             series.likes += 1  # Увеличиваем количество лайков
             series.save()  # Сохраняем изменения
             return Response({"detail": f'Serial "{serail.name}" added to favorites.'}, status=status.HTTP_201_CREATED) 
+
 
 class StatusNewViewSet(viewsets.ModelViewSet):
     queryset = StatusNew.objects.all()
@@ -663,6 +702,38 @@ class HistoryViewSet(viewsets.ModelViewSet):
     queryset = History.objects.all()
     serializer_class = HistorySerializer
 
+    @action(detail=False, methods=['post'])
+    def add_to_history(self, request):
+        # Получаем tg_id пользователя из request
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        if not tg_id:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Ищем пользователя по tg_id
+        user = Users.objects.filter(tg_id=tg_id).first()
+        if not user:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Получаем id сериала из параметров запроса
+        serail_id = request.data.get('serail_id')
+        if not serail_id:
+            return Response({"error": "Parameter 'serail_id' is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Ищем сериал по id
+        try:
+            serail = Serail.objects.get(id=serail_id)
+        except Serail.DoesNotExist:
+            return Response({"error": "Serail not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Проверяем, есть ли уже запись в истории для данного пользователя и сериала
+        history_entry, created = History.objects.get_or_create(user=user, serail=serail)
+
+        # Если запись была создана, возвращаем соответствующий ответ
+        if created:
+            return Response({"message": "Serail added to history successfully"}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"message": "Serail already in history"}, status=status.HTTP_200_OK)
+
 
 class SeriesViewSet(viewsets.ModelViewSet):
     queryset = Series.objects.all()
@@ -670,6 +741,21 @@ class SeriesViewSet(viewsets.ModelViewSet):
 
     http_method_names = ['get', 'post']
 
+
+    def get_user_language(self):
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        user = Users.objects.filter(tg_id=tg_id).first()
+        if user and user.lang:
+            return str(user.lang.lang_name)
+        return 'en'
+
+    def translate_it(self, text, target_lang):
+        if not text:
+            return '' 
+
+        translator = Translator()
+        translated = translator.translate(text, dest=target_lang)
+        return translated.text
 
     def get_queryset(self):
         tg_id = getattr(self.request, 'tg_id', None)
@@ -764,27 +850,7 @@ class SeriesViewSet(viewsets.ModelViewSet):
 
         return Response(serialized_data)
 
-    @action(detail=False, methods=['get'])
-    def get_series_by_serail(self, request):
-        data = request.query_params.get('data', None)
-
-        if data is not None:
-            try:
-                serail = Serail.objects.get(id=int(data))
-            except ValueError:
-               
-                serail = Serail.objects.filter(name__icontains=data).first()
-        else:
-            return Response({'error': 'Parameter "data" is required'}, status=400)
-
-        if not serail:
-            return Response({'error': 'No serail found'}, status=404)
-
-        series_list = Series.objects.filter(serail=serail)
-
-        serializer = SeriesSerializer(series_list, many=True)
-        return Response(serializer.data)
-
+        
     @action(detail=False, methods=['get'])
     def get_series(self, request):
         data = request.query_params.get('data', None)
@@ -814,12 +880,65 @@ class SeriesViewSet(viewsets.ModelViewSet):
         active_payment = Payments.objects.filter(
             user=user
         ).filter(
-            Q(status=Payments.StatusEnum.ALWAYS) |  # Бессрочная подписка
-            (Q(status=Payments.StatusEnum.TEMPORARILY_YEAR) & Q(created_date__gte=one_year_ago)) |  # Подписка на год
-            (Q(status=Payments.StatusEnum.TEMPORARILY_MONTH) & Q(created_date__gte=one_month_ago))  # Подписка на месяц
+            Q(status=Payments.StatusEnum.ALWAYS) |  
+            (Q(status=Payments.StatusEnum.TEMPORARILY_YEAR) & Q(created_date__gte=one_year_ago)) |  
+            (Q(status=Payments.StatusEnum.TEMPORARILY_MONTH) & Q(created_date__gte=one_month_ago))  
         ).exists()
         return active_payment
 
+    @action(detail=False, methods=['get'])
+    def get_series_by_serail(self, request):
+        data = request.query_params.get('data', None)
+        user_lang = self.get_user_language()  # Получаем язык пользователя для перевода
+
+        if data is not None:
+            try:
+                serail = Serail.objects.get(id=int(data))
+            except ValueError:
+                serail = Serail.objects.filter(name__icontains=data).first()
+        else:
+            return Response({'error': 'Parameter "data" is required'}, status=400)
+
+        if not serail:
+            return Response({'error': 'No serail found'}, status=404)
+
+        # Получаем список серий
+        series_list = Series.objects.filter(serail=serail).order_by('episode')
+        
+        # Проверка подписки и прав доступа
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        if not tg_id:
+            return Response({"detail": "User not found."}, status=404)
+
+        user = Users.objects.filter(tg_id=tg_id).first()
+        if not user:
+            return Response({"detail": "User not found."}, status=404)
+
+        has_subscription = self.has_active_subscription(user)
+
+        translated_series = []
+        for series_item in series_list:
+            # Проверяем доступ
+            has_permission = PermissionsModel.objects.filter(user=user, series=series_item).exists()
+            status = has_subscription or has_permission or series_item.episode <= 10
+
+            # Переводим название серии на язык пользователя
+            name_translated = self.translate_it(series_item.name, user_lang)
+            serail_name_translated = self.translate_it(serail.name, user_lang)
+
+            # Формируем ответные данные для каждой серии
+            series_data = {
+                "id": series_item.id,
+                "serail_name": serail_name_translated,
+                "episode": series_item.episode,
+                "name": name_translated,
+                "likes": series_item.likes,
+                "video": series_item.video.url if series_item.video else None,
+                "status": status  # Статус доступа
+            }
+            translated_series.append(series_data)
+
+        return Response(translated_series)
     @action(detail=False, methods=['get'])
     def get_all_series_from_serail(self, request):
         data = request.query_params.get('data', None)
@@ -848,7 +967,7 @@ class SeriesViewSet(viewsets.ModelViewSet):
 
         serail = series.serail
 
-        all_series_from_serail = Series.objects.filter(serail=serail)
+        all_series_from_serail = Series.objects.filter(serail=serail).order_by('episode')
 
         result = []
         has_subscription = self.has_active_subscription(user) 
@@ -858,21 +977,17 @@ class SeriesViewSet(viewsets.ModelViewSet):
 
             status = True if has_subscription or has_permission or series_item.episode <= 10 else False
 
-            if status:
-                result.append({
-                    "id": series_item.id,
-                    "name": series_item.name,
-                    "episode": series_item.episode,
-                    "video": series_item.video.url if series_item.video else None,
-                    "status": status  
-                })
-            else:
-                result.append({
-                    "id": series_item.id,
-                    "name": series_item.name,
-                    "episode": series_item.episode,
-                    "status": status  
-                })
+            series_data = {
+                "id": series_item.id,
+                "name": series_item.name,
+                "episode": series_item.episode,
+                "status": status  
+            }
+
+            if status and series_item.video:
+                series_data["video"] = series_item.video.url
+
+            result.append(series_data)
 
         return Response(result)
 
@@ -920,40 +1035,62 @@ class DocsTextsViewSet(viewsets.ModelViewSet):
             return Response({"error": "Document not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
+Configuration.account_id = '465363'
+Configuration.secret_key = 'test_UoRVwVuT-qtHat2h6NW4V2Y3lsRmfFBtapATvT7Vf6s'
+
 class PaymentsViewSet(viewsets.ModelViewSet):
     queryset = Payments.objects.all()
     serializer_class = PaymentsSerializer
 
 
-    http_method_names = ['get']
 
     @action(detail=False, methods=['get'])
     def get_payment(self, request):
-
         try:
-            # Данные для запроса к YooKassa API
-            headers = {
-                'Authorization': 'Basic qtHat2h6NW4V2Y3lsRmfFBtapATvT7Vf6s',
-                'Content-Type': 'application/json',
-            }
-
-            # Пример ID платежа
+            # Получение ID платежа из запроса
             payment_id = request.query_params.get('payment_id', None)
-
             if not payment_id:
                 return Response({'error': 'Payment ID is required'}, status=400)
 
-            # Запрос к API YooKassa для получения информации о платеже
-            response = requests.get(
-                f'https://api.yookassa.ru/v3/payments/{payment_id}',
-                headers=headers
-            )
-
-            # Если запрос успешен, возвращаем данные платежа
-            if response.status_code == 200:
-                return Response(response.json(), status=200)
+            # Запрос к YooKassa для получения информации о платеже
+            payment = Payment.find_one(payment_id)
+            if payment:
+                return Response(payment.json(), status=200)
             else:
-                return Response(response.json(), status=response.status_code)
+                return Response({'error': 'Payment not found'}, status=404)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
+
+    @action(detail=False, methods=['post'])
+    def create_payment(self, request):
+        try:
+            # Получение payment_token из запроса
+            payment_token = request.data.get('payment_token', None)
+            if not payment_token:
+                return Response({'error': 'Payment token is required'}, status=400)
+
+            # Данные для создания нового платежа
+            payment_data = {
+                "amount": {
+                    "value": "2.00",
+                    "currency": "RUB"
+                },
+                "payment_method_data": {
+                    "type": "bank_card",
+                    "payment_token": payment_token
+                },
+                "confirmation": {
+                    "type": "redirect",
+                    "return_url": "https://www.example.com/return_url"
+                },
+                "capture": True,
+                "description": "Заказ №72"
+            }
+
+            # Создаем платеж с помощью yookassa API
+            payment = Payment.create(payment_data)
+            return Response(payment.json(), status=201)
 
         except Exception as e:
             return Response({'error': str(e)}, status=500)
