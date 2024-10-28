@@ -927,15 +927,25 @@ class SeriesViewSet(viewsets.ModelViewSet):
             serail_name_translated = self.translate_it(serail.name, user_lang)
 
             # Формируем ответные данные для каждой серии
-            series_data = {
-                "id": series_item.id,
-                "serail_name": serail_name_translated,
-                "episode": series_item.episode,
-                "name": name_translated,
-                "likes": series_item.likes,
-                "video": series_item.video.url if series_item.video else None,
-                "status": status  # Статус доступа
-            }
+            if status:
+                series_data = {
+                    "id": series_item.id,
+                    "serail_name": serail_name_translated,
+                    "episode": series_item.episode,
+                    "name": name_translated,
+                    "likes": series_item.likes,
+                    "video": series_item.video.url if series_item.video else None,
+                    "status": status  # Статус доступа
+                }
+            else:
+                series_data = {
+                    "id": series_item.id,
+                    "serail_name": serail_name_translated,
+                    "episode": series_item.episode,
+                    "name": name_translated,
+                    "likes": series_item.likes,
+                    "status": status  # Статус доступа
+                }
             translated_series.append(series_data)
 
         return Response(translated_series)
