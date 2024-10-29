@@ -1349,7 +1349,7 @@ class SerailPriceViewSet(viewsets.ModelViewSet):
 
 
 
-""" 
+
 
 import asyncio
 from rest_framework.decorators import api_view, permission_classes
@@ -1385,10 +1385,15 @@ async def buy_lesson(request, lesson_id):
     
     # Генерация ссылки на оплату с использованием async_to_sync
     try:
-        payment_link = await create_payment_link(data)  # Обратите внимание, что это теперь await
+        payment_link = bot.create_invoice_link(
+                title=f'Урок {data["title"]}',
+                description=f'Покупка урока {data["description"]}',
+                payload=f'lesson_id:{data["lesson_id"]}:user_id:{data["user_id"]}',
+                currency='XTR',
+                prices=[LabeledPrice(label=data["label"], amount=int(data["price"] * 100))]  # Цена в копейках
+            )  # Обратите внимание, что это теперь await
         print(payment_link)
     except Exception as e:
         return Response({'error': f'Ошибка при создании ссылки на оплату: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     return Response({'payment_link': payment_link}, status=status.HTTP_200_OK)
- """

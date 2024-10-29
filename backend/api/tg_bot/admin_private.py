@@ -280,14 +280,12 @@ async def controll(callback: CallbackQuery):
     
 
 
-
 @admin_private.callback_query(F.data == 'user_present')
 async def user_present(callback: CallbackQuery):
     await callback.answer()
-    await callback.message.answer('Напишите сообщение /update_price ТИП TELEGRAM_ID или ИМЯ ПОЛЬЗОВАТЕЛЯ'
-                        '\n\n'
-                        'Например: \n/update_price month 5128389615\n/update_price year @username', reply_markup=kb.admin_panel())
-    
+    await callback.message.answer(r'Напишите сообщение /update_price {ТИП} {TELEGRAM_ID или ИМЯ ПОЛЬЗОВАТЕЛЯ} {ЦЕНА} {ЦЕНА В TG Stars} '
+                                  '\n\nНапример: \n/update_price month 5128389615 100 10\n/update_price year @username 150 15', 
+                                  reply_markup=kb.admin_panel())
 
 @admin_private.message(Command('update_price'))
 async def user_present_func(message: Message):
@@ -295,12 +293,60 @@ async def user_present_func(message: Message):
     if is_admin:
         text = message.text
         text2 = text.split(' ')
-        if len(text2) > 3 or len(text2) <3:
-            await message.answer(f'Непральный формат update_price, повторите попытку', reply_markup=kb.admin_panel())
-        else:
+        if len(text2) != 5:
+            await message.answer(f'Неправильный формат update_price, повторите попытку', reply_markup=kb.admin_panel())
+            return
+        
+        types = text2[1]  
+        user_data = text2[2]  
+        price = text2[3]  
+        stars_price = text2[4]  
+
+        try:
+            new_price_instance = await update_price_personal(types, user_data, price, stars_price)
+            await message.answer(f'Изменение цены успешно создано: {new_price_instance}', reply_markup=kb.admin_panel())
+        except Exception as e:
+            await message.answer(f'Ошибка при создании изменения цены: {str(e)}', reply_markup=kb.admin_panel())
+
+
+@admin_private.callback_query(F.data == 'group_present')
+async def group_present(callback: CallbackQuery):
+    await callback.answer()
+    await callback.message.answer(r'Напишите сообщение /update_group_price {ТИП} {TGID,TGID,TGID} {ЦЕНА} {ЦЕНА В TG Stars} '
+                                  '\n\nНапример: \n/update_group_price month 123456789,987654321 100 10', 
+                                  reply_markup=kb.admin_panel())
+
+@admin_private.message(Command('update_group_price'))
+async def update_group_price_func(message: Message):
+    is_admin = await check_admin(message.from_user.id)
+    if is_admin:
+        text = message.text
+        text2 = text.split(' ')
+        
+        if len(text2) != 5:
+            await message.answer(f'Неправильный формат update_group_price, повторите попытку', reply_markup=kb.admin_panel())
+            return
+        
+        types = text2[1]  # Получаем тип
+        user_ids = text2[2].split(',')  # Получаем список TGID
+        price = text2[3]  # Получаем цену
+        stars_price = text2[4]  # Получаем цену в TG Stars
+
+        # Попробуем создать изменение цены для всех пользователей в списке
+        try:
+            new_price_instances = []
+            for user_id in user_ids:
+                new_price_instance = await update_price_personal(types, user_id, price, stars_price)
+                if new_price_instance:
+                    new_price_instances.append(new_price_instance)
             
-
-
+            if new_price_instances:
+                await message.answer(f'Изменения цен успешно созданы для {len(new_price_instances)} пользователей.', reply_markup=kb.admin_panel())
+            else:
+                await message.answer('Не удалось создать изменения цен для указанных пользователей.', reply_markup=kb.admin_panel())
+        
+        except Exception as e:
+            await message.answer(f'Ошибка при создании изменения цен: {str(e)}', reply_markup=kb.admin_panel())
 
 
 

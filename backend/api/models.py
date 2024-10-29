@@ -109,6 +109,7 @@ class Serail(models.Model):
         verbose_name = 'Сериал'
         verbose_name_plural = 'Сериалы'
 
+
 class StatusNew(models.Model):
     serail = models.ForeignKey(Serail, on_delete=models.SET_NULL, null=True, related_name='statusnew')
     added_date = models.DateField('Дата добавления статуса', auto_now_add=True)
@@ -137,6 +138,7 @@ class Comments(models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
+
 
 class History(models.Model):
     serail = models.ForeignKey(Serail, on_delete=models.SET_NULL, null=True)
@@ -180,6 +182,7 @@ class PermissionsModel(models.Model):
         verbose_name = 'Доступ'
         verbose_name_plural = 'Доступы'
 
+
 class Payments(models.Model):
     class StatusEnum(models.TextChoices):
         TEMPORARILY_YEAR = 'TEMPORARILY_YEAR', _('TEMPORARILY_YEAR')
@@ -218,8 +221,6 @@ class ViewedSeries(models.Model):
         unique_together = ('user', 'series') 
         verbose_name = 'Просмотр'
         verbose_name_plural = 'Просмотры'
-
-
 
 
 class DocsTexts(models.Model):
@@ -278,6 +279,7 @@ class Subscriptions(models.Model):
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
 
+
 class Feasts(models.Model):
     name = models.CharField('Название', max_length=300)
     date = models.DateField('День праздника')
@@ -290,6 +292,7 @@ class Feasts(models.Model):
     class Meta:
         verbose_name = 'Праздник'
         verbose_name_plural = 'Праздник'
+
 
 class Newprice(models.Model):
     class StatusEnum(models.TextChoices):
@@ -314,6 +317,7 @@ class Newprice(models.Model):
     class Meta:
         verbose_name = 'Акции'
         verbose_name_plural = 'Акции'
+
 
 class SerailPrice(models.Model):
     serail = models.ForeignKey(Serail, on_delete=models.CASCADE, null=True)

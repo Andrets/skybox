@@ -1,5 +1,5 @@
 from asgiref.sync import sync_to_async
-from api.models import Users, Admins, Payments, Country, Language
+from api.models import Users, Admins, Payments, Country, Language, Newprice
 from datetime import timedelta, datetime
 from django.utils import timezone
 from django.db.models import Count
@@ -105,6 +105,51 @@ def add_user_data(tg_id, tg_username, name, photo, lang_code):
         return False
     return True
 
+
+@sync_to_async
+def update_price_personal(types, user_data, price, stars_price):
+    # Попробуем найти пользователя по tg_username
+    if user_data.startswith('@'):
+        user_data = user_data[1:]  # Убираем "@" из имени пользователя
+
+        try:
+            user = User.objects.get(tg_username=user_data)  # Ищем пользователя по tg_username
+            tg_id = user.tg_id  # Получаем tg_id пользователя
+        except User.DoesNotExist:
+            return None  # Если пользователь не найден, возвращаем None
+    else:
+        tg_id = int(user_data)
+    new_price = Newprice.objects.create(
+        updtype=Newprice.StatusEnum.PERSONAL,
+        periodtype=Newprice.StatusEnum2.PERSONAL,
+        price=price,
+        stars_price=stars_price,
+        data=[tg_id]  # Сохраняем tg_id вместо user_data
+    )
+    return new_price
+    
+@sync_to_async
+def update_price_personal(types, user_data, price, stars_price):
+    # Попробуем найти пользователя по tg_username
+    if user_data.startswith('@'):
+        user_data = user_data[1:]  # Убираем "@" из имени пользователя
+
+        try:
+            user = User.objects.get(tg_username=user_data)  # Ищем пользователя по tg_username
+            tg_id = user.tg_id  # Получаем tg_id пользователя
+        except User.DoesNotExist:
+            return None  # Если пользователь не найден, возвращаем None
+    else:
+        tg_id = int(user_data)
+    
+    new_price = Newprice.objects.create(
+        updtype=Newprice.StatusEnum.GROUP,  # Обновлено для групп
+        periodtype=types,
+        price=price,
+        stars_price=stars_price,
+        data=[tg_id]  # Сохраняем tg_id вместо user_data
+    )
+    return new_price 
 
 # ---------------------
 # PUT
