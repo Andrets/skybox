@@ -3,7 +3,8 @@ import { useAppDispatch } from "@/shared/hooks/reduxTypes";
 import { setVideoCurTime } from "@/modules/Serial/slices/FilmVideoSlice";
 
 export const useChangeVideoCurTime = (
-  videoRef: RefObject<HTMLVideoElement>
+  videoRef: RefObject<HTMLVideoElement>,
+  isActive: boolean
 ) => {
   const dispatch = useAppDispatch();
   useEffect(() => {
@@ -13,9 +14,12 @@ export const useChangeVideoCurTime = (
         videoRef.current.currentTime = e.detail.value;
       }
     }
-    window.addEventListener("sliderUserChangeEvent", changeFunc);
+
+    if (isActive) {
+      window.addEventListener("sliderUserChangeEvent", changeFunc);
+    }
 
     return () =>
       window.removeEventListener("sliderUserChangeEvent", changeFunc);
-  }, []);
+  }, [isActive]);
 };

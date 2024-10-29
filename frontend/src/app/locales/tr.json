@@ -24,8 +24,8 @@
   "results": "Sonuçlar",
   "typeSomething": "bir şey yazdır",
   "sendComment": "Yorum gönder",
-  "notEnterSearch": "Henüz hiçbir şey girmediniz.",
-  "searchEmptyResults": "Bu istek için dizi bulunamadı.",
+  "notEnterSearch": "Henüz hiçbir şey girmediniz",
+  "searchEmptyResults": "Bu istek için dizi bulunamadı",
   "russian": "Rusça",
   "english": "İngilizce",
   "korean": "Korece",
@@ -35,13 +35,17 @@
   "payment": "ödeme",
   "month": "Ay",
   "year": "Yıl",
-  "subscribeServiceMonthDescription": "1 ay boyunca sınırsız dizi erişimi",
-  "subscribeServiceYearDescription": "1 yıl boyunca sınırsız dizi erişimi",
+  "week": "Hafta",
+  "subscribeServiceMonthDescription": "1 ay boyunca dizilere sınırsız erişim",
+  "subscribeServiceYearDescription": "1 yıl boyunca dizilere sınırsız erişim",
+  "subscribeServiceWeekDescription": "1 hafta boyunca dizilere sınırsız erişim",
   "cardNumber": "Kart Numarası",
   "validityPeriod": "Geçerlilik Süresi",
   "payCard": "Kartla Öde",
   "annualSubscription": "Yıllık Abonelik",
   "monthlySubscription": "Aylık Abonelik",
+  "weeklySubscription": "Haftalık Abonelik",
+  
   "error": {
     "cardNumberRequired": "Kart numarasını girin",
     "cardNumberPattern": "Kart numarası hatalı formatta",
@@ -49,5 +53,16 @@
     "dateMinLength": "Tarih hatalı formatta",
     "cvvRequired": "CVV'yi girin",
     "cvvMinLength": "CVV hatalı formatta"
-  }
+  },
+  "categoryToggler": {
+    "popular": "Popüler",
+    "original": "Orijinaller",
+    "new": "Yeni",
+    "male": "Erkekler",
+    "female": "Kadınlar"
+  },
+  "rateFilm": "Filmi değerlendir",
+  "clipsNotFound": "Klipler bulunamadı",
+  "emptyWatchHistory": "İzleme geçmişi boş",
+  "unlockNow": "Şimdi aç"
 }

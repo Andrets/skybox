@@ -34,14 +34,17 @@
   "turkish": "التركية",
   "payment": "دفع",
   "month": "شهر",
-  "year": "سنة",
+  "year": "عام",
+  "week": "أسبوع",
   "subscribeServiceMonthDescription": "وصول غير محدود إلى المسلسلات لمدة شهر واحد",
   "subscribeServiceYearDescription": "وصول غير محدود إلى المسلسلات لمدة عام واحد",
+  "subscribeServiceWeekDescription": "وصول غير محدود إلى المسلسلات لمدة أسبوع واحد",
   "cardNumber": "رقم البطاقة",
   "validityPeriod": "مدة الصلاحية",
   "payCard": "الدفع بواسطة البطاقة",
   "annualSubscription": "اشتراك سنوي",
   "monthlySubscription": "اشتراك شهري",
+  "weeklySubscription": "اشتراك أسبوعي",
   "error": {
     "cardNumberRequired": "يرجى إدخال رقم البطاقة",
     "cardNumberPattern": "تنسيق رقم البطاقة غير صالح",
@@ -49,5 +52,16 @@
     "dateMinLength": "تنسيق التاريخ غير صالح",
     "cvvRequired": "يرجى إدخال CVV",
     "cvvMinLength": "تنسيق CVV غير صالح"
-  }
+  },
+  "categoryToggler": {
+    "popular": "شعبية",
+    "original": "أصلية",
+    "new": "جديد",
+    "male": "للرجال",
+    "female": "للنساء"
+  },
+  "rateFilm": "قيم الفيلم",
+  "clipsNotFound": "لم يتم العثور على المقاطع",
+  "emptyWatchHistory": "سجل المشاهدة فارغ",
+  "unlockNow": "افتح الآن"
 }

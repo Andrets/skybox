@@ -1,0 +1,28 @@
+.list {
+  margin-top: 16px;
+  width: 100%;
+  .listContent {
+    left: 16px;
+    display: flex;
+    flex-direction: row;
+    min-width: 0;
+  }
+
+  .watchItem {
+    margin-left: 8px;
+    width: 25%;
+    min-width: 120px;
+    &:first-child {
+      margin-left: 0;
+    }
+  }
+}
+
+.emptyContainer {
+  display: flex;
+  margin: 32px 0 16px 0;
+  font-weight: 700;
+  text-align: center;
+  font-size: 18px;
+  justify-content: center;
+}

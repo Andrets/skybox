@@ -1,5 +1,5 @@
 import { Button } from "@mui/material";
-import { TypeSubscribeBannerModel } from "../../model/models";
+import { TypeSubscribeBannerModel } from "../../modules/PaySubscribe/model/models";
 import styles from "./styles.module.scss";
 
 export const TypeSubscribeBanner = ({
@@ -10,7 +10,6 @@ export const TypeSubscribeBanner = ({
   className,
   ...restProps
 }: TypeSubscribeBannerModel) => {
-  console.log("className", className);
   return (
     <Button
       className={`${styles.subBtn} ${

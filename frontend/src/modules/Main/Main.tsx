@@ -8,15 +8,16 @@ import {
 } from "./components";
 import { SectionHeader } from "@/ui/SectionHeader";
 import { useTranslation } from "react-i18next";
+import useBackButton from "@/shared/hooks/useBackButton";
 
 const Main: FC = () => {
   const { t } = useTranslation();
+  useBackButton();
   return (
     <>
       <div className={`${styles.container}`}>
-        <div style={{ padding: 0 }} className="container">
-          <CategoryToggler />
-
+        <CategoryToggler />
+        <div style={{ padding: 0 }} className={`container ${styles.topCont}`}>
           <CategoryListFilm />
         </div>
 

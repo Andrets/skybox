@@ -21,10 +21,12 @@ export const VideoTimeSlider = () => {
             width: "100%",
             zIndex: "2",
           }}
-          onTouchStart={() => {
+          onMouseDown={(e) => {
+            e.stopPropagation();
             setIsChangingTime(true);
           }}
-          onTouchEnd={() => {
+          onMouseUp={(e) => {
+            e.stopPropagation();
             setIsChangingTime(false);
           }}
           value={curTime}

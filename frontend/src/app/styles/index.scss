@@ -112,11 +112,6 @@ legend {
   scrollbar-width: none; /* Скрывает скроллбар для всех браузеров */
 }
 
-/* Удаление скроллбара для Chrome, Edge и Opera */
-*::-webkit-scrollbar {
-  display: none;
-}
-
 /* Удаление скроллбара для Firefox */
 * {
   scrollbar-width: none;

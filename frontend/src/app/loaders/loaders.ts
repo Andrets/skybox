@@ -64,3 +64,9 @@ export const policyLoader = async () => {
 
   return null;
 };
+
+export const serialLoader = async () => {
+  store.dispatch(userApiSlice.endpoints.getSubPrices.initiate());
+
+  return null;
+};

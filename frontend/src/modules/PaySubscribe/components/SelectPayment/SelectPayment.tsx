@@ -4,7 +4,7 @@ import starIMG from "@images/star.png";
 import { Button } from "@mui/material";
 
 import styles from "./styles.module.scss";
-import { ReactComponent as ArrowRight } from "@icons/ArrowRight.svg";
+import { ReactComponent as ArrowRight } from "@icons/ArrowRight.svg"
 
 export const SelectPayment = () => {
   return (

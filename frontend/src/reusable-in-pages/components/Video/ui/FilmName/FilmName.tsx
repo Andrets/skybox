@@ -10,7 +10,7 @@ export const FilmName: FC<FilmNameProps> = memo(
       </header>
     );
   },
-  () => {
-    return true;
+  (np, pp) => {
+    return pp.name === np.name && pp.episode === np.episode;
   }
 );

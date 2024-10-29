@@ -4,6 +4,8 @@ import styles from "./styles.module.scss";
 import { useContext } from "react";
 import { AddCardContext } from "@/reusable-in-pages/contexts/AddCardContext/context";
 import { useTranslation } from "react-i18next";
+import { useGetToken } from "./helpers/useGetToken";
+import useBackButton from "@/shared/hooks/useBackButton";
 export const PaySubscribe = () => {
   const {
     formHook: {
@@ -13,8 +15,18 @@ export const PaySubscribe = () => {
 
   const { t } = useTranslation();
 
+  const getToken = useGetToken();
+
+  useBackButton();
+
   return (
-    <form className={`container ${styles.form}`}>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        getToken();
+      }}
+      className={`container ${styles.form}`}
+    >
       <SelectSubscribe />
 
       <SelectPayment />

@@ -20,7 +20,7 @@ const resources: Resource = {
   ar: {
     translation: translationAR,
   },
-  ch: {
+  zh: {
     translation: translationCH,
   },
   ko: {

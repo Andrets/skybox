@@ -35,3 +35,30 @@ body {
 .container.no-padding {
   padding: 0;
 }
+
+.scrollContainer {
+  scrollbar-width: auto;
+  /* Стили для полосы прокрутки */
+
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 4px;
+  }
+
+  /* Стили для ползунка прокрутки */
+  &::-webkit-scrollbar-thumb {
+    background-color: #dadada69;
+    border-radius: 10px;
+  }
+
+  /* Стили для области полосы прокрутки (кроме ползунка) */
+  &::-webkit-scrollbar-track {
+    background-color: black;
+  }
+}
+
+html, body {
+  -ms-overflow-style: none;
+  scrollbar-width: none; /* Скрывает скроллбар для всех браузеров */
+
+}

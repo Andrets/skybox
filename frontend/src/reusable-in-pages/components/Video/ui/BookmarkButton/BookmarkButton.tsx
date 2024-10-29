@@ -1,7 +1,7 @@
 import { FC } from "react";
 import styles from "./styles.module.scss";
 import { Button } from "@mui/material";
-import { ReactComponent as BookmarkSVG } from "@icons/Bookmark.svg";
+import { ReactComponent as BookmarkSVG } from "@icons/BookmarkEpisode.svg";
 import { BookmarkButtonProps } from "../../models/ButtonModels";
 export const BookmarkButton: FC<BookmarkButtonProps> = ({
   onClick,

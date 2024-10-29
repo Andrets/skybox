@@ -7,6 +7,7 @@ interface ShortsItemProviderProps {
 
 export const ShortsItemProvider = ({ children }: ShortsItemProviderProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [videoIsLoading, setVideoIsLoading] = useState(false);
   const [videoLength, setVideoLength] = useState(0);
   const [curTime, setCurTime] = useState(0);
   const [viewPlay, setViewPlay] = useState(false);
@@ -30,6 +31,8 @@ export const ShortsItemProvider = ({ children }: ShortsItemProviderProps) => {
         setIsChangingTime,
         userIsView,
         setUserIsView,
+        videoIsLoading,
+        setVideoIsLoading,
       }}
     >
       {children}

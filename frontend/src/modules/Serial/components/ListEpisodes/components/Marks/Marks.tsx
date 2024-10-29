@@ -1,14 +1,18 @@
 import AttentionMark from "@/ui/marks/Attention/AttentionMark";
 import StandartMark from "@/ui/marks/Standart/StandartMark";
 import styles from "./styles.module.scss";
-const Marks = () => {
+import { MarksProps } from "../../model/MarksProps";
+const Marks = ({ is_new, numEpisodes }: MarksProps) => {
   return (
     <ul className={styles.marksList}>
+      {is_new && (
+        <li>
+          <AttentionMark>NEW</AttentionMark>
+        </li>
+      )}
+
       <li>
-        <AttentionMark>NEW</AttentionMark>
-      </li>
-      <li>
-        <StandartMark>all 56 episodes</StandartMark>
+        <StandartMark>all {numEpisodes} episodes</StandartMark>
       </li>
     </ul>
   );

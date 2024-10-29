@@ -1,3 +1,6 @@
+import { SeriesItem } from "@/shared/models/FilmInfoApi";
+
 export interface ListEpisodesProps {
-  isOpen: boolean;
+  episodes: SeriesItem[];
 }
+

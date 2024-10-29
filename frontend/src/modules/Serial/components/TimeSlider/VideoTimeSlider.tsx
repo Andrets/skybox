@@ -6,6 +6,7 @@ export const VideoTimeSlider = ({ onChange, ...restProps }: SliderProps) => {
   const videoLength = useAppSelector((state) => state.filmVideo.videoLength);
   const videoCurTime = useAppSelector((state) => state.filmVideo.videoCurTime);
 
+
   // Функция для создания и отправки кастомного события
   const triggerCustomEvent = (value: number | number[]) => {
     const customEvent = new CustomEvent("sliderUserChangeEvent", {
@@ -18,9 +19,12 @@ export const VideoTimeSlider = ({ onChange, ...restProps }: SliderProps) => {
     triggerCustomEvent(newValue); // триггерим кастомное событие
   };
 
-
   return (
-    <div className={styles.timeSlider}>
+    <div
+      onMouseDown={restProps.onMouseDown}
+      onMouseUp={restProps.onMouseUp}
+      className={styles.timeSlider}
+    >
       <TimeSlider
         {...restProps}
         className={styles.slider}

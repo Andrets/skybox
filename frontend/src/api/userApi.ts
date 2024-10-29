@@ -1,8 +1,11 @@
 import { apiSlice } from "@/app/store/api";
 import { LANGUAGESLIST } from "@/shared/constants/constants";
 import {
+  SubscriptionPlanModel,
+  SubscriptionPlanObject,
   TransformUserInfoResponseItem,
   UserInfoResponseItem,
+  WatchHistoryItem,
 } from "@/shared/models/UserInfoApi";
 
 export const userApiSlice = apiSlice.injectEndpoints({
@@ -33,7 +36,6 @@ export const userApiSlice = apiSlice.injectEndpoints({
       query: () => {
         return {
           method: "GET",
-
           url: "history/",
         };
       },
@@ -48,6 +50,32 @@ export const userApiSlice = apiSlice.injectEndpoints({
           },
         };
       },
+      invalidatesTags: ["Language"],
+    }),
+    getHistory: builder.query<WatchHistoryItem[], void>({
+      query: () => {
+        return { method: "GET", url: "history/get_history" };
+      },
+      providesTags: ["Language"],
+    }),
+    getSubPrices: builder.query<SubscriptionPlanObject, void>({
+      query: () => {
+        return { method: "GET", url: "subscriptions/get_subscription_price" };
+      },
+      transformResponse: (res: SubscriptionPlanModel[]) => {
+        const subscriptionPlanObject: SubscriptionPlanObject = res.reduce(
+          (acc, plan) => ({
+            ...acc,
+            [plan.subtype]: {
+              price_in_rubles: plan.price_in_rubles,
+              price_in_stars: plan.price_in_stars,
+            },
+          }),
+          {}
+        );
+
+        return subscriptionPlanObject;
+      },
     }),
   }),
   overrideExisting: true,
@@ -57,4 +85,6 @@ export const {
   useAuthorizationQuery,
   useGetWatchHistoryQuery,
   useChangeUserLangMutation,
+  useGetHistoryQuery,
+  useGetSubPricesQuery,
 } = userApiSlice;

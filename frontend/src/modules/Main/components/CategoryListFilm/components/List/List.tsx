@@ -29,7 +29,7 @@ export const List = ({ data }: TopSerialListProps) => {
         return (
           <SwiperSlide className={styles.slide} key={el.id}>
             <CategoryFilm
-              to="/filmVideo"
+              to={`/filmVideo/${el.id}`}
               poster={transformPathToPhoto(el.vertical_photo)}
             />
           </SwiperSlide>

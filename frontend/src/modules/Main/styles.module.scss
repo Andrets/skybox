@@ -4,4 +4,10 @@
   .originalsSectHeader {
     margin-top: 24px;
   }
+
+  .topCont {
+    @media (max-width: 541px) {
+      margin-top: 16px;
+    }
+  }
 }

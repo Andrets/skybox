@@ -9,8 +9,6 @@ import {
 } from "@/api/userApi";
 import { useAppDispatch } from "@/shared/hooks/reduxTypes";
 import i18n from "@/app/locales/i18n";
-import { filmInfoApiSlice } from "@/api/FilmInfoApi";
-import { mainPageApiSlice } from "@/api/MainPageApi";
 
 export const LanguageList = () => {
   const { data } = useAuthorizationQuery();
@@ -23,23 +21,18 @@ export const LanguageList = () => {
       e.preventDefault();
 
       const changeLanguageFetch = async () => {
-        const response = await changeLangQuery(value);
-        if (!response.error) {
-          dispatch(filmInfoApiSlice.util.resetApiState());
-          dispatch(mainPageApiSlice.util.resetApiState());
-          i18n.changeLanguage(value);
-          await dispatch(
-            userApiSlice.util.updateQueryData(
-              "authorization",
-              undefined,
-              (draft) => {
-                draft.lang = value;
-
-                return draft;
-              }
-            )
-          );
-        }
+        i18n.changeLanguage(value);
+        dispatch(
+          userApiSlice.util.updateQueryData(
+            "authorization",
+            undefined,
+            (draft) => {
+              draft.lang = value;
+              return draft;
+            }
+          )
+        );
+        await changeLangQuery(value);
       };
 
       changeLanguageFetch();

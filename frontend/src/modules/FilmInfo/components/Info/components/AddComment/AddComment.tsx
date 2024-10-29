@@ -10,7 +10,7 @@ import { useAppDispatch } from "@/shared/hooks/reduxTypes";
 const AddComment = () => {
   const dispatch = useAppDispatch();
   const { data: userData } = useAuthorizationQuery();
-  const [formValid, setFormValid] = useState(false);
+  const [commentText, setCommentText] = useState("");
   const { t } = useTranslation();
   const commentRef = useRef<HTMLTextAreaElement>(null);
   const { id } = useParams();
@@ -18,35 +18,30 @@ const AddComment = () => {
   const onChangeTextarea: React.ChangeEventHandler<HTMLTextAreaElement> = (
     e
   ) => {
-    if (e.target.value.length === 0) {
-      setFormValid(false);
-    } else {
-      setFormValid(true);
-    }
+    setCommentText(e.target.value);
   };
 
   const formSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    if (formValid && commentRef?.current?.value && id) {
+    if (commentText.length > 0 && id) {
       dispatch(
         filmInfoApiSlice.util.updateQueryData("getFilmInfo", id, (draft) => {
           if (draft.comments && userData) {
             draft.comments.push({
               tg_username: userData.tg_username,
               user_avatar: userData.photo,
-              text: String(commentRef.current?.value),
+              text: commentText,
             });
           }
 
           return draft;
         })
       );
+      setCommentText("");
       await addComment({
         serial_id: Number(id),
-        text: commentRef.current?.value,
+        text: commentText,
       });
-
-      commentRef.current.value = "";
     }
   };
   return (
@@ -55,11 +50,12 @@ const AddComment = () => {
         onChange={onChangeTextarea}
         ref={commentRef}
         placeholder={t("typeSomething")}
+        value={commentText}
         className={styles.textarea}
       />
 
       <Button
-        disabled={!formValid}
+        disabled={commentText.length === 0}
         className={styles.sendComment}
         type="submit"
       >

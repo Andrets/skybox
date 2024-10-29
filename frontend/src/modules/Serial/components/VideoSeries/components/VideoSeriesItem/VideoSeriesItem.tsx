@@ -1,7 +1,6 @@
 import { Video } from "@/reusable-in-pages/components/Video";
-import videoFILE from "@/shared/assets/videos/video.mp4";
 import { useAppSelector } from "@/shared/hooks/reduxTypes";
-import { useRef } from "react";
+import { useContext } from "react";
 import styles from "./styles.module.scss";
 import { VideoSeriesItemModel } from "../models/VideoSeriesItemModel";
 import { Control } from "./components/Control";
@@ -9,18 +8,26 @@ import { useVideoSeriesClick } from "../../../../helpers/useVideoSeriesClick";
 import { useVideoCurTimeSlide } from "./helpers/useVideoCurTImeSlide";
 import { useChangeVideoCurTime } from "./helpers/useChangeVideoCurTIme";
 import { useVideoFunctions } from "./helpers/useVideoFunctions";
+import { VideoSeriesItemContext } from "@/reusable-in-pages/contexts/VideoSeriesItemContext/context";
+import { LoaderSpinner } from "@/ui/Icons";
+import { BlockSlide } from "./components";
+import { useCurrentVideoLength } from "./helpers/useCurrentVideoLength";
 
-export const VideoSeriesItem = ({ isActive = false }: VideoSeriesItemModel) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
+export const VideoSeriesItem = ({
+  isActive = false,
+  episode,
+  isAvailable,
+  ...restProps
+}: VideoSeriesItemModel) => {
+
 
   const isPlay = useAppSelector((state) => state.filmVideo.isPlayVideo);
-  if (isActive) {
-    console.log( videoRef, isPlay);
-  }
+  const isViewController = useAppSelector(
+    (state) => state.filmVideo.isViewControlVideo
+  );
 
-  useVideoCurTimeSlide(isActive, videoRef);
-  useChangeVideoCurTime(videoRef);
-  const { onClick } = useVideoSeriesClick();
+  const { videoRef, videoIsLoading } = useContext(VideoSeriesItemContext);
+
   const {
     handleEndedVideo,
     onClickPlay,
@@ -28,31 +35,48 @@ export const VideoSeriesItem = ({ isActive = false }: VideoSeriesItemModel) => {
     onPause,
     onTimeUpdate,
     onLoadedMetadata,
+    onPlaying,
+    onWaiting,
   } = useVideoFunctions(isActive, videoRef);
 
-  const isViewController = useAppSelector(
-    (state) => state.filmVideo.isViewControlVideo
-  );
+  useVideoCurTimeSlide(isActive, videoRef);
+  useChangeVideoCurTime(videoRef, isActive);
+  useCurrentVideoLength(isActive, videoRef);
+
+  const { onClick } = useVideoSeriesClick();
+
+
+  if (!isAvailable) {
+    return <>{isActive && <BlockSlide />}</>;
+  }
 
   return (
     <Video
+      {...restProps}
       onEnded={handleEndedVideo}
       className={styles.video}
       onPlay={onPlay}
       onPause={onPause}
       videoRef={videoRef}
-      src={videoFILE}
       onTimeUpdate={onTimeUpdate}
       onLoadedMetadata={onLoadedMetadata}
-      onClick={onClick}
+      onClickContainer={onClick}
+      onPlaying={onPlaying}
+      onWaiting={onWaiting}
     >
-      {isViewController && (
-        <Control
-          onClick={onClick}
-          isPlaying={isPlay}
-          onClickPlay={onClickPlay}
-        />
-      )}
+      <>
+        {isViewController && (
+          <Control
+            onClick={onClick}
+            isPlaying={isPlay}
+            onClickPlay={onClickPlay}
+            episode={episode}
+   
+          />
+        )}
+
+        {videoIsLoading && <LoaderSpinner className={styles.loaderSpinner} />}
+      </>
     </Video>
   );
 };

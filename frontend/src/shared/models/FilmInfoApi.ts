@@ -19,3 +19,18 @@ export interface CreateCommentQueryParams {
   serial_id: number;
   text: string;
 }
+
+export interface UpdateRatingBody {
+  rating: number;
+  serail_id: number;
+}
+
+export interface SeriesItem {
+  episode: number;
+  id: number;
+  likes: number;
+  name: string;
+  serail_name: string;
+  status: boolean;
+  video?: string; // Видео может отсутствовать
+}

@@ -1,5 +1,5 @@
 import { ShortsItemContext } from "@/reusable-in-pages/contexts/ShortsContext/context";
-import { useEffect, useContext, useCallback } from "react";
+import { useEffect, useContext, useCallback, useRef } from "react";
 
 export const useActivePlayingSwiper = (
   isActive: boolean,
@@ -18,22 +18,11 @@ export const useActivePlayingSwiper = (
           video.currentTime = 0;
         }
       }
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
   }, [isActive]);
 };
 
-export const useUserIsView = (isActive: boolean, serial_id: number) => {
-  console.log(serial_id);
-  const { userIsView, setUserIsView } = useContext(ShortsItemContext);
 
-  useEffect(() => {
-    if (isActive && userIsView) {
-      setUserIsView(true);
-    }
-  }, [isActive]);
-};
 
 export const useUpdateVideoMetaInfo = () => {
   const {
@@ -43,7 +32,10 @@ export const useUpdateVideoMetaInfo = () => {
     isPlaying,
     setViewPlay,
     videoRef,
+    setVideoIsLoading,
   } = useContext(ShortsItemContext);
+
+  const timerLoading = useRef<NodeJS.Timeout | null>(null);
   const onVideoMetaDataLoad = useCallback(
     (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
       setVideoLength(e.currentTarget.duration);
@@ -66,22 +58,19 @@ export const useUpdateVideoMetaInfo = () => {
     setIsPlaying(false);
   }, []);
 
-  const onClickVideo = useCallback(
-    (videoRef: React.RefObject<HTMLVideoElement>) => {
-      const video = videoRef.current;
+  const onClickVideo = (videoRef: React.RefObject<HTMLVideoElement>) => {
+    const video = videoRef.current;
 
-      if (video) {
-        if (isPlaying) {
-          video.pause();
-          setViewPlay(true);
-        } else {
-          video.play();
-          setViewPlay(false);
-        }
+    if (video) {
+      if (isPlaying) {
+        video.pause();
+        setViewPlay(true);
+      } else {
+        video.play();
+        setViewPlay(false);
       }
-    },
-    [isPlaying]
-  );
+    }
+  };
 
   const onSliderChange = useCallback((value: number | number[]) => {
     /* eslint-disable */ // <-- Before function
@@ -95,6 +84,20 @@ export const useUpdateVideoMetaInfo = () => {
     /* eslint-enable */
   }, []);
 
+  const onPlaying = () => {
+    setVideoIsLoading(false);
+    if (timerLoading.current) clearTimeout(timerLoading.current);
+  };
+
+  const onWaiting = () => {
+    if (isPlaying) {
+      timerLoading.current = setTimeout(() => {
+        setVideoIsLoading(true);
+        if (timerLoading.current) clearTimeout(timerLoading.current);
+      }, 100);
+    }
+  };
+
   return {
     onVideoMetaDataLoad,
     onTimeUpdate,
@@ -102,5 +105,7 @@ export const useUpdateVideoMetaInfo = () => {
     onPauseVideo,
     onClickVideo,
     onSliderChange,
+    onPlaying,
+    onWaiting,
   };
 };

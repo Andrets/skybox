@@ -3,12 +3,13 @@ import { apiSlice } from "./api"; // Правильный импорт apiSlice
 import FilmVideoReducer from "@/modules/Serial/slices/FilmVideoSlice";
 import SearchInputSlice from "@/reusable-in-pages/slices/SearchFormSlice";
 import MainSlice from "@/modules/Main/slices/MainSlice";
-
+import PaySubscribeSlice from "@/modules/PaySubscribe/slices/slice";
 const store = configureStore({
   reducer: {
     filmVideo: FilmVideoReducer,
     searchInput: SearchInputSlice,
     mainSlice: MainSlice,
+    paySubscribe: PaySubscribeSlice,
     [apiSlice.reducerPath]: apiSlice.reducer, // Обязательно используем apiSlice.reducerPath
   },
   middleware: (getDefaultMiddleware) =>

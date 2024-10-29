@@ -7,14 +7,16 @@ const EpisodeListButton: FC<EpisodeListButtonProps> = ({
   disabled,
   isActive,
   children,
+  ...restProps
 }) => {
   return (
     <Button
+      {...restProps}
       sx={{ minWidth: 0, width: 48, height: 48 }}
       className={`${styles.episodeListBtn} ${isActive && styles.active} ${
         disabled && styles.disabled
       }`}
-      disabled={disabled}
+      disabled={false}
     >
       {children}
       {disabled && <LockSVG className={styles.lockSVG} />}

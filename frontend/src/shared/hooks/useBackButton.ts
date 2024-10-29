@@ -20,7 +20,6 @@ const useBackButton = (onClick?: () => void, active = true) => {
 
     return () => {
       webApp.BackButton.offClick(onClick ? onClick : defaultFunc);
-      webApp.BackButton.hide();
     };
   }, [onClick, active]);
 };

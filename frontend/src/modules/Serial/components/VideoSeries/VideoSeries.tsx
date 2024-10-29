@@ -1,13 +1,30 @@
 import { SwiperSlide, Swiper } from "swiper/react";
 import { Swiper as SwiperType } from "swiper";
 import styles from "./styles.module.scss";
-
 import { VideoSeriesItem } from "./components/VideoSeriesItem/VideoSeriesItem";
 import { useContext } from "react";
 import { SerialContext } from "@/reusable-in-pages/contexts/SerialContext/context";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/reduxTypes";
 import { setActiveEpisode, setVideoCurTime } from "../../slices/FilmVideoSlice";
-export const VideoSeries = () => {
+import { VideoSeriesProps } from "../../model/models";
+import { VideoSeriesItemProvider } from "@/reusable-in-pages/contexts/VideoSeriesItemContext/provider";
+import { Mousewheel } from "swiper/modules";
+import { SeriesItem } from "@/shared/models/FilmInfoApi";
+
+const setFilmSeries = (arr: SeriesItem[]) => {
+  const res: SeriesItem[] = [];
+  for (let i = 0; i < arr.length; i++) {
+    let el = arr[i];
+    res.push(el);
+
+    if (!el.status) {
+      return res;
+    }
+  }
+
+  return res;
+};
+export const VideoSeries = ({ series }: VideoSeriesProps) => {
   const { swiperRef } = useContext(SerialContext);
   const activeEpisode = useAppSelector(
     (state) => state.filmVideo.activeEpisode
@@ -28,22 +45,23 @@ export const VideoSeries = () => {
       className={styles.container}
       onSlideChange={onSlideChange}
       direction="vertical"
+      mousewheel
+      modules={[Mousewheel]}
     >
-      <SwiperSlide className={styles.slide}>
-        <VideoSeriesItem isActive={activeEpisode === 0} />
-      </SwiperSlide>
-
-      <SwiperSlide className={styles.slide}>
-        <VideoSeriesItem isActive={activeEpisode === 1} />
-      </SwiperSlide>
-
-      <SwiperSlide className={styles.slide}>
-        <VideoSeriesItem isActive={activeEpisode === 2} />
-      </SwiperSlide>
-
-      <SwiperSlide className={styles.slide}>
-        <VideoSeriesItem isActive={activeEpisode === 3} />
-      </SwiperSlide>
+      {setFilmSeries(series).map((el, index) => {
+        return (
+          <SwiperSlide key={index} className={styles.slide}>
+            <VideoSeriesItemProvider>
+              <VideoSeriesItem
+                isAvailable={el.status}
+                src={activeEpisode === index ? el.video : undefined}
+                episode={el.episode}
+                isActive={activeEpisode === index}
+              />
+            </VideoSeriesItemProvider>
+          </SwiperSlide>
+        );
+      })}
     </Swiper>
   );
 };

@@ -2,25 +2,35 @@
   display: flex;
   border: 0;
   margin: 8px 0 0 0;
+  flex-wrap: wrap;
   button.toggler {
     padding: 0;
     border: 0;
     position: relative;
+    white-space: nowrap;
 
     &:first-child {
       margin-left: 0;
 
       &::after {
-        display: none;
+        content: "/";
+        position: absolute;
+        right: -18px;
       }
     }
 
-    margin-left: 32px;
+    margin-left: 28px;
 
     &::after {
       content: "/";
       position: absolute;
-      left: -16px;
+      right: -16px;
+    }
+
+    &:last-child{
+      &::after{
+        display: none;
+      }
     }
   }
 }

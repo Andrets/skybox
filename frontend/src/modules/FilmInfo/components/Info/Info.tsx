@@ -4,9 +4,10 @@ import { SectionHeader } from "@/ui/SectionHeader";
 import CommentsBlock from "@/modules/FilmInfo/components/Info/components/Comments/Comments";
 import AddComment from "@/modules/FilmInfo/components/Info/components/AddComment/AddComment";
 import { ReactComponent as PlaySVG } from "@icons/Play.svg";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { FilmInfoProps } from "../../model/models";
 import { useTranslation } from "react-i18next";
+import { RatingFilm } from "./components/Rating/Rating";
 
 const Info = ({
   description,
@@ -17,9 +18,10 @@ const Info = ({
   rating,
 }: FilmInfoProps) => {
   const { t } = useTranslation();
+  const { id } = useParams();
   return (
     <div className={`${styles.info}`}>
-      <div className={styles.container}>
+      <div className={`${styles.container} container`}>
         <MainInfo
           description={description}
           name={name}
@@ -27,6 +29,12 @@ const Info = ({
           genre={genre}
           rating={rating}
         />
+
+        <SectionHeader className={styles.sectHeader}>
+          {t("rateFilm")}
+        </SectionHeader>
+
+        <RatingFilm />
 
         <SectionHeader className={styles.sectHeader}>
           {t("comments")}
@@ -40,7 +48,7 @@ const Info = ({
 
         <AddComment />
 
-        <Link to={"/filmVideo"} className={`${styles.link}`}>
+        <Link to={`/filmVideo/${id}`} className={`${styles.link}`}>
           <PlaySVG /> {t("startPlay")}
         </Link>
       </div>

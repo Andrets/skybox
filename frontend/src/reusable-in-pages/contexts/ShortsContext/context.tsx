@@ -14,6 +14,8 @@ export interface ShortsItemContextModel {
   setIsChangingTime: React.Dispatch<React.SetStateAction<boolean>>;
   userIsView: boolean;
   setUserIsView: React.Dispatch<React.SetStateAction<boolean>>;
+  videoIsLoading: boolean;
+  setVideoIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const ShortsItemContext = createContext<ShortsItemContextModel>(null!);

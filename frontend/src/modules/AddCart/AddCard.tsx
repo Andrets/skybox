@@ -11,6 +11,10 @@ export const AddCard = () => {
       formState: { isValid },
     },
   } = useContext(AddCardContext);
+
+
+
+
   return (
     <AddCardForm className={styles.form}>
       <FooterInfo />

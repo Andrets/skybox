@@ -7,6 +7,8 @@ interface InitialStateModel {
   videoLength: number;
   videoCurTime: number;
   activeEpisode: number;
+  paginationPage: number;
+  isBlockedSlide: boolean;
 }
 
 const initialState: InitialStateModel = {
@@ -16,6 +18,8 @@ const initialState: InitialStateModel = {
   videoLength: 0,
   videoCurTime: 0,
   activeEpisode: 0,
+  paginationPage: 0,
+  isBlockedSlide: false,
 };
 
 const filmVideoSlice = createSlice({
@@ -40,6 +44,15 @@ const filmVideoSlice = createSlice({
     setActiveEpisode: (state, action: PayloadAction<number>) => {
       state.activeEpisode = action.payload;
     },
+    setPaginationPage: (state, action: PayloadAction<number>) => {
+      state.paginationPage = action.payload;
+    },
+    setIsBlockedSlide: (state, action: PayloadAction<boolean>) => {
+      state.isBlockedSlide = action.payload;
+    },
+    resetState: () => {
+      return { ...initialState };
+    },
   },
 });
 
@@ -50,6 +63,9 @@ export const {
   setVideoLength,
   setVideoCurTime,
   setActiveEpisode,
+  setPaginationPage,
+  setIsBlockedSlide,
+  resetState,
 } = filmVideoSlice.actions;
 
 export default filmVideoSlice.reducer;

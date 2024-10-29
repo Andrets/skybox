@@ -1,4 +1,4 @@
-import { BaseComponentInterface } from "@/shared/models/BaseComponentInterfaces";
+import { LinkProps } from "react-router-dom";
 
 export interface IPeopleSearchingItem {
   poster: string;
@@ -10,4 +10,4 @@ export interface IPeopleSearchingItem {
 
 export interface PeopleSearchingItemProps
   extends IPeopleSearchingItem,
-    BaseComponentInterface {}
+    LinkProps {}

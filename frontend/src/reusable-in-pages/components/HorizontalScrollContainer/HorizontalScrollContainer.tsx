@@ -18,11 +18,52 @@ const HorizontalScrollContainer = ({
         contentRef?.current ? contentRef.current.clientHeight : 0
       }px`;
     }
-  }, [containerRef.current, contentRef.current, children]);
+  }, [children]);
+
+  useEffect(() => {
+    const checkSize = () => {
+      if (containerRef && containerRef.current) {
+        containerRef.current.style.height = `${
+          contentRef?.current ? contentRef.current.clientHeight : 0
+        }px`;
+      }
+    };
+    const resizeWindow = () => {
+      checkSize();
+    };
+
+    window.addEventListener("resize", resizeWindow);
+
+    return () => {
+      window.removeEventListener("resize", resizeWindow);
+    };
+  }, [children]);
+
+  const handleResize = (entries: ResizeObserverEntry[]) => {
+    const entry = entries[0];
+    if (entry) {
+      if (containerRef && containerRef.current) {
+        containerRef.current.style.height = `${entry.contentRect.height}px`;
+      }
+
+    }
+  };
+
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver(handleResize);
+    if (contentRef.current) {
+      resizeObserver.observe(contentRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [contentRef.current]);
+
   return (
     <div
       ref={containerRef}
-      className={`${styles.scrollContainer} ${className}`}
+      className={`${styles.scrollContainer} ${className} scrollContainer`}
     >
       <div ref={contentRef} className={`${styles.content} ${contentClassName}`}>
         {children}

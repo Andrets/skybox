@@ -21,3 +21,25 @@ export interface TransformUserInfoResponseItem {
   tg_id: number;
   tg_username: string;
 }
+
+export interface WatchHistoryItem {
+  cover: string | null;
+  id: number;
+  name: string;
+}
+
+export enum SubscriptionSubtype {
+  TEMPORARILY_MONTH = "TEMPORARILY_MONTH",
+  TEMPORARILY_YEAR = "TEMPORARILY_YEAR",
+  TEMPORARILY_WEEK = "TEMPORARILY_WEEK",
+}
+
+export interface SubscriptionPlanModel {
+  subtype: SubscriptionSubtype;
+  price_in_rubles: number;
+  price_in_stars: number;
+}
+
+export interface SubscriptionPlanObject {
+  [key: string]: Omit<SubscriptionPlanModel, "subtype">;
+}

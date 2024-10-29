@@ -22,6 +22,7 @@ import {
   filmInfoLoader,
   mainPageLoader,
   policyLoader,
+  serialLoader,
   termsLoader,
   userLoader,
 } from "./loaders/loaders";
@@ -56,7 +57,11 @@ export const routes: RouteObject[] = [
         element: <FilmInfoPage />,
         loader: filmInfoLoader,
       },
-      { path: "filmVideo", element: <FilmVideoPage /> },
+      {
+        path: "filmVideo/:id",
+        element: <FilmVideoPage />,
+        loader: serialLoader,
+      },
 
       {
         path: "",

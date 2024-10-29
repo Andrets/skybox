@@ -7,6 +7,8 @@ import {
   useCallback,
   SyntheticEvent,
   MouseEventHandler,
+  useRef,
+
 } from "react";
 import {
   setVideoCurTime,
@@ -14,14 +16,19 @@ import {
   togglePlayVideo,
   toggleViewControlVideo,
 } from "@/modules/Serial/slices/FilmVideoSlice";
+import { VideoSeriesItemContext } from "@/reusable-in-pages/contexts/VideoSeriesItemContext/context";
 
 export const useVideoFunctions = (
   isActive: boolean,
   videoRef: RefObject<HTMLVideoElement>
 ) => {
   const { swiperRef, viewTimerRef } = useContext(SerialContext);
+  const { setVideoIsLoading } = useContext(VideoSeriesItemContext);
   const dispatch = useAppDispatch();
   const isPlay = useAppSelector((state) => state.filmVideo.isPlayVideo);
+  const timerLoading = useRef<NodeJS.Timeout | null>(null);
+
+
 
   const handleEndedVideo: ReactEventHandler<HTMLVideoElement> =
     useCallback(() => {
@@ -75,8 +82,22 @@ export const useVideoFunctions = (
         dispatch(setVideoLength(e.currentTarget.duration));
       }
     },
-    []
+    [isActive]
   );
+
+  const onPlaying = () => {
+    setVideoIsLoading(false);
+    if (timerLoading.current) clearTimeout(timerLoading.current);
+  };
+
+  const onWaiting = () => {
+    if (isPlay) {
+      timerLoading.current = setTimeout(() => {
+        setVideoIsLoading(true);
+        if (timerLoading.current) clearTimeout(timerLoading.current);
+      }, 500);
+    }
+  };
 
   return {
     handleEndedVideo,
@@ -85,5 +106,7 @@ export const useVideoFunctions = (
     onPause,
     onTimeUpdate,
     onLoadedMetadata,
+    onPlaying,
+    onWaiting,
   };
 };

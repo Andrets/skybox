@@ -1,0 +1,15 @@
+.button {
+  min-height: 60px;
+  border-radius: 12px;
+  background-color: var(--main-theme-color-2);
+  color: white;
+  background: rgba(251, 138, 0, 1);
+  z-index: 2;
+}
+
+.lockSVG {
+  width: 20px;
+  height: 20px;
+  margin-right: 4px;
+
+}

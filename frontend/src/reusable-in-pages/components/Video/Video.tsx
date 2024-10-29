@@ -7,14 +7,18 @@ export const Video: FC<VideoInterfaceProps> = ({
   className,
   children,
   onClick,
+  onClickContainer,
   ...restProps
 }) => {
   return (
-    <div className={`${styles.container} ${className}`}>
+    <div
+      onClick={onClickContainer}
+      className={`${styles.container} ${className}`}
+    >
       <video
         onContextMenu={(e) => e.preventDefault()}
         ref={videoRef}
-        onClick={onClick}
+      
         {...restProps}
         playsInline
       />

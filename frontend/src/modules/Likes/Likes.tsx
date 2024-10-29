@@ -3,9 +3,11 @@ import styles from "./styles.module.scss";
 import { LikeItem } from "./ui";
 import posterIMG from "@images/poster.png";
 import { useTranslation } from "react-i18next";
+import useBackButton from "@/shared/hooks/useBackButton";
 
 const Likes = () => {
   const { t } = useTranslation();
+  useBackButton();
   return (
     <div className={`container`}>
       <SectionHeader className={styles.header}>{t("myList")}</SectionHeader>

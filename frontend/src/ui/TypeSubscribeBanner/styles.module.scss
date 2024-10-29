@@ -1,9 +1,11 @@
-.subBtn {
+button.subBtn {
   width: 100%;
   background-color: rgba(33, 29, 29, 1);
+  border: 2px solid rgba(251, 138, 0, 0);
+  transition: 0.25s;
 }
 
-.activeSubBtn {
+button.activeSubBtn {
   border: 2px solid rgba(251, 138, 0, 1);
 }
 

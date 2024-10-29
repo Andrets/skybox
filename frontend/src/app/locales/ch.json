@@ -33,15 +33,18 @@
   "arabian": "阿拉伯语",
   "turkish": "土耳其语",
   "payment": "付款",
-  "month": "月份",
+  "month": "月",
   "year": "年",
-  "subscribeServiceMonthDescription": "1个月内无限访问系列",
-  "subscribeServiceYearDescription": "1年内无限访问系列",
+  "week": "周",
+  "subscribeServiceMonthDescription": "1个月无限观看电视剧",
+  "subscribeServiceYearDescription": "1年无限观看电视剧",
+  "subscribeServiceWeekDescription": "1周无限观看电视剧",
   "cardNumber": "卡号",
   "validityPeriod": "有效期",
   "payCard": "使用卡支付",
   "annualSubscription": "年度订阅",
   "monthlySubscription": "每月订阅",
+  "weeklySubscription": "周订阅",
   "error": {
     "cardNumberRequired": "请输入卡号",
     "cardNumberPattern": "卡号格式无效",
@@ -49,5 +52,16 @@
     "dateMinLength": "日期格式无效",
     "cvvRequired": "请输入CVV",
     "cvvMinLength": "CVV格式无效"
-  }
+  },
+  "categoryToggler": {
+    "popular": "热门",
+    "original": "原创",
+    "new": "最新",
+    "male": "男士",
+    "female": "女士"
+  },
+  "rateFilm": "评价电影",
+  "clipsNotFound": "未找到剪辑",
+  "emptyWatchHistory": "观看历史为空",
+  "unlockNow": "立即解锁"
 }

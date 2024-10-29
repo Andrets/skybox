@@ -12,3 +12,12 @@ export enum LANGUAGESLIST {
   ar = "ar",
   zh = "zh",
 }
+
+export enum YooMoneyCheckoutErrorList {
+  invalid_number = "invalid_number",
+  invalid_expiry_month = "invalid_expiry_month",
+  invalid_expiry_year = "invalid_expiry_year",
+  invalid_cvc = "invalid_cvc",
+  processing_error = "processing_error",
+  missing = "missing",
+}

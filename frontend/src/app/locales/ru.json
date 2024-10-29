@@ -35,13 +35,16 @@
   "turkish": "Турецкий",
   "month": "Месяц",
   "year": "Год",
+  "week": "Неделя",
   "subscribeServiceMonthDescription": "Безлимитный доступ к сериалам 1 месяц",
   "subscribeServiceYearDescription": "Безлимитный доступ к сериалам 1 год",
+  "subscribeServiceWeekDescription": "Безлимитный доступ к сериалам 1 неделю",
   "cardNumber": "Номер карты",
   "validityPeriod": "Срок дейтсвия",
   "payCard": "Оплатить картой",
   "annualSubscription": "Годовая подписка",
   "monthlySubscription": "Ежемесячная подписка",
+  "weeklySubscription": "Недельная подписка",
   "error": {
     "cardNumberRequired": "Введите номер карты",
     "cardNumberPattern": "Неверный формат номера карты",
@@ -49,5 +52,16 @@
     "dateMinLength": "Неверный формат даты",
     "cvvRequired": "Введите CVV",
     "cvvMinLength": "Неверный формат CVV"
-  }
+  },
+  "categoryToggler": {
+    "popular": "Популярные",
+    "original": "Оригиналы",
+    "new": "Новые",
+    "male": "Мужское",
+    "female": "Женское"
+  },
+  "rateFilm": "Оцени фильм",
+  "clipsNotFound": "Клипы не найдены",
+  "emptyWatchHistory": "История просмотров пуста",
+  "unlockNow": "Разблокировать сейчас"
 }

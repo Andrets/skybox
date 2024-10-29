@@ -12,7 +12,7 @@ const MainInfo = ({
   genre,
   is_new,
 }: FilmMainInfoProps) => {
-  console.log(rating);
+
   return (
     <div className={styles.main}>
       <SectionHeader className={styles.title}>{name}</SectionHeader>

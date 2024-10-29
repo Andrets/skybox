@@ -25,7 +25,7 @@
   "results": "Results",
   "typeSomething": "Type something",
   "sendComment": "Send comment",
-  "notEnterSearch": "You haven't entered anything yet.",
+  "notEnterSearch": "You haven't entered anything yet",
   "searchEmptyResults": "No series were found for this request.",
   "russian": "Russian",
   "english": "English",
@@ -35,13 +35,16 @@
   "turkish": "Turkish",
   "month": "Month",
   "year": "Year",
+  "week": "Week",
   "subscribeServiceMonthDescription": "Unlimited access to series for 1 month",
   "subscribeServiceYearDescription": "Unlimited access to series for 1 year",
+  "subscribeServiceWeekDescription": "Unlimited access to series for 1 week",
   "cardNumber": "Card Number",
   "validityPeriod": "Validity Period",
   "payCard": "Pay by Card",
   "annualSubscription": "Annual Subscription",
   "monthlySubscription": "Monthly Subscription",
+  "weeklySubscription": "Weekly Subscription",
   "error": {
     "cardNumberRequired": "Please enter card number",
     "cardNumberPattern": "Invalid card number format",
@@ -49,5 +52,16 @@
     "dateMinLength": "Invalid date format",
     "cvvRequired": "Please enter CVV",
     "cvvMinLength": "Invalid CVV format"
-  }
+  },
+  "categoryToggler": {
+    "popular": "Popular",
+    "original": "Originals",
+    "new": "New",
+    "male": "Male",
+    "female": "Female"
+  },
+  "rateFilm": "Rate film",
+  "clipsNotFound": "Clips not found",
+  "emptyWatchHistory": "Watch history is empty",
+  "unlockNow": "Unlock now"
 }

@@ -14,10 +14,11 @@ export const List = ({ data }: { data: SearchResultResponse["results"] }) => {
   }
   return (
     <Layout>
-      {data.map((el, index) => {
+      {data.map((el) => {
         return (
           <ResultItem
-            key={index}
+            to={`/filmInfo/${el.id}`}
+            key={el.id}
             poster={el.vertical_photo ? el.vertical_photo : ""}
             header={el.name}
             category={el.genre}

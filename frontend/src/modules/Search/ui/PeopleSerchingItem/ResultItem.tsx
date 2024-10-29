@@ -4,6 +4,7 @@ import Poster from "@/ui/Poster/Poster";
 import styles from "./styles.module.scss";
 import Info from "./Info/Info";
 import StandartMark from "@/ui/marks/Standart/StandartMark";
+import { Link } from "react-router-dom";
 
 export const ResultItem: FC<PeopleSearchingItemProps> = ({
   status,
@@ -11,9 +12,10 @@ export const ResultItem: FC<PeopleSearchingItemProps> = ({
   poster,
   category,
   header,
+  to,
 }) => {
   return (
-    <div className={styles.container}>
+    <Link to={to} className={styles.container}>
       <Poster className={styles.poster} poster={poster}>
         <>
           {category && (
@@ -22,6 +24,6 @@ export const ResultItem: FC<PeopleSearchingItemProps> = ({
         </>
       </Poster>
       <Info header={header} status={status} description={description} />
-    </div>
+    </Link>
   );
 };

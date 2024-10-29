@@ -9,14 +9,7 @@ import {
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/reduxTypes";
 import { setActiveCategory } from "../../slices/MainSlice";
 import { ExclusiveOriginalsSearchParams } from "@/shared/models/MainPageApi";
-
-const CATEGORIES = [
-  { value: ExclusiveOriginalsSearchParams.popular, children: "Popular" },
-  { value: ExclusiveOriginalsSearchParams.new, children: "New" },
-  { value: ExclusiveOriginalsSearchParams.original, children: "Original" },
-  { value: ExclusiveOriginalsSearchParams.male, children: "Male" },
-  { value: ExclusiveOriginalsSearchParams.female, children: "Female" },
-];
+import { useTranslation } from "react-i18next";
 
 export const CategoryToggler = () => {
   const activeCategory = useAppSelector(
@@ -27,17 +20,46 @@ export const CategoryToggler = () => {
     e.preventDefault();
     dispatch(setActiveCategory(value));
   };
+
+  const { t } = useTranslation();
+
+  const categoriesList = () => {
+    return [
+      {
+        value: ExclusiveOriginalsSearchParams.popular,
+        children: t("categoryToggler.popular"),
+      },
+      {
+        value: ExclusiveOriginalsSearchParams.new,
+        children: t("categoryToggler.new"),
+      },
+      {
+        value: ExclusiveOriginalsSearchParams.original,
+        children: t("categoryToggler.original"),
+      },
+      {
+        value: ExclusiveOriginalsSearchParams.male,
+        children: t("categoryToggler.male"),
+      },
+      {
+        value: ExclusiveOriginalsSearchParams.female,
+        children: t("categoryToggler.female"),
+      },
+    ];
+  };
+
   return (
-    <HorizontalScrollContainer className={styles.container}>
+    <HorizontalScrollContainer className={`${styles.container} container`}>
       <ToggleButtonGroup
         className={styles.btnGroup}
         exclusive
         aria-label="Category"
       >
-        {CATEGORIES.map((el, index) => {
+        {categoriesList().map((el, index) => {
           return (
             <ToggleButton
               key={index}
+              sx={{ maxWidth: undefined }}
               className={`${styles.item} ${
                 el.value === activeCategory && styles.active
               }`}

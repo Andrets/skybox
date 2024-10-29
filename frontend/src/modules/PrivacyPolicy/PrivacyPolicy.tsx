@@ -1,9 +1,12 @@
 import { useGetPolicyQuery } from "@/api/DocumentsApi";
 import styles from "./styles.module.scss";
 import { LoaderSpinner } from "@/ui/Icons";
+import useBackButton from "@/shared/hooks/useBackButton";
 
 const PrivacyPolicy = () => {
   const { data, isLoading } = useGetPolicyQuery();
+
+  useBackButton();
 
   if (isLoading) {
     return (

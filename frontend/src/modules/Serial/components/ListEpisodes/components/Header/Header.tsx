@@ -4,10 +4,17 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { Button } from "@mui/material";
 import { HeaderProps } from "../../model/HeaderProps";
 import { FC } from "react";
+import { useGetFilmInfoQuery } from "@/api/FilmInfoApi";
+import { useParams } from "react-router-dom";
 const Header: FC<HeaderProps> = ({ onClose }) => {
+  const { id } = useParams();
+  const { data } = useGetFilmInfoQuery(id ? id : "", {
+    skip: id ? false : true,
+  });
+
   return (
     <div className={styles.top}>
-      <SectionHeader>Falling In Love with the Rascue</SectionHeader>
+      <SectionHeader>{data?.name}</SectionHeader>
       <Button
         sx={{ minWidth: 0, padding: "0 12px" }}
         onClick={onClose}

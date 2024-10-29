@@ -1,27 +1,24 @@
 import { apiSlice } from "@/app/store/api";
 import { isNotFoundShortsDetail } from "@/shared/helpers/checkTypeFunctions";
 import {
-  NotFoundShortsDetail,
+  SendLikeQueryParams,
   ShortsItemModel,
 } from "@/shared/models/ShortsApi";
 
 export const shortsApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getShorts: builder.query<(ShortsItemModel | NotFoundShortsDetail)[], void>({
+    getShorts: builder.query<ShortsItemModel[], void>({
       query: () => {
         return {
           url: "series/get_shorts",
           method: "GET",
         };
       },
-      transformResponse: (res: NotFoundShortsDetail | ShortsItemModel[]) => {
-        if (isNotFoundShortsDetail(res)) {
-          return [res];
-        }
+      transformResponse: (res: ShortsItemModel[]) => { 
         return res;
       },
-      transformErrorResponse: () => {
-        return [{ details: "not found" }];
+      transformErrorResponse: (err) => {
+        return err;
       },
       merge: (currentCache, newItems) => {
         return [...currentCache, ...newItems];
@@ -39,7 +36,39 @@ export const shortsApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+    sendLike: builder.mutation<unknown, SendLikeQueryParams>({
+      query: (params) => {
+        return {
+          url: `serail/like_it?series_id=${params.serail_id}`,
+          method: "GET",
+        };
+      },
+
+      async onQueryStarted(arg, { dispatch }) {
+        dispatch(
+          shortsApiSlice.util.updateQueryData(
+            "getShorts",
+            undefined,
+            (draft) => {
+              for (let i = 0; i < draft.length; i++) {
+                let el = draft[i];
+
+                if (
+                  !isNotFoundShortsDetail(el) &&
+                  el.serail_id === arg.serail_id
+                ) {
+                  if (el.is_liked) el.likes -= 1;
+                  else el.likes += 1;
+                  el.is_liked = !el.is_liked;
+                }
+              }
+            }
+          )
+        );
+      },
+    }),
   }),
 });
 
-export const { useGetShortsQuery, useMetrikViewMutation } = shortsApiSlice;
+export const { useGetShortsQuery, useMetrikViewMutation, useSendLikeMutation } =
+  shortsApiSlice;

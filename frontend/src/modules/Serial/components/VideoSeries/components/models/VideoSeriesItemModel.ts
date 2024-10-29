@@ -1,5 +1,7 @@
-import { HTMLAttributes } from "react";
+import { VideoInterfaceProps } from "@/reusable-in-pages/components/Video/interface";
 
-export interface VideoSeriesItemModel extends HTMLAttributes<HTMLVideoElement> {
+export interface VideoSeriesItemModel extends VideoInterfaceProps {
   isActive?: boolean;
+  episode: number;
+  isAvailable: boolean;
 }

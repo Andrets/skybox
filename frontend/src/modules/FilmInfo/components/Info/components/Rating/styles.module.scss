@@ -1,0 +1,11 @@
+.container {
+  border-bottom: 1px solid rgba(121, 120, 124, 0.5);
+
+  .rating {
+    margin: 10px 0 16px -3px;
+
+    svg {
+      fill: var(--main-theme-color-2);
+    }
+  }
+}

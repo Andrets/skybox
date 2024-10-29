@@ -6,20 +6,37 @@ import { ShortsItemContext } from "@/reusable-in-pages/contexts/ShortsContext/co
 import { SideButtons } from "./SideButtons";
 import { ControlProps } from "../../model/ControlProps";
 import { VideoTimeSlider } from "./VideoTimeSlider";
+import { LoaderSpinner } from "@/ui/Icons";
 
 export const Control = memo(
-  ({ isViewTimeSlider, ...restProps }: ControlProps) => {
-    const { viewPlay } = useContext(ShortsItemContext);
+  ({
+    isViewTimeSlider,
+    name,
+    is_liked,
+    likes,
+    episode,
+    shorts_id,
+    serail_id,
+    ...restProps
+  }: ControlProps) => {
+    const { viewPlay, videoIsLoading } = useContext(ShortsItemContext);
 
     return (
       <div {...restProps} className={styles.control}>
-        {viewPlay && <PlayButton className={styles.playBtn} isPlay={false} />}
+        {viewPlay && (
+          <PlayButton
+            onMouseDown={restProps.onMouseDown}
+            onTouchEnd={restProps.onTouchEnd}
+            className={styles.playBtn}
+            isPlay={false}
+          />
+        )}
 
-        <FilmName
-          className={styles.film}
-          name={"Love the way you lie"}
-          episode={1}
-        />
+        {videoIsLoading && !viewPlay && (
+          <LoaderSpinner className={styles.loader} />
+        )}
+
+        <FilmName className={styles.film} name={name} episode={episode} />
 
         {isViewTimeSlider && (
           <>
@@ -27,7 +44,12 @@ export const Control = memo(
           </>
         )}
 
-        <SideButtons />
+        <SideButtons
+          serail_id={serail_id}
+          id={shorts_id}
+          likes={likes}
+          is_liked={is_liked}
+        />
       </div>
     );
   }

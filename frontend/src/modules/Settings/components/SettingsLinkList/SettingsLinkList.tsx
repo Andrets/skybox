@@ -2,9 +2,20 @@ import { useTranslation } from "react-i18next";
 import { SettingsLinkButton } from "../../ui";
 import styles from "./styles.module.scss";
 import { ReactComponent as ArrowRight } from "@icons/ArrowRight.svg";
+import { useAuthorizationQuery } from "@/api/userApi";
+
+export enum LANGUAGESLIST {
+  ko = " 한국어",
+  en = "English",
+  ru = "Русский",
+  tr = "Türkçe",
+  ar = "لعربية",
+  zh = "中文",
+}
 
 export const SettingsLinkList = () => {
   const { t } = useTranslation();
+  const {data} = useAuthorizationQuery()
   return (
     <div className={`container ${styles.container}`}>
       <SettingsLinkButton
@@ -13,7 +24,7 @@ export const SettingsLinkList = () => {
         to="/lang"
       >
         <span className={styles.language}>
-          English <ArrowRight />
+          {data?.lang && LANGUAGESLIST[data?.lang]} <ArrowRight />
         </span>
       </SettingsLinkButton>
       <SettingsLinkButton

@@ -1,74 +1,29 @@
-import { SectionHeader } from "@/ui/SectionHeader";
-import styles from "./styles.module.scss";
-
-import { WatchHistoryItem } from "../../ui";
-import posterIMG from "@images/poster.png";
-import HorizontalScrollContainer from "@/reusable-in-pages/components/HorizontalScrollContainer/HorizontalScrollContainer";
-import { useTranslation } from "react-i18next";
+import { useGetHistoryQuery } from "@/api/userApi";
+import { WatchHistoryLayout } from "./layouts/Layout";
+import { List, Loading } from "./components";
 
 export const WatchHistory = () => {
-  const { t } = useTranslation();
-  return (
-    <>
-      <div className={`container ${styles.container}`}>
-        <SectionHeader className={styles.header}>
-          {t("watchHistory")}
-        </SectionHeader>
-      </div>
+  const { data, isLoading, isError } = useGetHistoryQuery();
 
-      <HorizontalScrollContainer
-        contentClassName={`${styles.listContent} `}
-        className={`${styles.list} container no-padding`}
-      >
-        <WatchHistoryItem
-          className={styles.watchItem}
-          name={"Ep1 / Ep2"}
-          poster={posterIMG}
-          to={""}
-        />
-        <WatchHistoryItem
-          className={styles.watchItem}
-          name={"Ep1 / Ep2"}
-          poster={posterIMG}
-          to={""}
-        />
-        <WatchHistoryItem
-          className={styles.watchItem}
-          name={"Ep1 / Ep2"}
-          poster={posterIMG}
-          to={""}
-        />
-        <WatchHistoryItem
-          className={styles.watchItem}
-          name={"Ep1 / Ep2"}
-          poster={posterIMG}
-          to={""}
-        />
-        <WatchHistoryItem
-          className={styles.watchItem}
-          name={"Ep1 / Ep2"}
-          poster={posterIMG}
-          to={""}
-        />
-        <WatchHistoryItem
-          className={styles.watchItem}
-          name={"Ep1 / Ep2"}
-          poster={posterIMG}
-          to={""}
-        />
-        <WatchHistoryItem
-          className={styles.watchItem}
-          name={"Ep1 / Ep2"}
-          poster={posterIMG}
-          to={""}
-        />
-        <WatchHistoryItem
-          className={styles.watchItem}
-          name={"Ep1 / Ep2"}
-          poster={posterIMG}
-          to={""}
-        />
-      </HorizontalScrollContainer>
-    </>
-  );
+  if (isLoading) {
+    return (
+      <WatchHistoryLayout>
+        <Loading />
+      </WatchHistoryLayout>
+    );
+  }
+
+  if (isError) {
+    return <WatchHistoryLayout></WatchHistoryLayout>;
+  }
+
+  if (data) {
+    return (
+      <WatchHistoryLayout>
+        <List data={data} />
+      </WatchHistoryLayout>
+    );
+  }
+
+  return <></>;
 };
