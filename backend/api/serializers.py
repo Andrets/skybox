@@ -14,6 +14,7 @@ from .models import (
     Payments,
     Favorite,
     Subscriptions,
+    SerailPrice,
 )
 
 
@@ -105,4 +106,17 @@ class RatingUpdateSerializer(serializers.Serializer):
 class SubscriptionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscriptions
+        fields = '__all__'
+    
+class SubscriptionPriceSerializer(serializers.Serializer):
+    tg_id = serializers.IntegerField(required=True, help_text="Telegram ID пользователя")
+
+    def validate_tg_id(self, value):
+        if not Users.objects.filter(tg_id=value).exists():
+            raise serializers.ValidationError("Пользователь с данным tg_id не найден.")
+        return value
+
+class SerailPriceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SerailPrice
         fields = '__all__'

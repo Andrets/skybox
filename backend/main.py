@@ -14,6 +14,18 @@ from aiogram.enums import ParseMode
 from api.tg_bot.track_orders import notify_user
 
 
+from django.shortcuts import get_object_or_404
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from aiogram.types import LabeledPrice
+from asgiref.sync import sync_to_async
+
+from api.models import Payments
+from api.serializers import PaymentsSerializer
+
+
 load_dotenv()
 
 bot = Bot('8090358352:AAHqI7UIDxQSgAr0MUKug8Ixc0OeozWGv7I', default=DefaultBotProperties(parse_mode=ParseMode.HTML))
@@ -56,6 +68,10 @@ async def main():
 
     tasks[0].add_done_callback(lambda x: finish_all_tasks(tasks))
     await asyncio.gather(*tasks)
+
+
+
+
 
 
 if __name__ == '__main__':

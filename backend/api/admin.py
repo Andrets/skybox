@@ -23,6 +23,7 @@ from .models import (
     Subscriptions,
     Feasts,
     Newprice,
+    SerailPrice,
 )
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
@@ -239,18 +240,12 @@ class FavoriteAdmin(admin.ModelAdmin):
 admin.site.register(Favorite, FavoriteAdmin)
 
 
-class SubscriptionsAdmin(admin.ModelAdmin):
-    list_per_page = 500
-    fields = ('subtype', 'price')
 
-    
-
-    class Meta:
-        model = Subscriptions
-
-admin.site.register(Subscriptions, SubscriptionsAdmin)
+admin.site.register(Subscriptions)
 
 
 admin.site.register(Feasts)
 admin.site.register(Newprice)
+admin.site.register(SerailPrice)
+
 

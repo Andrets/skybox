@@ -94,7 +94,7 @@ class Serail(models.Model):
     horizontal_photo8 = models.ImageField('Горизонтальная обложка 9', null=True, upload_to='static/media/serail/', blank=True)
     horizontal_photo9 = models.ImageField('Горизонтальная обложка 10', null=True, upload_to='static/media/serail/', blank=True)
     genre = models.ForeignKey(Genre, on_delete=models.SET_NULL, null=True, related_name='serails')
-    rating = models.IntegerField('Рейтинг', default=0, null=False, blank=True)
+    rating = models.CharField('Рейтинг', max_length=500, null=True, blank=True)
     description = models.TextField('Описание', null=True, blank=True)
     is_original = models.BooleanField('Является оригиналом', default=False)
     views = models.BigIntegerField('Просмотры', default=0)
@@ -184,6 +184,8 @@ class Payments(models.Model):
     class StatusEnum(models.TextChoices):
         TEMPORARILY_YEAR = 'TEMPORARILY_YEAR', _('TEMPORARILY_YEAR')
         TEMPORARILY_MONTH = 'TEMPORARILY_MONTH', _('TEMPORARILY_MONTH')
+        TEMPORARILY_WEEK = 'TEMPORARILY_WEEK', _('TEMPORARILY_WEEK')
+
         ALWAYS = 'ALWAYS', _('ALWAYS')
         ONCE = 'ONCE', _('ONCE')
         
@@ -258,15 +260,19 @@ class Subscriptions(models.Model):
     class StatusEnum(models.TextChoices):
         TEMPORARILY_YEAR = 'TEMPORARILY_YEAR', _('TEMPORARILY_YEAR')
         TEMPORARILY_MONTH = 'TEMPORARILY_MONTH', _('TEMPORARILY_MONTH')
+        TEMPORARILY_WEEK = 'TEMPORARILY_WEEK', _('TEMPORARILY_WEEK')
         ALWAYS = 'ALWAYS', _('ALWAYS')
         ONCE = 'ONCE', _('ONCE')
 
     subtype = models.CharField('Тип подписки', choices=StatusEnum.choices, max_length=300)
-    price = models.CharField('Цена', default=0, max_length=300)
-    percent = models.CharField('Скидка', default='0', max_length=250)
+    price = models.CharField('Цена в руб', default='0', max_length=300)
+    stars_price = models.CharField('Цена в tg stars', default='0', max_length=300)
+    percent = models.CharField('Скидка для рубля', default='0', max_length=250)
+    stars_percent = models.CharField('Скидка для tg stars', default='0', max_length=250)
+
     def __str__(self):
         
-        return f'{self.subtype} - {self.price}'
+        return f'{self.subtype} - {self.price} руб./{self.stars_price} stars'
 
     class Meta:
         verbose_name = 'Подписка'
@@ -276,9 +282,10 @@ class Feasts(models.Model):
     name = models.CharField('Название', max_length=300)
     date = models.DateField('День праздника')
     percent = models.CharField('Процент скидки', default='0', max_length=300)
+    stars_percent = models.CharField('Скидка для tg stars', default='0', max_length=300)
 
     def __str__(self):
-        return f'{name} - {date} c {percent}%'
+        return f'{self.name} - {self.date} c {self.percent}%'
 
     class Meta:
         verbose_name = 'Праздник'
@@ -288,12 +295,17 @@ class Newprice(models.Model):
     class StatusEnum(models.TextChoices):
         PERSONAL = 'PERSONAL', _('PERSONAL')
         GROUP = 'GROUP', _('GROUP')
-        
+
+    class StatusEnum2(models.TextChoices):
+        TEMPORARILY_YEAR = 'TEMPORARILY_YEAR', _('TEMPORARILY_YEAR')
+        TEMPORARILY_MONTH = 'TEMPORARILY_MONTH', _('TEMPORARILY_MONTH')
+        TEMPORARILY_WEEK = 'TEMPORARILY_WEEK', _('TEMPORARILY_WEEK')
+
     data = models.JSONField(default=list, verbose_name='Список')
     updtype = models.CharField('Тип изменения', choices=StatusEnum.choices, max_length=300)
-    month = models.CharField('За месяц', default=0, max_length=300)
-    year = models.CharField('За год', default=0, max_length=300)
-
+    periodtype = models.CharField('Тип периода', choices=StatusEnum2.choices, max_length=300)
+    price = models.CharField('Цена в руб', default='0', max_length=300)
+    stars_price = models.CharField('Цена в tg stars', default='0', max_length=300)
     list_per_page = 500
 
     def __str__(self):
@@ -303,3 +315,16 @@ class Newprice(models.Model):
         verbose_name = 'Акции'
         verbose_name_plural = 'Акции'
 
+class SerailPrice(models.Model):
+    serail = models.ForeignKey(Serail, on_delete=models.CASCADE, null=True)
+    price = models.CharField('Цена в руб', default='0', max_length=300)
+    stars_price = models.CharField('Цена в tg stars', default='0', max_length=300)
+
+    list_per_page = 500
+
+    def __str__(self):
+        return f'{self.serail.name} - {self.price} руб/{self.stars_price} stars'
+
+    class Meta:
+        verbose_name = 'Цена на сериал'
+        verbose_name_plural = 'Цены на сериалы'

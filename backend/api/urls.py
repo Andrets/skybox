@@ -15,7 +15,10 @@ from .views import (
     PaymentsViewSet,
     FavoriteViewSet,
     SubscriptionsViewSet,
+    SerailPriceViewSet,
+   # buy_lesson
 )
+
 
 router = DefaultRouter()
 router.register('users', UsersViewSet)
@@ -31,6 +34,8 @@ router.register('documents', DocsTextsViewSet)
 router.register('payments', PaymentsViewSet)
 router.register('favorite', FavoriteViewSet)
 router.register('subscriptions', SubscriptionsViewSet)
+router.register('serailprice', SerailPriceViewSet)
+
 
 
 
@@ -38,4 +43,6 @@ router.register('subscriptions', SubscriptionsViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+  #  path('buy-lesson/<int:lesson_id>/', buy_lesson, name='buy-lesson'),
+
 ]

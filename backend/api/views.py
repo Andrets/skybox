@@ -16,6 +16,9 @@ from .models import (
     PermissionsModel,
     Payments,
     Subscriptions,
+    Feasts,
+    Newprice,
+    SerailPrice,
 )
 from .serializers import (
     UsersSerializer,
@@ -33,6 +36,8 @@ from .serializers import (
     RatingUpdateSerializer,
     FavoriteSerializer,
     SubscriptionsSerializer,
+    SubscriptionPriceSerializer,
+    SerailPriceSerializer,
 )
 import requests
 import random
@@ -52,6 +57,9 @@ from rest_framework import status as rest_status
 import boto3
 from yookassa import Payment
 from yookassa import Configuration
+from datetime import date 
+
+
 class UsersViewSet(viewsets.ModelViewSet): 
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
@@ -220,7 +228,6 @@ class SerailViewSet(viewsets.ModelViewSet):
     def create(self, request):
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-
     def get_user_language(self):
         tg_id = int(self.request.tg_user_data.get('tg_id', 0))
         user = Users.objects.filter(tg_id=tg_id).first()
@@ -237,7 +244,7 @@ class SerailViewSet(viewsets.ModelViewSet):
         return translated.text
 
     @action(detail=False, methods=['get'])
-    def get_serail_details(self, request, url_path='serail-details'):
+    def get_serail_details(self, request):
         user_lang = self.get_user_language()
         data = request.query_params.get('data', None)
         
@@ -263,7 +270,6 @@ class SerailViewSet(viewsets.ModelViewSet):
 
         result_data = []
         for serail in serails:
-
             name_translated = self.translate_it(serail.name, user_lang)
             description_translated = self.translate_it(serail.description, user_lang)
             genre_translated = str(self.translate_it(str(serail.genre), user_lang)) if serail.genre else None
@@ -280,23 +286,17 @@ class SerailViewSet(viewsets.ModelViewSet):
             serail_data = {
                 'name': name_translated,
                 'genre': genre_translated,
-                'rating': serail.rating,
+                'rating': round(float(serail.rating)) if serail.rating else None,  # Возвращаем рейтинг в округленном виде
                 'description': description_translated,
-                'comments': comments_data,  
-                'is_new': serail.statusnew.exists(),  
-                'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,  
-                'horizontal_photos': []  
+                'comments': comments_data,
+                'is_new': serail.statusnew.exists(),
+                'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,
+                'horizontal_photos': [getattr(serail, f'horizontal_photo{i}', None).url for i in range(10) if getattr(serail, f'horizontal_photo{i}', None)]
             }
-
-            for i in range(10):  
-                photo_field = getattr(serail, f'horizontal_photo{i}', None)
-                if photo_field:
-                    serail_data['horizontal_photos'].append(photo_field.url)  
 
             result_data.append(serail_data)
 
         return Response(result_data)
-
 
     @action(detail=False, methods=['get'])
     def get_top_3(self, request):
@@ -527,7 +527,6 @@ class SerailViewSet(viewsets.ModelViewSet):
 
         return Response({'results': result_data}, status=status.HTTP_200_OK)
 
-
     @action(detail=False, methods=['post'])
     def update_rating(self, request):
         serializer = RatingUpdateSerializer(data=request.data)
@@ -537,13 +536,16 @@ class SerailViewSet(viewsets.ModelViewSet):
 
             serail = get_object_or_404(Serail, id=serail_id)
 
-            current_rating = serail.rating
-            updated_rating = (current_rating + new_rating) / 2
+            if serail.rating:
+                current_rating = float(serail.rating)
+                updated_rating = (current_rating + new_rating) / 2
+            else:
+                updated_rating = new_rating
 
-            serail.rating = updated_rating
+            serail.rating = str(updated_rating)  
             serail.save()
 
-            return Response({"message": "Рейтинг успешно обновлен", "new_rating": updated_rating}, status=status.HTTP_200_OK)
+            return Response({"message": "Рейтинг успешно обновлен", "new_rating": round(updated_rating)}, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -613,7 +615,6 @@ class SerailViewSet(viewsets.ModelViewSet):
             result.append(series_data)
 
         return Response(result)
-
 
     @action(detail=False, methods=['get'])
     def like_it(self, request):
@@ -759,6 +760,8 @@ class HistoryViewSet(viewsets.ModelViewSet):
             })
 
         return Response(history_data, status=status.HTTP_200_OK)
+
+
 class SeriesViewSet(viewsets.ModelViewSet):
     queryset = Series.objects.all()
     serializer_class = SeriesSerializer
@@ -1072,6 +1075,7 @@ class DocsTextsViewSet(viewsets.ModelViewSet):
 Configuration.account_id = '465363'
 Configuration.secret_key = 'test_UoRVwVuT-qtHat2h6NW4V2Y3lsRmfFBtapATvT7Vf6s'
 
+
 class PaymentsViewSet(viewsets.ModelViewSet):
     queryset = Payments.objects.all()
     serializer_class = PaymentsSerializer
@@ -1175,11 +1179,156 @@ class FavoriteViewSet(viewsets.ModelViewSet):
         return Response(serialized_data)
 
 
+
+
+
+
+
 class SubscriptionsViewSet(viewsets.ModelViewSet):
     queryset = Subscriptions.objects.all()
     serializer_class = SubscriptionsSerializer
     http_method_names = ['get']
 
+    def get_discounted_price(self, base_price, percent_discount):
+        """Расчет цены со скидкой."""
+        return round(float(base_price) * (1 - float(percent_discount) / 100), 2)
+
+    def get_feast_discount(self):
+        """Получение скидки на сегодня из праздников."""
+        today = date.today()  # Теперь date определен
+        feast = Feasts.objects.filter(date=today).first()
+        if feast:
+            return {
+                "percent": float(feast.percent),
+                "stars_percent": float(feast.stars_percent)
+            }
+        return {"percent": 0, "stars_percent": 0}
+
+
+    def get_personal_price(self, tg_id):
+        """Проверка и получение персональной цены для пользователя."""
+        newprice_entries = Newprice.objects.filter(updtype=Newprice.StatusEnum.PERSONAL)
+
+        for entry in newprice_entries:
+            if tg_id in entry.data:
+                return entry
+            
+        return None
+
+    def get_group_price(self, tg_id):
+        """Проверка и получение групповой цены для пользователя."""
+        newprice_entries = Newprice.objects.filter(updtype=Newprice.StatusEnum.GROUP)
+
+        for entry in newprice_entries:
+            if tg_id in entry.data:
+                return entry
+            
+        return None
+
+    @action(detail=False, methods=['get'])
+    def get_subscription_price(self, request):
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        if not tg_id:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        user = Users.objects.filter(tg_id=tg_id).first()
+        if not user:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Получаем базовые цены подписок
+        subscriptions = Subscriptions.objects.all()  # Получаем все записи подписок
+
+        results = []
+        feast_discount = self.get_feast_discount()  # Получение скидки на праздники
+
+        # Получаем персональную и групповую цены, если существуют
+        personal_price = self.get_personal_price(tg_id)
+
+        group_price = self.get_group_price(tg_id)
+
+        for subscription in subscriptions:
+            base_price = float(subscription.price)
+            stars_base_price = float(subscription.stars_price)
+
+            # Если есть персональная цена, используем её
+            if personal_price:
+
+                
+                if subscription.subtype == personal_price.periodtype:
+
+                    base_price = float(personal_price.price)
+                    stars_base_price = float(personal_price.stars_price)
+
+            # Если нет персональной цены, проверяем групповую
+            elif group_price:
+                if subscription.subtype in group_price.data:  # Проверка принадлежности к группе
+                    base_price = float(group_price.price)
+                    stars_base_price = float(group_price.stars_price)
+
+            # Применяем скидки
+            price_with_discount = self.get_discounted_price(base_price, int(subscription.percent))
+            stars_price_with_discount = self.get_discounted_price(stars_base_price, int(subscription.stars_percent))
+
+            # Добавляем праздничные скидки
+            price_with_discount = self.get_discounted_price(price_with_discount, feast_discount['percent'])
+            stars_price_with_discount = self.get_discounted_price(stars_price_with_discount, feast_discount['stars_percent'])
+
+            results.append({
+                "subtype": subscription.subtype,
+                "price_in_rubles": round(price_with_discount, 2),
+                "price_in_stars": round(stars_price_with_discount, 2),
+            })
+
+        return Response(results, status=status.HTTP_200_OK)
+
+
+
+class SerailPriceViewSet(viewsets.ModelViewSet):
+    queryset = SerailPrice.objects.all()
+    serializer_class = SerailPriceSerializer
+    http_method_names = ['get']
+
+    def get_discounted_price(self, base_price, percent_discount):
+        """Расчет цены со скидкой."""
+        return round(float(base_price) * (1 - float(percent_discount) / 100), 2)
+
+    def get_feast_discount(self):
+        """Получение скидки на сегодня из праздников."""
+        today = date.today()
+        feast = Feasts.objects.filter(date=today).first()
+        if feast:
+            return {
+                "percent": float(feast.percent),
+                "stars_percent": float(feast.stars_percent)
+            }
+        return {"percent": 0, "stars_percent": 0}
+
+    @action(detail=False, methods=['get'])
+    def get_price_by_serail_id(self, request):
+        serail_id = request.query_params.get('serail_id')
+        if not serail_id:
+            return Response({"detail": "serail_id parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        serail_price = SerailPrice.objects.filter(serail_id=serail_id).first()
+        if not serail_price:
+            return Response({"detail": "Price for the specified serial not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Получение базовых цен
+        base_price = int(serail_price.price)
+        stars_base_price = int(serail_price.stars_price)
+
+        # Применение праздничной скидки
+        feast_discount = self.get_feast_discount()
+        price_with_discount = self.get_discounted_price(base_price, feast_discount['percent'])
+        stars_price_with_discount = self.get_discounted_price(stars_base_price, feast_discount['stars_percent'])
+
+        result = {
+            "serail_id": serail_id,
+            "price_in_rubles": price_with_discount,
+            "price_in_stars": stars_price_with_discount
+        }
+
+        return Response(result, status=status.HTTP_200_OK)
 
 
 
@@ -1200,15 +1349,46 @@ class SubscriptionsViewSet(viewsets.ModelViewSet):
 
 
 
+""" 
 
+import asyncio
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework import status
+from asgiref.sync import sync_to_async, async_to_sync
+from aiogram import Bot
+from aiogram.types import LabeledPrice
 
+# Инициализируем бота
+bot = Bot('8090358352:AAHqI7UIDxQSgAr0MUKug8Ixc0OeozWGv7I')
 
+@sync_to_async
+def create_payment_link(data):
+    return bot.create_invoice_link(
+        title=f'Урок {data["title"]}',
+        description=f'Покупка урока {data["description"]}',
+        payload=f'lesson_id:{data["lesson_id"]}:user_id:{data["user_id"]}',
+        currency='XTR',
+        prices=[LabeledPrice(label=data["label"], amount=int(data["price"] * 100))]  # Цена в копейках
+    )
 
+@api_view(['POST'])
+async def buy_lesson(request, lesson_id):
+    data = {
+        "title": "Урок",
+        "description": "Описание урока",
+        "lesson_id": 1,
+        "user_id": 	5128389615,  # Пример получения ID пользователя
+        "label": "Урок",
+        "price": 5  # Пример цены
+    }
+    
+    # Генерация ссылки на оплату с использованием async_to_sync
+    try:
+        payment_link = await create_payment_link(data)  # Обратите внимание, что это теперь await
+        print(payment_link)
+    except Exception as e:
+        return Response({'error': f'Ошибка при создании ссылки на оплату: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-
-
-
-
-
-
+    return Response({'payment_link': payment_link}, status=status.HTTP_200_OK)
+ """
