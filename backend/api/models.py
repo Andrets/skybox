@@ -244,7 +244,7 @@ class DocsTexts(models.Model):
 
 
 class Favorite(models.Model):
-    serail = models.ForeignKey(Serail, on_delete=models.SET_NULL, null=True)
+    serail = models.ForeignKey(Serail, on_delete=models.PROTECT, null=True)
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
 
     def __str__(self):

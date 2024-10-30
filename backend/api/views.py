@@ -1173,6 +1173,9 @@ class PaymentsViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def create_payment(self, request):
         payment_id = request.query_params.get('payment_id', None)
+        subscription_type = request.query_params.get('subscription_type', None)
+        if str(subscription_type) == "TEMPORARILY_YEAR":
+            value = 1
         if not payment_id:
             return Response({'error': 'Payment ID is required'}, status=400)
         try:
@@ -1186,7 +1189,6 @@ class PaymentsViewSet(viewsets.ModelViewSet):
                     "value": "2.00",
                     "currency": "RUB"
                 },
-
                 "confirmation": {
                     "type": "redirect",
                     "return_url": "https://skybox.video/"
@@ -1234,7 +1236,7 @@ class FavoriteViewSet(viewsets.ModelViewSet):
         favorite_series = Favorite.objects.filter(user=user).select_related('serail')
 
         if not favorite_series.exists():
-            return Response({"detail": "No favorites found."}, status=404)
+            return Response([], status=200)
 
         serialized_data = [
             {
