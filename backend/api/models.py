@@ -199,7 +199,7 @@ class Payments(models.Model):
     list_per_page = 500
 
     def __str__(self):
-        return f'{self.user.name} - {self.summa} USD/USDT'
+        return f'{self.user.name} - {self.summa} руб.'
 
     class Meta:
         verbose_name = 'Транзакция'

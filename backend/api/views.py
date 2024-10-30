@@ -1152,41 +1152,32 @@ class PaymentsViewSet(viewsets.ModelViewSet):
 
 
 
-    @action(detail=False, methods=['get'])
-    def get_payment(self, request):
-        try:
-            # Получение ID платежа из запроса
-            payment_id = request.query_params.get('payment_id', None)
-            if not payment_id:
-                return Response({'error': 'Payment ID is required'}, status=400)
-
-            # Запрос к YooKassa для получения информации о платеже
-            payment = Payment.find_one(payment_id)
-            if payment:
-                return Response(payment.json(), status=200)
-            else:
-                return Response({'error': 'Payment not found'}, status=404)
-
-        except Exception as e:
-            return Response({'error': str(e)}, status=500)
-
     @action(detail=False, methods=['post'])
     def create_payment(self, request):
+        # Получение payment_id и типа подписки из параметров запроса
         payment_id = request.query_params.get('payment_id', None)
         subscription_type = request.query_params.get('subscription_type', None)
-        if str(subscription_type) == "TEMPORARILY_YEAR":
-            value = 1
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        user = Users.objects.filter(tg_id=tg_id).first()
+        # Проверка наличия payment_id
         if not payment_id:
-            return Response({'error': 'Payment ID is required'}, status=400)
-        try:
-            # Получение payment_token из запроса
-           
-            idempotence_key = str(uuid.uuid4())
+            return Response({'error': 'Payment ID is required'}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Получение подписки по типу
+        subscription = get_object_or_404(Subscriptions, subtype=subscription_type)
+
+        # Формирование idempotence_key
+        idempotence_key = str(uuid.uuid4())
+
+        try:
+            # Получение цены подписки из модели
+            price_value = subscription.price
+
+            # Создание платежа
             payment = Payment.create({
                 "payment_token": payment_id,
                 "amount": {
-                    "value": "2.00",
+                    "value": price_value,
                     "currency": "RUB"
                 },
                 "confirmation": {
@@ -1194,15 +1185,20 @@ class PaymentsViewSet(viewsets.ModelViewSet):
                     "return_url": "https://skybox.video/"
                 },
                 "capture": True,
-                "description": "Заказ №72"
+                "description": f"Заказ для подписки {subscription.subtype}"
             }, idempotence_key)
+            confirmation_url = payment.confirmation.confirmation_url if payment.confirmation else None
 
-            confirmation_url = payment.status
+            new_payment = Payments.objects.create(
+                user=user,
+                summa=int(price_value),
+                status=subscription_type  
+            )
 
-            return Response(f'{confirmation_url}', status=201)
+            return Response({'status': payment.status, 'payment_id': new_payment.id}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            return Response({'error': str(e)}, status=500)
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class FavoriteViewSet(viewsets.ModelViewSet):
