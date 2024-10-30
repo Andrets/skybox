@@ -469,10 +469,10 @@ class SerailViewSet(viewsets.ModelViewSet):
         elif data == 'original':
             serials = Serail.objects.filter(is_original=True)[:count]
         elif data == 'men':
-            men_genre = get_object_or_404(Genre, genre="Мужское")
+            men_genre = get_object_or_404(Genre, genre="Male")
             serials = Serail.objects.filter(genre=men_genre)[:count]
         elif data == 'women':
-            women_genre = get_object_or_404(Genre, genre="Женское")
+            women_genre = get_object_or_404(Genre, genre="Female")
             serials = Serail.objects.filter(genre=women_genre)[:count]  
         else:
             return Response({'error': 'Invalid or missing data parameter'}, status=400)
