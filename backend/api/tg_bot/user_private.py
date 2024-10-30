@@ -149,10 +149,10 @@ async def start_message(message: Message, bot: Bot):
         photo=photo, 
         lang_code=language_code  
     )
-    if not user_reg:
+    """ if not user_reg:
         text = "Хотите указать дату рождения?\n Напишите /birthday {Ваш день рождения в формате 13.06}"
         text = await translate_it(text, language_code)
-        await message.answer(text)
+        await message.answer(text) """
 
 
 

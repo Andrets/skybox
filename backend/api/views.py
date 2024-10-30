@@ -947,7 +947,6 @@ class SeriesViewSet(viewsets.ModelViewSet):
 
         return Response(serialized_data)
 
-        
     @action(detail=False, methods=['get'])
     def get_series(self, request):
         data = request.query_params.get('data', None)
@@ -986,7 +985,7 @@ class SeriesViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def get_series_by_serail(self, request):
         data = request.query_params.get('data', None)
-        user_lang = self.get_user_language()  # Получаем язык пользователя для перевода
+        user_lang = self.get_user_language()
 
         if data is not None:
             try:
@@ -999,10 +998,8 @@ class SeriesViewSet(viewsets.ModelViewSet):
         if not serail:
             return Response({'error': 'No serail found'}, status=404)
 
-        # Получаем список серий
         series_list = Series.objects.filter(serail=serail).order_by('episode')
-        
-        # Проверка подписки и прав доступа
+
         tg_id = int(self.request.tg_user_data.get('tg_id', 0))
         if not tg_id:
             return Response({"detail": "User not found."}, status=404)
@@ -1157,6 +1154,55 @@ class PaymentsViewSet(viewsets.ModelViewSet):
         # Получение payment_id и типа подписки из параметров запроса
         payment_id = request.query_params.get('payment_id', None)
         subscription_type = request.query_params.get('subscription_type', None)
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        user = Users.objects.filter(tg_id=tg_id).first()
+        # Проверка наличия payment_id
+        if not payment_id:
+            return Response({'error': 'Payment ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Получение подписки по типу
+        subscription = get_object_or_404(Subscriptions, subtype=subscription_type)
+
+        # Формирование idempotence_key
+        idempotence_key = str(uuid.uuid4())
+
+        try:
+            # Получение цены подписки из модели
+            price_value = subscription.price
+
+            # Создание платежа
+            payment = Payment.create({
+                "payment_token": payment_id,
+                "amount": {
+                    "value": price_value,
+                    "currency": "RUB"
+                },
+                "confirmation": {
+                    "type": "redirect",
+                    "return_url": "https://skybox.video/"
+                },
+                "capture": True,
+                "description": f"Заказ для подписки {subscription.subtype}"
+            }, idempotence_key)
+            confirmation_url = payment.confirmation.confirmation_url if payment.confirmation else None
+
+            new_payment = Payments.objects.create(
+                user=user,
+                summa=int(price_value),
+                status=subscription_type  
+            )
+
+            return Response({'status': payment.status, 'payment_id': new_payment.id}, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+    @action(detail=False, methods=['post'])
+    def create_payment_serail(self, request):
+        # Получение payment_id и типа подписки из параметров запроса
+        payment_id = request.query_params.get('payment_id', None)
+        serail_id = request.query_params.get('serail_id', None)
         tg_id = int(self.request.tg_user_data.get('tg_id', 0))
         user = Users.objects.filter(tg_id=tg_id).first()
         # Проверка наличия payment_id
