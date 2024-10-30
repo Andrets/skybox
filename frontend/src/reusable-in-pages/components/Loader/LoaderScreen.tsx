@@ -3,7 +3,7 @@ import styles from "./styles.module.scss";
 import { LoaderSpinner } from "@/ui/Icons";
 
 export const LoaderScreen = () => {
-  useBlockScroll(true);
+  useBlockScroll();
 
   return (
     <div className={styles.container}>

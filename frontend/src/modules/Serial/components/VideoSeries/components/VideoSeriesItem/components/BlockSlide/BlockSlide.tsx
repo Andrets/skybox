@@ -1,4 +1,3 @@
-
 import styles from "./styles.module.scss";
 import { SubsDrawer, UnlockNowButton } from "./ui";
 import { useTranslation } from "react-i18next";
@@ -8,7 +7,13 @@ import { MouseEventHandler, useEffect, useRef, useState } from "react";
 import { setIsBlockedSlide } from "@/modules/Serial/slices/FilmVideoSlice";
 import { useGetSubPricesQuery } from "@/api/userApi";
 
-export const BlockSlide = () => {
+export const BlockSlide = ({
+  likes,
+  isLiked,
+}: {
+  likes: string;
+  isLiked: boolean;
+}) => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const [modal, setModal] = useState(false);
@@ -70,7 +75,7 @@ export const BlockSlide = () => {
       </UnlockNowButton>
 
       <div className={styles.cont}>
-        <SideButtons />
+        <SideButtons likes={likes} isLiked={isLiked} />
       </div>
 
       {data && (

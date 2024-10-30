@@ -25,7 +25,7 @@ const Serial = () => {
       skip: id === undefined ? true : false,
     });
 
-  useBlockScroll(true);
+  useBlockScroll();
   useAddHistory();
   useBackButton();
 

@@ -14,7 +14,7 @@ import { ErrorShorts } from "./components/Error/Error";
 import { LoaderSpinner } from "@/ui/Icons";
 
 const Shorts = () => {
-  useBlockScroll(true);
+  useBlockScroll();
   useShortsStyleRoot();
   useInfinityShorts();
   useBackButton();

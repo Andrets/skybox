@@ -7,7 +7,7 @@ import { useGetFilmInfoQuery } from "@/api/FilmInfoApi";
 import { LoaderScreen } from "@/reusable-in-pages/components/Loader/LoaderScreen";
 
 const FilmInfo = () => {
-  useBlockScroll(true);
+  useBlockScroll();
   useBackButton();
   const { id } = useParams();
   const { data, isLoading, isError } = useGetFilmInfoQuery(String(id));

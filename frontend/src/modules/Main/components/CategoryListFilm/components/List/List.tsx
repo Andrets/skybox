@@ -5,7 +5,6 @@ import { Pagination, Autoplay } from "swiper/modules";
 import { CategoryFilm } from "@/modules/Main/ui";
 import styles from "./styles.module.scss";
 import { TopSerialListProps } from "@/modules/Main/models/models";
-import { transformPathToPhoto } from "@/shared/helpers/transformPathToPhoto";
 
 export const List = ({ data }: TopSerialListProps) => {
   return (

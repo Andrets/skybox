@@ -1,7 +1,7 @@
 import { useLayoutEffect } from "react";
 import { styleRootPreventScroll } from "../helpers/rootPreventScroll";
 
-const useBlockScroll = (active: boolean) => {
+const useBlockScroll = () => {
   useLayoutEffect(styleRootPreventScroll, []);
 };
 
