@@ -60,7 +60,7 @@ from yookassa import Configuration, Payment
 import uuid
 from datetime import date 
 
-
+from urllib.parse import unquote
 class UsersViewSet(viewsets.ModelViewSet): 
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
@@ -503,7 +503,7 @@ class SerailViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Не указан параметр query'}, status=status.HTTP_400_BAD_REQUEST)
 
         user_lang = self.get_user_language()
-
+        search_query = unquote(search_query)
         # Переводим поисковый запрос на английский (если язык пользователя не английский)
         if user_lang != 'en':
             search_query_translated = self.translate_it(search_query, 'en')
