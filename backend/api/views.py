@@ -19,6 +19,7 @@ from .models import (
     Feasts,
     Newprice,
     SerailPrice,
+    UserRating,
 )
 from .serializers import (
     UsersSerializer,
@@ -254,13 +255,13 @@ class SerailViewSet(viewsets.ModelViewSet):
                     'comments', 
                     'genre', 
                     'statusnew'
-                ).filter(id=int(data))  
+                ).filter(id=int(data))
             except ValueError:
                 serails = Serail.objects.prefetch_related(
                     'comments', 
                     'genre', 
                     'statusnew'
-                ).filter(name__icontains=data)  
+                ).filter(name__icontains=data)
         else:
             serails = Serail.objects.prefetch_related(
                 'comments', 
@@ -268,11 +269,22 @@ class SerailViewSet(viewsets.ModelViewSet):
                 'statusnew'
             ).all()
 
+        # Get the user by Telegram ID
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        user = get_object_or_404(Users, tg_id=tg_id)
+
         result_data = []
         for serail in serails:
             name_translated = self.translate_it(serail.name, user_lang)
             description_translated = self.translate_it(serail.description, user_lang)
             genre_translated = str(self.translate_it(str(serail.genre), user_lang)) if serail.genre else None
+
+            # Check if the user has liked this serial
+            user_has_liked = Favorite.objects.filter(user=user, serail=serail).exists()
+
+            # Retrieve the user's rating for this serial, if it exists
+            user_rating = UserRating.objects.filter(user=user, serail=serail).first()
+            user_specific_rating = user_rating.rating if user_rating else None  # Defaults to None if no rating found
 
             comments_data = []
             for comment in serail.comments.all():
@@ -286,9 +298,12 @@ class SerailViewSet(viewsets.ModelViewSet):
             serail_data = {
                 'name': name_translated,
                 'genre': genre_translated,
-                'rating': round(float(serail.rating)) if serail.rating else None,  # Возвращаем рейтинг в округленном виде
+                'rating': round(float(serail.rating)) if serail.rating else None,
+                'user_rating': int(user_specific_rating) if user_specific_rating else None,  # Рейтинг, который поставил пользователь
+                'user_has_liked': user_has_liked,  # True if user liked the serial, False otherwise
                 'description': description_translated,
                 'comments': comments_data,
+                'likes': serail.likes,
                 'is_new': serail.statusnew.exists(),
                 'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,
                 'horizontal_photos': [getattr(serail, f'horizontal_photo{i}', None).url for i in range(10) if getattr(serail, f'horizontal_photo{i}', None)]
@@ -445,16 +460,20 @@ class SerailViewSet(viewsets.ModelViewSet):
         data = request.query_params.get('data')
 
         count = 18
+        print(data)
 
         if data == 'popular':
             serials = Serail.objects.order_by('-views')[:count]
-
         elif data == 'new':
             serials = Serail.objects.filter(statusnew__isnull=False).order_by('-statusnew__added_date')[:count]
-
         elif data == 'original':
             serials = Serail.objects.filter(is_original=True)[:count]
-
+        elif data == 'men':
+            men_genre = get_object_or_404(Genre, genre="Мужское")
+            serials = Serail.objects.filter(genre=men_genre)[:count]
+        elif data == 'women':
+            women_genre = get_object_or_404(Genre, genre="Женское")
+            serials = Serail.objects.filter(genre=women_genre)[:count]  
         else:
             return Response({'error': 'Invalid or missing data parameter'}, status=400)
 
@@ -535,19 +554,34 @@ class SerailViewSet(viewsets.ModelViewSet):
             new_rating = serializer.validated_data['rating']
 
             serail = get_object_or_404(Serail, id=serail_id)
-
+            
+            # Calculate the updated rating
             if serail.rating:
                 current_rating = float(serail.rating)
                 updated_rating = (current_rating + new_rating) / 2
             else:
                 updated_rating = new_rating
-
-            serail.rating = str(updated_rating)  
+            
+            serail.rating = str(updated_rating)
             serail.save()
 
-            return Response({"message": "Рейтинг успешно обновлен", "new_rating": round(updated_rating)}, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # Retrieve the user by Telegram ID
+            tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+            user = get_object_or_404(Users, tg_id=tg_id)
+
+            # Update or create a rating entry in UserRating
+            UserRating.objects.update_or_create(
+                user=user,
+                serail=serail,
+                defaults={'rating': new_rating}
+            )
+
+            return Response({
+                "message": "Рейтинг успешно обновлен",
+                "new_rating": round(updated_rating)
+            }, status=status.HTTP_200_OK)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def has_active_subscription(self, user):
         now = timezone.now()
@@ -651,6 +685,40 @@ class SerailViewSet(viewsets.ModelViewSet):
             series.save()  # Сохраняем изменения
             return Response({"detail": f'Serial "{serail.name}" added to favorites.'}, status=status.HTTP_201_CREATED) 
 
+
+    @action(detail=False, methods=['get'])
+    def like_serial(self, request):
+        # Получаем ID сериала из запроса
+        serail_id = request.query_params.get('serail_id')
+        if not serail_id:
+            return Response({'error': 'Parameter "serail_id" is required'}, status=400)
+
+        # Проверяем, что у пользователя есть Telegram ID
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        if not tg_id:
+            return Response({"detail": "User not found."}, status=404)
+
+        # Получаем пользователя по его Telegram ID
+        user = get_object_or_404(Users, tg_id=tg_id)
+
+        # Получаем сериал по его ID
+        serail = get_object_or_404(Serail, id=serail_id)
+
+        # Проверяем, есть ли сериал в избранном пользователя
+        favorite = Favorite.objects.filter(user=user, serail=serail).first()
+
+        if favorite:
+            # Если сериал уже в избранном, удаляем его
+            favorite.delete()
+            serail.likes -= 1  # Уменьшаем количество лайков
+            serail.save()  # Сохраняем изменения
+            return Response({"detail": f'Serial "{serail.name}" removed from favorites.'}, status=status.HTTP_200_OK)
+        else:
+            # Если нет — добавляем сериал в избранное
+            Favorite.objects.create(user=user, serail=serail)
+            serail.likes += 1  # Увеличиваем количество лайков
+            serail.save()  # Сохраняем изменения
+            return Response({"detail": f'Serial "{serail.name}" added to favorites.'}, status=status.HTTP_201_CREATED)
 
 class StatusNewViewSet(viewsets.ModelViewSet):
     queryset = StatusNew.objects.all()

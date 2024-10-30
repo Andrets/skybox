@@ -95,10 +95,10 @@ class Serail(models.Model):
     horizontal_photo9 = models.ImageField('Горизонтальная обложка 10', null=True, upload_to='static/media/serail/', blank=True)
     genre = models.ForeignKey(Genre, on_delete=models.SET_NULL, null=True, related_name='serails')
     rating = models.CharField('Рейтинг', max_length=500, null=True, blank=True)
+    likes = models.BigIntegerField('Лайки', default=0, null=True)
     description = models.TextField('Описание', null=True, blank=True)
     is_original = models.BooleanField('Является оригиналом', default=False)
     views = models.BigIntegerField('Просмотры', default=0)
-
 
     list_per_page = 500
 
@@ -332,3 +332,16 @@ class SerailPrice(models.Model):
     class Meta:
         verbose_name = 'Цена на сериал'
         verbose_name_plural = 'Цены на сериалы'
+
+
+class UserRating(models.Model):
+    serail = models.ForeignKey(Serail, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(Users, on_delete=models.CASCADE)
+    rating = models.CharField('Рейтинг', max_length=500, null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.serail.name} - {self.user.tg_username}'
+
+    class Meta:
+        verbose_name = 'Рейтинг'
+        verbose_name_plural = 'Рейтинги'

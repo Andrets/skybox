@@ -24,6 +24,7 @@ from .models import (
     Feasts,
     Newprice,
     SerailPrice,
+    UserRating,
 )
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
@@ -247,5 +248,7 @@ admin.site.register(Subscriptions)
 admin.site.register(Feasts)
 admin.site.register(Newprice)
 admin.site.register(SerailPrice)
+admin.site.register(UserRating)
+
 
 
