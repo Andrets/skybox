@@ -145,7 +145,6 @@ class History(models.Model):
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
 
     def __str__(self):
-        
         return f'{self.user.name}/{self.user.tg_username} - {self.serail.name}'
 
     class Meta:

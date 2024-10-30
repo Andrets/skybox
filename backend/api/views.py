@@ -56,8 +56,8 @@ from django.db.models.functions import Coalesce
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status as rest_status
 import boto3
-from yookassa import Payment
-from yookassa import Configuration
+from yookassa import Configuration, Payment
+import uuid
 from datetime import date 
 
 
@@ -720,6 +720,7 @@ class SerailViewSet(viewsets.ModelViewSet):
             serail.save()  # Сохраняем изменения
             return Response({"detail": f'Serial "{serail.name}" added to favorites.'}, status=status.HTTP_201_CREATED)
 
+
 class StatusNewViewSet(viewsets.ModelViewSet):
     queryset = StatusNew.objects.all()
     serializer_class = StatusNewSerializer
@@ -1171,33 +1172,32 @@ class PaymentsViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def create_payment(self, request):
+        payment_id = request.query_params.get('payment_id', None)
+        if not payment_id:
+            return Response({'error': 'Payment ID is required'}, status=400)
         try:
             # Получение payment_token из запроса
-            payment_token = request.data.get('payment_token', None)
-            if not payment_token:
-                return Response({'error': 'Payment token is required'}, status=400)
+           
+            idempotence_key = str(uuid.uuid4())
 
-            # Данные для создания нового платежа
-            payment_data = {
+            payment = Payment.create({
+                "payment_token": payment_id,
                 "amount": {
                     "value": "2.00",
                     "currency": "RUB"
                 },
-                "payment_method_data": {
-                    "type": "bank_card",
-                    "payment_token": payment_token
-                },
+
                 "confirmation": {
                     "type": "redirect",
-                    "return_url": "https://www.example.com/return_url"
+                    "return_url": "https://skybox.video/"
                 },
                 "capture": True,
                 "description": "Заказ №72"
-            }
+            }, idempotence_key)
 
-            # Создаем платеж с помощью yookassa API
-            payment = Payment.create(payment_data)
-            return Response(payment.json(), status=201)
+            confirmation_url = payment.status
+
+            return Response(f'{confirmation_url}', status=201)
 
         except Exception as e:
             return Response({'error': str(e)}, status=500)
@@ -1246,11 +1246,6 @@ class FavoriteViewSet(viewsets.ModelViewSet):
         ]
 
         return Response(serialized_data)
-
-
-
-
-
 
 
 class SubscriptionsViewSet(viewsets.ModelViewSet):
@@ -1349,7 +1344,6 @@ class SubscriptionsViewSet(viewsets.ModelViewSet):
             })
 
         return Response(results, status=status.HTTP_200_OK)
-
 
 
 class SerailPriceViewSet(viewsets.ModelViewSet):
