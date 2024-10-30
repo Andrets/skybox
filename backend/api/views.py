@@ -818,14 +818,15 @@ class HistoryViewSet(viewsets.ModelViewSet):
         # Получаем записи истории для данного пользователя
         history_entries = History.objects.filter(user=user).select_related('serail')
 
-        # Формируем ответные данные
+        # Формируем ответные данные, проверяя существование серий
         history_data = []
         for entry in history_entries:
-            history_data.append({
-                "id": entry.serail.id,
-                "name": entry.serail.name,
-                "cover": entry.serail.vertical_photo.url if entry.serail.vertical_photo else None,
-            })
+            if entry.serail:  # Проверяем, что сериал существует
+                history_data.append({
+                    "id": entry.serail.id,
+                    "name": entry.serail.name,
+                    "cover": entry.serail.vertical_photo.url if entry.serail.vertical_photo else None,
+                })
 
         return Response(history_data, status=status.HTTP_200_OK)
 
