@@ -10,7 +10,7 @@ export const List = ({ data }: RecomendationListProps) => {
           <LazyLoadComponent key={el.id} threshold={-20}>
             <RecomendationCard
               to={`/filmInfo/${el.id}`}
-              poster={String(el.name)}
+              poster={String(el.vertical_photo)}
               name={el.name}
             />
           </LazyLoadComponent>

@@ -1,16 +1,13 @@
 import { Rating } from "@mui/material";
-import { useState } from "react";
 import styles from "./styles.module.scss";
-import {
-  //   useGetFilmInfoQuery,
-  useUpdateRatingMutation,
-} from "@/api/FilmInfoApi";
+import { filmInfoApiSlice, useUpdateRatingMutation } from "@/api/FilmInfoApi";
 import { useParams } from "react-router-dom";
+import { useAppDispatch } from "@/shared/hooks/reduxTypes";
 
-export const RatingFilm = () => {
-  const [value, setValue] = useState(0);
+export const RatingFilm = ({ rating }: { rating: number | null }) => {
   const [updateRatingQuery] = useUpdateRatingMutation();
   const { id } = useParams();
+  const dispatch = useAppDispatch();
 
   //   const { data } = useGetFilmInfoQuery(String(id));
   return (
@@ -19,11 +16,22 @@ export const RatingFilm = () => {
         size="large"
         precision={1}
         className={styles.rating}
-        value={value}
+        readOnly={rating !== null}
+        value={rating ? rating : 0}
         onChange={(_, value) => {
           if (value) {
-            setValue(value);
             if (id) {
+              dispatch(
+                filmInfoApiSlice.util.updateQueryData(
+                  "getFilmInfo",
+                  id,
+                  (draft) => {
+                    draft.user_rating = value;
+
+                    return draft
+                  }
+                )
+              );
               updateRatingQuery({ serail_id: parseInt(id), rating: value });
             }
           }

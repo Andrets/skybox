@@ -10,6 +10,7 @@ export interface FilmMainInfoProps {
   is_new: boolean;
   name: string;
   rating: number;
+  user_rating: number | null
 }
 
 export interface FilmInfoProps extends FilmMainInfoProps {

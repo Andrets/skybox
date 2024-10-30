@@ -38,11 +38,11 @@ export const CategoryToggler = () => {
         children: t("categoryToggler.original"),
       },
       {
-        value: ExclusiveOriginalsSearchParams.male,
+        value: ExclusiveOriginalsSearchParams.men,
         children: t("categoryToggler.male"),
       },
       {
-        value: ExclusiveOriginalsSearchParams.female,
+        value: ExclusiveOriginalsSearchParams.women,
         children: t("categoryToggler.female"),
       },
     ];

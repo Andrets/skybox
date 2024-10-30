@@ -69,6 +69,15 @@ export const filmInfoApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+
+    likeSerial: builder.mutation<unknown, string | number>({
+      query: (params) => {
+        return {
+          url: `/serail/like_serial?serail_id=${params}`,
+          method: "GET",
+        };
+      },
+    }),
   }),
 });
 
@@ -78,4 +87,5 @@ export const {
   useGetAllSeriesQuery,
   useUpdateRatingMutation,
   useAddHistoryMutation,
+  useLikeSerialMutation,
 } = filmInfoApiSlice;

@@ -16,6 +16,7 @@ const Info = ({
   is_new,
   genre,
   rating,
+  user_rating,
 }: FilmInfoProps) => {
   const { t } = useTranslation();
   const { id } = useParams();
@@ -34,7 +35,7 @@ const Info = ({
           {t("rateFilm")}
         </SectionHeader>
 
-        <RatingFilm />
+        <RatingFilm rating={user_rating} />
 
         <SectionHeader className={styles.sectHeader}>
           {t("comments")}

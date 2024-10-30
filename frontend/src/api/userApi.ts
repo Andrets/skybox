@@ -1,6 +1,9 @@
 import { apiSlice } from "@/app/store/api";
 import { LANGUAGESLIST } from "@/shared/constants/constants";
 import {
+  CreatePaymentParams,
+  ListLikeItem,
+  PaymentCreateStatusResponse,
   SubscriptionPlanModel,
   SubscriptionPlanObject,
   TransformUserInfoResponseItem,
@@ -77,6 +80,22 @@ export const userApiSlice = apiSlice.injectEndpoints({
         return subscriptionPlanObject;
       },
     }),
+    getLikes: builder.query<ListLikeItem[], void>({
+      query: () => {
+        return { url: "favorite/get_my_list", method: "GET" };
+      },
+    }),
+    createPayment: builder.mutation<
+      PaymentCreateStatusResponse,
+      CreatePaymentParams
+    >({
+      query: (params) => {
+        return {
+          method: "POST",
+          url: `payments/create_payment/?payment_id=${params.paymentToken}&subscription_type=${params.subType}`,
+        };
+      },
+    }),
   }),
   overrideExisting: true,
 });
@@ -87,4 +106,6 @@ export const {
   useChangeUserLangMutation,
   useGetHistoryQuery,
   useGetSubPricesQuery,
+  useCreatePaymentMutation,
+  useGetLikesQuery,
 } = userApiSlice;

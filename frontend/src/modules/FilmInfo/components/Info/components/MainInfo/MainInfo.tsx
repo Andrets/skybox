@@ -11,8 +11,7 @@ const MainInfo = ({
   description,
   genre,
   is_new,
-}: FilmMainInfoProps) => {
-
+}: Omit<FilmMainInfoProps, "user_rating">) => {
   return (
     <div className={styles.main}>
       <SectionHeader className={styles.title}>{name}</SectionHeader>

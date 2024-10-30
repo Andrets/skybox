@@ -8,11 +8,11 @@ export const ExclusiveOriginals = () => {
   const activeCategory = useAppSelector(
     (state) => state.mainSlice.activeCategory
   );
-  const { data, isLoading, isError } = useGetExclusiveQuery(
+  const { data, isLoading, isFetching, isError } = useGetExclusiveQuery(
     ExclusiveOriginalsSearchParams[activeCategory]
   );
 
-  if (isLoading) {
+  if (isLoading || isFetching) {
     return <ExclusiveLoading />;
   }
 

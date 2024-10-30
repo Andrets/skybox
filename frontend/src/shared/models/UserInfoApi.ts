@@ -43,3 +43,50 @@ export interface SubscriptionPlanModel {
 export interface SubscriptionPlanObject {
   [key: string]: Omit<SubscriptionPlanModel, "subtype">;
 }
+
+export interface PaymentData {
+  amount: {
+    currency: string;
+    value: string;
+  };
+  confirmation: {
+    confirmation_url: string;
+    return_url: string;
+    type: string;
+  };
+  created_at: string;
+  description: string;
+  id: string;
+  metadata: {
+    cms_name: string;
+  };
+  paid: boolean;
+  payment_method: {
+    id: string;
+    saved: boolean;
+    type: string;
+  };
+  recipient: {
+    account_id: string;
+    gateway_id: string;
+  };
+  refundable: boolean;
+  status: string;
+  test: boolean;
+}
+
+export interface ListLikeItem {
+  id: number;
+  name: string;
+  cover: string | null;
+}
+
+export interface CreatePaymentParams {
+  paymentToken: string;
+  subType: SubscriptionSubtype;
+}
+
+export interface PaymentCreateStatusResponse {
+  payment_id: number;
+  status: string;
+}

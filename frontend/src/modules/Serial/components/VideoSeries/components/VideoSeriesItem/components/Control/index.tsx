@@ -19,7 +19,7 @@ export const Control = ({
     skip: id ? false : true,
   });
 
-  console.log("hhhh", filmInfoData?.name);
+  console.log("hhhh", filmInfoData);
   return (
     <>
       <div {...restProps} className={styles.control}>
@@ -31,7 +31,14 @@ export const Control = ({
           />
         )}
 
-        <SideButtons />
+        <SideButtons
+          likes={
+            typeof filmInfoData?.likes === "number"
+              ? String(filmInfoData?.likes)
+              : ""
+          }
+          isLiked={filmInfoData?.user_has_liked ? true : false}
+        />
 
         <FilmName
           className={styles.name}

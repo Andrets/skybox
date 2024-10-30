@@ -9,6 +9,9 @@ export interface FilmInfoResponse {
   description: string;
   genre: string;
   horizontal_photos: string[]; // Массив строк для URL-адресов фотографий
+  user_has_liked: boolean;
+  likes: number;
+  user_rating: null | number;
   is_new: boolean;
   name: string;
   rating: number;

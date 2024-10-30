@@ -52,7 +52,7 @@ const ListEpisodeToggle = ({ episodes }: ListEpisodesProps) => {
         return (
           <EpisodeListButton
             isActive={activeEpisode === index}
-            disabled={el.video ? false : true}
+            disabled={!el.status}
             onClick={onClickSerial(el, index)}
             key={index}
           >

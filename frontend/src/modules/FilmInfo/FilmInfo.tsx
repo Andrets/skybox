@@ -27,6 +27,7 @@ const FilmInfo = () => {
           genre={data.genre}
           name={data.name}
           rating={data.rating}
+          user_rating={data.user_rating}
         />
       </>
     );

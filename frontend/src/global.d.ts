@@ -22,7 +22,7 @@ declare global {
 
 interface PaymentTokenizeResponse {
   message: string;
-  paymentToken: string;
+  response: { paymentToken: string };
   status_code: number;
   type: string;
 }

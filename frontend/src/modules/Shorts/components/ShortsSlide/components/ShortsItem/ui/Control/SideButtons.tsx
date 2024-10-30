@@ -6,6 +6,7 @@ import styles from "./styles.module.scss";
 import { memo, MouseEventHandler } from "react";
 import { SideButtonsProps } from "../../model/ControlProps";
 import { useSendLikeMutation } from "@/api/ShortsApi";
+import { useNavigate } from "react-router-dom";
 
 export const SideButtons = memo(
   ({ is_liked, likes, id, serail_id }: SideButtonsProps) => {
@@ -15,6 +16,8 @@ export const SideButtons = memo(
 
       sendLikeQuery({ shorts_id: id, serail_id: serail_id });
     };
+
+    const navigate = useNavigate();
     return (
       <div className={styles.sideButtons}>
         <BookmarkButton
@@ -48,6 +51,9 @@ export const SideButtons = memo(
           }}
           onMouseUp={(e) => {
             e.stopPropagation();
+          }}
+          onClick={() => {
+            navigate(`/filmVideo/${serail_id}`);
           }}
           className={`${styles.btn} ${styles.liked}`}
         />

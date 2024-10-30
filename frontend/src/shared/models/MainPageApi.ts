@@ -2,8 +2,8 @@ export enum ExclusiveOriginalsSearchParams {
   popular = "popular",
   new = "new",
   original = "original",
-  male = "male",
-  female = "female",
+  men = "men",
+  women = "women",
 }
 
 export interface TopSerial {

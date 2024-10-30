@@ -19,8 +19,6 @@ export const VideoSeriesItem = ({
   isAvailable,
   ...restProps
 }: VideoSeriesItemModel) => {
-
-
   const isPlay = useAppSelector((state) => state.filmVideo.isPlayVideo);
   const isViewController = useAppSelector(
     (state) => state.filmVideo.isViewControlVideo
@@ -44,7 +42,6 @@ export const VideoSeriesItem = ({
   useCurrentVideoLength(isActive, videoRef);
 
   const { onClick } = useVideoSeriesClick();
-
 
   if (!isAvailable) {
     return <>{isActive && <BlockSlide />}</>;
@@ -71,7 +68,6 @@ export const VideoSeriesItem = ({
             isPlaying={isPlay}
             onClickPlay={onClickPlay}
             episode={episode}
-   
           />
         )}
 

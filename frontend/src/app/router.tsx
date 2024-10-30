@@ -27,6 +27,7 @@ import {
   userLoader,
 } from "./loaders/loaders";
 import { PaySubscribePage } from "@/pages/PaySubscribe/PaySubscribe";
+import { SuccessPaymentPage } from "@/pages/SuccessPaymentPage/SuccessPaymentPage";
 
 export const routes: RouteObject[] = [
   {
@@ -85,6 +86,8 @@ export const routes: RouteObject[] = [
           { path: "addCard", element: <AddCartPage /> },
         ],
       },
+
+      { path: "successPayment", element: <SuccessPaymentPage /> },
     ],
   },
 ];
