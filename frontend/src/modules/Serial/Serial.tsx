@@ -1,4 +1,4 @@
-import { useAppSelector } from "@/shared/hooks/reduxTypes";
+import { useAppDispatch, useAppSelector } from "@/shared/hooks/reduxTypes";
 import ListEpisodes from "./components/ListEpisodes";
 import { VideoTimeSlider } from "./components/TimeSlider/VideoTimeSlider";
 import { VideoSeries } from "./components/VideoSeries/VideoSeries";
@@ -10,8 +10,11 @@ import { useAddHistory } from "./helpers/useAddHistory";
 import { LoaderSpinner } from "@/ui/Icons";
 import styles from "./styles.module.scss";
 import useBackButton from "@/shared/hooks/useBackButton";
+import { useEffect } from "react";
+import { resetState } from "./slices/FilmVideoSlice";
 
 const Serial = () => {
+  const dispatch = useAppDispatch();
   const isViewSlider = useAppSelector(
     (state) => state.filmVideo.isViewControlVideo
   );
@@ -29,6 +32,10 @@ const Serial = () => {
   useAddHistory();
   useBackButton();
 
+  useEffect(() => {
+    dispatch(resetState());
+  }, []);
+
   if (filmSeriesLoading) {
     return (
       <>
@@ -42,7 +49,12 @@ const Serial = () => {
       <>
         <VideoSeries series={filmSeriesData} />
         {isViewSlider && !isBlockSlide && (
-          <VideoTimeSlider onMouseDown={onTouchStart} onMouseUp={onTouchEnd} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} />
+          <VideoTimeSlider
+            onMouseDown={onTouchStart}
+            onMouseUp={onTouchEnd}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+          />
         )}
         <ListEpisodes episodes={filmSeriesData} />
       </>

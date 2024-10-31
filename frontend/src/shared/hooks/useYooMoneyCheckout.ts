@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 export const useYooMoneyCheckout = () => {
   const [checkout, setCheckout] = useState(
-    window.YooMoneyCheckout(import.meta.env.VITE_SHOP_ID, { language: "ru" })
+    window.YooMoneyCheckout("465363", { language: "ru" })
   );
   const { data } = useAuthorizationQuery();
 
