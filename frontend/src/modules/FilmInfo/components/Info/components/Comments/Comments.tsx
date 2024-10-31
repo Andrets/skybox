@@ -3,8 +3,10 @@ import styles from "./styles.module.scss";
 import CommentsItem from "./ui/CommentsItem";
 import { useParams } from "react-router-dom";
 import { LoaderSpinner } from "@/ui/Icons";
+import { useTranslation } from "react-i18next";
 
 const CommentsBlock = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const {
     data: comments,
@@ -24,7 +26,7 @@ const CommentsBlock = () => {
     if (comments.length === 0) {
       return (
         <div className={styles.emptyList}>
-          <span>Комментариев пока нет</span>
+          <span>{t("commentsNotFound")}</span>
         </div>
       );
     }

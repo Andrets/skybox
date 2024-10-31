@@ -63,5 +63,7 @@
   "rateFilm": "قيم الفيلم",
   "clipsNotFound": "لم يتم العثور على المقاطع",
   "emptyWatchHistory": "سجل المشاهدة فارغ",
-  "unlockNow": "افتح الآن"
+  "unlockNow": "افتح الآن",
+  "commentsNotFound": "لا توجد تعليقات حتى الآن",
+  "allEpisodes": "جميع {{numEpisodes}} حلقة"
 }

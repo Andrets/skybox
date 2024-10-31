@@ -10,7 +10,7 @@ export const useYooMoneyCheckout = () => {
   useEffect(() => {
     if (data?.lang) {
       setCheckout(
-        window.YooMoneyCheckout(import.meta.env.VITE_SHOP_ID, {
+        window.YooMoneyCheckout("465363", {
           language: data.lang === "en" ? "en" : "ru",
         })
       );

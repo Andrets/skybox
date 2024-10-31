@@ -8,7 +8,7 @@ import { TypeSubscribeBanner } from "@/ui/TypeSubscribeBanner/TypeSubscribeBanne
 import { useTranslation } from "react-i18next";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { MouseEventHandler } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 export interface SubsDrawerProps extends DrawerProps {
   data: SubscriptionPlanObject;
@@ -18,9 +18,10 @@ export interface SubsDrawerProps extends DrawerProps {
 export const SubsDrawer = ({ data, open, closeClick }: SubsDrawerProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { id } = useParams();
   const clickBanner: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.stopPropagation();
-    navigate("/paySubscribe");
+    navigate(`/paySubscribe?serial_id=${id}`);
   };
   return (
     <Drawer className={styles.container} open={open} anchor="bottom">

@@ -63,5 +63,7 @@
   "rateFilm": "评价电影",
   "clipsNotFound": "未找到剪辑",
   "emptyWatchHistory": "观看历史为空",
-  "unlockNow": "立即解锁"
+  "unlockNow": "立即解锁",
+  "commentsNotFound": "还没有评论",
+  "allEpisodes": "全部 {{numEpisodes}} 集"
 }

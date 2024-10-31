@@ -25,17 +25,21 @@ const AddComment = () => {
     e.preventDefault();
     if (commentText.length > 0 && id) {
       dispatch(
-        filmInfoApiSlice.util.updateQueryData("getFilmInfo", id, (draft) => {
-          if (draft.comments && userData) {
-            draft.comments.push({
-              tg_username: userData.tg_username,
-              user_avatar: userData.photo,
-              text: commentText,
-            });
-          }
+        filmInfoApiSlice.util.updateQueryData(
+          "getFilmComments",
+          id,
+          (draft) => {
+            if (draft && userData) {
+              draft.push({
+                tg_username: userData.tg_username,
+                user_avatar: userData.photo,
+                text: commentText,
+              });
+            }
 
-          return draft;
-        })
+            return draft;
+          }
+        )
       );
       setCommentText("");
       await addComment({
