@@ -20,6 +20,7 @@ from .models import (
     Newprice,
     SerailPrice,
     UserRating,
+    Tokens,
 )
 from .serializers import (
     UsersSerializer,
@@ -1172,17 +1173,7 @@ class PaymentsViewSet(viewsets.ModelViewSet):
     queryset = Payments.objects.all()
     serializer_class = PaymentsSerializer
 
-    async def create_invoice(self, amount, payload):
-        prices = [LabeledPrice(label="SKYBOX PAYMENTS", amount=amount)]
-        payment_link = await bot.create_invoice_link(
-            title="Оплата по Telegram Stars",
-            description="Покупка подписки за Telegram Stars",
-            payload=payload,
-            provider_token="",
-            currency="XTR",
-            prices=prices
-        )
-        return payment_link
+
 
     def get_discounted_price(self, base_price, percent_discount):
         """Расчет цены со скидкой."""
@@ -1389,51 +1380,53 @@ class PaymentsViewSet(viewsets.ModelViewSet):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+    async def create_invoice(self, amount, payload):
+        prices = [LabeledPrice(label="SKYBOX PAYMENTS", amount=amount)]
+        payment_link = await bot.create_invoice_link(
+            title="Оплата по Telegram Stars",
+            description="Покупка подписки/сериала за Telegram Stars",
+            payload=str(payload),
+            provider_token="",
+            currency="XTR",
+            prices=prices
+        )
+        return payment_link
+
+    @sync_to_async
+    def create_token(self, user):
+        payload_token = random.randint(10**15, 10**16 - 1)
+        token = Tokens.objects.create(user=user, payloadtoken=payload_token, is_paid=False)
+        return token.payloadtoken
+
     @action(detail=False, methods=['post'])
     def create_payment_stars(self, request):
         subscription_type = request.query_params.get('subscription_type', None)
         tg_id = int(self.request.tg_user_data.get('tg_id', 0))
         user = Users.objects.filter(tg_id=tg_id).first()
-
-        # Получение подписки по типу
+        
         subscriptionel = get_object_or_404(Subscriptions, subtype=subscription_type)
-
-        # Формирование idempotence_key
-        # Получаем базовые цены подписок
-        subscriptions = Subscriptions.objects.all()  # Получаем все записи подписок
-
+        subscriptions = Subscriptions.objects.all()
         results = []
-        feast_discount = self.get_feast_discount()  # Получение скидки на праздники
 
-        # Получаем персональную и групповую цены, если существуют
+        # Получаем скидки и цены
+        feast_discount = self.get_feast_discount()
         personal_price = self.get_personal_price(tg_id)
-
         group_price = self.get_group_price(tg_id)
-
+        
         for subscription in subscriptions:
             base_price = float(subscription.price)
             stars_base_price = float(subscription.stars_price)
-
-            # Если есть персональная цена, используем её
-            if personal_price:
-
-                
-                if subscription.subtype == personal_price.periodtype:
-
-                    base_price = float(personal_price.price)
-                    stars_base_price = float(personal_price.stars_price)
-
-            # Если нет персональной цены, проверяем групповую
-            elif group_price:
-                if subscription.subtype in group_price.data:  # Проверка принадлежности к группе
-                    base_price = float(group_price.price)
-                    stars_base_price = float(group_price.stars_price)
-
-            # Применяем скидки
+            
+            if personal_price and subscription.subtype == personal_price.periodtype:
+                base_price = float(personal_price.price)
+                stars_base_price = float(personal_price.stars_price)
+            elif group_price and subscription.subtype in group_price.data:
+                base_price = float(group_price.price)
+                stars_base_price = float(group_price.stars_price)
+            
             price_with_discount = self.get_discounted_price(base_price, int(subscription.percent))
             stars_price_with_discount = self.get_discounted_price(stars_base_price, int(subscription.stars_percent))
-
-            # Добавляем праздничные скидки
+            
             price_with_discount = self.get_discounted_price(price_with_discount, feast_discount['percent'])
             stars_price_with_discount = self.get_discounted_price(stars_price_with_discount, feast_discount['stars_percent'])
 
@@ -1442,30 +1435,51 @@ class PaymentsViewSet(viewsets.ModelViewSet):
                 "price_in_rubles": round(price_with_discount, 2),
                 "price_in_stars": round(stars_price_with_discount, 2),
             })
+        
         try:
-            # Получение цены подписки из модели
-            price_value = 0
-            for el in results:
-                if el['subtype'] == f'{subscriptionel.subtype}':
-                    price_value = el['price_in_stars']
-                    break
-                    # Проверка наличия payment_id
+            price_value = next((el['price_in_stars'] for el in results if el['subtype'] == subscriptionel.subtype), None)
+            if price_value is None:
+                return Response({'error': 'Price not found'}, status=status.HTTP_404_NOT_FOUND)
 
-            new_payment = Payments.objects.create(
-                user=user,
-                summa=int(price_value),
-                status=subscription_type  
-            )
-            payment_link = async_to_sync(self.create_invoice)(price_value, payload=subscription.subtype)
+            new_payment = Payments.objects.create(user=user, summa=int(price_value), status=subscription_type)
+            payload_token = async_to_sync(self.create_token)(user)
+            payment_link = async_to_sync(self.create_invoice)(price_value, payload=payload_token)
+
             if not user.isActive:
                 user.isActive = True
                 user.paid = True
                 user.save()
-            return Response({'payment_link': payment_link, 'ready_to_pay': True}, status=status.HTTP_201_CREATED)
+            
+            return Response({'payment_link': payment_link, 'payload_token': payload_token, 'ready_to_pay': True}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    def get_token_status(self, payload_token):
+        try:
+            token_obj = Tokens.objects.get(payloadtoken=payload_token)
+            return {'status': 'success', 'is_paid': token_obj.is_paid}
+        except Tokens.DoesNotExist:
+            return {'status': 'error', 'message': 'Token not found'}
+
+    @action(detail=False, methods=['get'])
+    def check_token_status(self, request):
+        payload_token = request.query_params.get('payload_token', None)
+        
+        if not payload_token:
+            return Response({'error': 'payload_token is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            payload_token = int(payload_token)
+        except ValueError:
+            return Response({'error': 'Invalid payload_token format'}, status=status.HTTP_400_BAD_REQUEST)
+
+        result = self.get_token_status(payload_token)
+        
+        if result['status'] == 'success':
+            return Response({'is_paid': result['is_paid']}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': result['message']}, status=status.HTTP_404_NOT_FOUND)
 
 class FavoriteViewSet(viewsets.ModelViewSet):
     queryset = Favorite.objects.all()

@@ -162,9 +162,8 @@ async def successful_payment_handler(message: Message):
     currency = successful_payment.currency  # Валюта платежа
     invoice_payload = successful_payment.invoice_payload  # Полезная нагрузка
 
-    
-    await message.answer("Спасибо за покупку! Платеж успешно завершен.")
-    print(f"Успешная оплата: {total_amount} {currency}, Payload: {invoice_payload}")
+    await update_payment_status(int(invoice_payload))
+
 
 
 @user_private.pre_checkout_query(lambda query: True)

@@ -348,8 +348,7 @@ class UserRating(models.Model):
 class Tokens(models.Model):
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
     payloadtoken = models.BigIntegerField('Токен', null=True, blank=True)
-    sub = models.ForeignKey(Subscriptions, on_delete=models.PROTECT)
-
+    is_paid = models.BooleanField('Оплачено', default=False)
 
     def __str__(self):
         return f'{self.payloadtoken} - {self.user.tg_username}'

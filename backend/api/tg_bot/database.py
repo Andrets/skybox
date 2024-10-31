@@ -1,5 +1,5 @@
 from asgiref.sync import sync_to_async
-from api.models import Users, Admins, Payments, Country, Language, Newprice
+from api.models import Users, Admins, Payments, Country, Language, Newprice, Tokens
 from datetime import timedelta, datetime
 from django.utils import timezone
 from django.db.models import Count
@@ -165,7 +165,15 @@ def update_user_birthday(tg_id, date):
     except User.DoesNotExist:
         return False
 
-
+@sync_to_async
+def update_payment_status(payload_token):
+    try:
+        token_obj = Tokens.objects.get(payloadtoken=payload_token)
+        token_obj.is_paid = True
+        token_obj.save()
+        return True
+    except Tokens.DoesNotExist:
+        return False
 # ---------------------
 # DELETE
 # ---------------------
