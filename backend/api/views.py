@@ -1171,7 +1171,7 @@ class PaymentsViewSet(viewsets.ModelViewSet):
 
     def get_feast_discount(self):
         """Получение скидки на сегодня из праздников."""
-        today = date.today()  # Теперь date определен
+        today = date.today()
         feast = Feasts.objects.filter(date=today).first()
         if feast:
             return {
@@ -1217,7 +1217,6 @@ class PaymentsViewSet(viewsets.ModelViewSet):
         subscription = get_object_or_404(Subscriptions, subtype=subscription_type)
 
         """ # Формирование idempotence_key
-        idempotence_key = str(uuid.uuid4())
         # Получаем базовые цены подписок
         subscriptions = Subscriptions.objects.all()  # Получаем все записи подписок
 
@@ -1266,6 +1265,7 @@ class PaymentsViewSet(viewsets.ModelViewSet):
             price_value = subscription.price
             """ print(results) """
             # Создание платежа
+            idempotence_key = str(uuid.uuid4())
             payment = Payment.create({
                 "payment_token": payment_id,
                 "amount": {
@@ -1297,28 +1297,41 @@ class PaymentsViewSet(viewsets.ModelViewSet):
     def create_payment_serail(self, request):
         # Получение payment_id и типа подписки из параметров запроса
         payment_id = request.query_params.get('payment_id', None)
-        serail_id = request.query_params.get('serail_id', None)
         tg_id = int(self.request.tg_user_data.get('tg_id', 0))
         user = Users.objects.filter(tg_id=tg_id).first()
-        # Проверка наличия payment_id
+        
+        # Проверка наличия payment_id и пользователя
         if not payment_id:
             return Response({'error': 'Payment ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+        if not user:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Получение подписки по типу
-        subscription = get_object_or_404(Subscriptions, subtype=subscription_type)
+        # Получение ID сериала
+        serail_id = request.query_params.get('serail_id')
+        if not serail_id:
+            return Response({"detail": "serail_id parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Получение цены сериала
+        serail_price = SerailPrice.objects.filter(serail_id=serail_id).first()
+        if not serail_price:
+            return Response({"detail": "Price for the specified serial not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        base_price = int(serail_price.price)
+        stars_base_price = int(serail_price.stars_price)
+
+        # Применение праздничной скидки
+        feast_discount = self.get_feast_discount()
+        price_with_discount = self.get_discounted_price(base_price, feast_discount['percent'])
 
         # Формирование idempotence_key
         idempotence_key = str(uuid.uuid4())
 
         try:
-            # Получение цены подписки из модели
-            price_value = subscription.price
-
             # Создание платежа
             payment = Payment.create({
                 "payment_token": payment_id,
                 "amount": {
-                    "value": price_value,
+                    "value": price_with_discount,
                     "currency": "RUB"
                 },
                 "confirmation": {
@@ -1326,15 +1339,22 @@ class PaymentsViewSet(viewsets.ModelViewSet):
                     "return_url": "https://skybox.video/"
                 },
                 "capture": True,
-                "description": f"Заказ для подписки {subscription.subtype}"
+                "description": f"Заказ для сериала {serail_id}"
             }, idempotence_key)
             confirmation_url = payment.confirmation.confirmation_url if payment.confirmation else None
 
+            # Создание записи о платеже
             new_payment = Payments.objects.create(
                 user=user,
-                summa=int(price_value),
-                status=subscription_type  
+                summa=int(price_with_discount),
+                status=Payments.StatusEnum.ONCE
             )
+
+            # Получаем все серии для указанного сериала и создаем доступ для каждой
+            series_list = Series.objects.filter(serail_id=serail_id)
+            print(series_list)
+            for series in series_list:
+                PermissionsModel.objects.create(series=series, user=user)
 
             return Response({'status': payment.status, 'payment_id': new_payment.id}, status=status.HTTP_201_CREATED)
 

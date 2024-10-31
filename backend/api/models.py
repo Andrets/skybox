@@ -175,7 +175,7 @@ class PermissionsModel(models.Model):
     list_per_page = 500
 
     def __str__(self):
-        return f'{self.serail.name} - {self.user.username}'
+        return f'{self.series.name} - {self.user.tg_username}'
 
     class Meta:
         verbose_name = 'Доступ'
