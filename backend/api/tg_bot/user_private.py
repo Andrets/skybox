@@ -40,37 +40,10 @@ user_private = Router()
 bot = Bot('8090358352:AAHqI7UIDxQSgAr0MUKug8Ixc0OeozWGv7I', default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
 
-async def create_invoce():
-    bot = Bot('8090358352:AAHqI7UIDxQSgAr0MUKug8Ixc0OeozWGv7I', default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-
-    data = {
-        "title": "Урок",
-        "description": "Описание урока",
-        "lesson_id": 1,
-        "user_id": 	5128389615,  # Пример получения ID пользователя
-        "label": "Урок",
-        "price": 5  # Пример цены
-    }
-    
-    # Генерация ссылки на оплату с использованием async_to_sync
-    try:
-        payment_link = bot.create_invoice_link(
-                title=f'Урок {data["title"]}',
-                description=f'Покупка урока {data["description"]}',
-                payload=f'lesson_id:{data["lesson_id"]}:user_id:{data["user_id"]}',
-                currency='XTR',
-                prices=[LabeledPrice(label=data["label"], amount=int(data["price"] * 100))]  # Цена в копейках
-            )  # Обратите внимание, что это теперь await
-        print(payment_link)
-    except Exception as e:
-        return Response({'error': f'Ошибка при создании ссылки на оплату: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    return Response({'payment_link': payment_link}, status=status.HTTP_200_OK)
-
-
 
 @user_private.message(CommandStart())
 async def start_message(message: Message, bot: Bot):
+
     language_code = str(message.from_user.language_code)
     if language_code == "ru":
         await message.answer('🎬 Добро пожаловать в SKYBOX!\n'
@@ -175,17 +148,29 @@ async def start_message(message: Message, bot: Bot):
         photo=photo, 
         lang_code=language_code  
     )
-    #await create_invoce()
     """ if not user_reg:
         text = "Хотите указать дату рождения?\n Напишите /birthday {Ваш день рождения в формате 13.06}"
         text = await translate_it(text, language_code)
         await message.answer(text) """
 
 
+@user_private.message(F.successful_payment)
+async def successful_payment_handler(message: Message):
+    successful_payment: SuccessfulPayment = message.successful_payment
 
-
+    total_amount = successful_payment.total_amount  # Сумма платежа
+    currency = successful_payment.currency  # Валюта платежа
+    invoice_payload = successful_payment.invoice_payload  # Полезная нагрузка
 
     
+    await message.answer("Спасибо за покупку! Платеж успешно завершен.")
+    print(f"Успешная оплата: {total_amount} {currency}, Payload: {invoice_payload}")
+
+
+@user_private.pre_checkout_query(lambda query: True)
+async def pre_checkout_query(pre_checkout_q: PreCheckoutQuery):
+    await bot.answer_pre_checkout_query(pre_checkout_q.id, ok=True)
+
     
 
 @user_private.message(Command(commands="birthday"))

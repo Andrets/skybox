@@ -344,3 +344,16 @@ class UserRating(models.Model):
     class Meta:
         verbose_name = 'Рейтинг'
         verbose_name_plural = 'Рейтинги'
+
+class Tokens(models.Model):
+    user = models.ForeignKey(Users, on_delete=models.CASCADE)
+    payloadtoken = models.BigIntegerField('Токен', null=True, blank=True)
+    sub = models.ForeignKey(Subscriptions, on_delete=models.PROTECT)
+
+
+    def __str__(self):
+        return f'{self.payloadtoken} - {self.user.tg_username}'
+
+    class Meta:
+        verbose_name = 'Токен'
+        verbose_name_plural = 'Токены'

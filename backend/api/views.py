@@ -59,8 +59,12 @@ import boto3
 from yookassa import Configuration, Payment
 import uuid
 from datetime import date 
-
 from urllib.parse import unquote
+from aiogram import Bot
+from aiogram.client.bot import DefaultBotProperties
+from aiogram.enums import ParseMode
+from asgiref.sync import sync_to_async, async_to_sync
+from aiogram.types import LabeledPrice, PreCheckoutQuery, SuccessfulPayment, ContentType
 
 
 class UsersViewSet(viewsets.ModelViewSet): 
@@ -1159,11 +1163,26 @@ class DocsTextsViewSet(viewsets.ModelViewSet):
 Configuration.account_id = '465363'
 Configuration.secret_key = 'test_UoRVwVuT-qtHat2h6NW4V2Y3lsRmfFBtapATvT7Vf6s'
 
+bot = Bot('8090358352:AAHqI7UIDxQSgAr0MUKug8Ixc0OeozWGv7I', default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+
+
+
 
 class PaymentsViewSet(viewsets.ModelViewSet):
     queryset = Payments.objects.all()
     serializer_class = PaymentsSerializer
 
+    async def create_invoice(self, amount, payload):
+        prices = [LabeledPrice(label="SKYBOX PAYMENTS", amount=amount)]
+        payment_link = await bot.create_invoice_link(
+            title="Оплата по Telegram Stars",
+            description="Покупка подписки за Telegram Stars",
+            payload=payload,
+            provider_token="",
+            currency="XTR",
+            prices=prices
+        )
+        return payment_link
 
     def get_discounted_price(self, base_price, percent_discount):
         """Расчет цены со скидкой."""
@@ -1370,6 +1389,84 @@ class PaymentsViewSet(viewsets.ModelViewSet):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+    @action(detail=False, methods=['post'])
+    def create_payment_stars(self, request):
+        subscription_type = request.query_params.get('subscription_type', None)
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        user = Users.objects.filter(tg_id=tg_id).first()
+
+        # Получение подписки по типу
+        subscriptionel = get_object_or_404(Subscriptions, subtype=subscription_type)
+
+        # Формирование idempotence_key
+        # Получаем базовые цены подписок
+        subscriptions = Subscriptions.objects.all()  # Получаем все записи подписок
+
+        results = []
+        feast_discount = self.get_feast_discount()  # Получение скидки на праздники
+
+        # Получаем персональную и групповую цены, если существуют
+        personal_price = self.get_personal_price(tg_id)
+
+        group_price = self.get_group_price(tg_id)
+
+        for subscription in subscriptions:
+            base_price = float(subscription.price)
+            stars_base_price = float(subscription.stars_price)
+
+            # Если есть персональная цена, используем её
+            if personal_price:
+
+                
+                if subscription.subtype == personal_price.periodtype:
+
+                    base_price = float(personal_price.price)
+                    stars_base_price = float(personal_price.stars_price)
+
+            # Если нет персональной цены, проверяем групповую
+            elif group_price:
+                if subscription.subtype in group_price.data:  # Проверка принадлежности к группе
+                    base_price = float(group_price.price)
+                    stars_base_price = float(group_price.stars_price)
+
+            # Применяем скидки
+            price_with_discount = self.get_discounted_price(base_price, int(subscription.percent))
+            stars_price_with_discount = self.get_discounted_price(stars_base_price, int(subscription.stars_percent))
+
+            # Добавляем праздничные скидки
+            price_with_discount = self.get_discounted_price(price_with_discount, feast_discount['percent'])
+            stars_price_with_discount = self.get_discounted_price(stars_price_with_discount, feast_discount['stars_percent'])
+
+            results.append({
+                "subtype": subscription.subtype,
+                "price_in_rubles": round(price_with_discount, 2),
+                "price_in_stars": round(stars_price_with_discount, 2),
+            })
+        try:
+            # Получение цены подписки из модели
+            price_value = 0
+            for el in results:
+                if el['subtype'] == f'{subscriptionel.subtype}':
+                    price_value = el['price_in_stars']
+                    break
+                    # Проверка наличия payment_id
+
+            new_payment = Payments.objects.create(
+                user=user,
+                summa=int(price_value),
+                status=subscription_type  
+            )
+            payment_link = async_to_sync(self.create_invoice)(price_value, payload=subscription.subtype)
+            if not user.isActive:
+                user.isActive = True
+                user.paid = True
+                user.save()
+            return Response({'payment_link': payment_link, 'ready_to_pay': True}, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class FavoriteViewSet(viewsets.ModelViewSet):
     queryset = Favorite.objects.all()
     serializer_class = FavoriteSerializer
@@ -1554,6 +1651,8 @@ class SerailPriceViewSet(viewsets.ModelViewSet):
 
         result = {
             "serail_id": serail_id,
+            "serail_name": serail_price.name,
+
             "price_in_rubles": price_with_discount,
             "price_in_stars": stars_price_with_discount
         }
@@ -1577,53 +1676,3 @@ class SerailPriceViewSet(viewsets.ModelViewSet):
 
 
 
-
-
-
-
-import asyncio
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.response import Response
-from rest_framework import status
-from asgiref.sync import sync_to_async, async_to_sync
-from aiogram import Bot
-from aiogram.types import LabeledPrice
-
-# Инициализируем бота
-bot = Bot('8090358352:AAHqI7UIDxQSgAr0MUKug8Ixc0OeozWGv7I')
-
-@sync_to_async
-def create_payment_link(data):
-    return bot.create_invoice_link(
-        title=f'Урок {data["title"]}',
-        description=f'Покупка урока {data["description"]}',
-        payload=f'lesson_id:{data["lesson_id"]}:user_id:{data["user_id"]}',
-        currency='XTR',
-        prices=[LabeledPrice(label=data["label"], amount=int(data["price"] * 100))]  # Цена в копейках
-    )
-
-@api_view(['POST'])
-async def buy_lesson(request, lesson_id):
-    data = {
-        "title": "Урок",
-        "description": "Описание урока",
-        "lesson_id": 1,
-        "user_id": 	5128389615,  # Пример получения ID пользователя
-        "label": "Урок",
-        "price": 5  # Пример цены
-    }
-    
-    # Генерация ссылки на оплату с использованием async_to_sync
-    try:
-        payment_link = bot.create_invoice_link(
-                title=f'Урок {data["title"]}',
-                description=f'Покупка урока {data["description"]}',
-                payload=f'lesson_id:{data["lesson_id"]}:user_id:{data["user_id"]}',
-                currency='XTR',
-                prices=[LabeledPrice(label=data["label"], amount=int(data["price"] * 100))]  # Цена в копейках
-            )  # Обратите внимание, что это теперь await
-        print(payment_link)
-    except Exception as e:
-        return Response({'error': f'Ошибка при создании ссылки на оплату: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    return Response({'payment_link': payment_link}, status=status.HTTP_200_OK)

@@ -16,7 +16,6 @@ from .views import (
     FavoriteViewSet,
     SubscriptionsViewSet,
     SerailPriceViewSet,
-    buy_lesson
 )
 
 
@@ -43,6 +42,5 @@ router.register('serailprice', SerailPriceViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('buy-lesson/<int:lesson_id>/', buy_lesson, name='buy-lesson'),
 
 ]
