@@ -4,7 +4,7 @@ import { VideoTimeSlider } from "./components/TimeSlider/VideoTimeSlider";
 import { VideoSeries } from "./components/VideoSeries/VideoSeries";
 import useBlockScroll from "@/shared/hooks/useBlockScroll";
 import { useVideoSeriesClick } from "./helpers/useVideoSeriesClick";
-import { filmInfoApiSlice, useGetAllSeriesQuery } from "@/api/FilmInfoApi";
+import { useGetAllSeriesQuery } from "@/api/FilmInfoApi";
 import { useParams } from "react-router-dom";
 import { useAddHistory } from "./helpers/useAddHistory";
 import { LoaderSpinner } from "@/ui/Icons";
@@ -14,7 +14,6 @@ import { useEffect } from "react";
 import { resetState } from "./slices/FilmVideoSlice";
 
 const Serial = () => {
-
   const dispatch = useAppDispatch();
   const isViewSlider = useAppSelector(
     (state) => state.filmVideo.isViewControlVideo
@@ -29,20 +28,12 @@ const Serial = () => {
       skip: id === undefined ? true : false,
     });
 
-
-
   useBlockScroll();
   useAddHistory();
   useBackButton();
 
   useEffect(() => {
     dispatch(resetState());
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      dispatch(filmInfoApiSlice.util.invalidateTags(["Likes", "Language"]));
-    };
   }, []);
 
   if (filmSeriesLoading) {

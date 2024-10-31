@@ -63,7 +63,5 @@
   "rateFilm": "Rate film",
   "clipsNotFound": "Clips not found",
   "emptyWatchHistory": "Watch history is empty",
-  "unlockNow": "Unlock now",
-  "commentsNotFound": "No comments yet",
-  "allEpisodes": "all {{numEpisodes}} episodes"
+  "unlockNow": "Unlock now"
 }

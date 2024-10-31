@@ -45,7 +45,7 @@
   "annualSubscription": "Yıllık Abonelik",
   "monthlySubscription": "Aylık Abonelik",
   "weeklySubscription": "Haftalık Abonelik",
-
+  
   "error": {
     "cardNumberRequired": "Kart numarasını girin",
     "cardNumberPattern": "Kart numarası hatalı formatta",
@@ -64,7 +64,5 @@
   "rateFilm": "Filmi değerlendir",
   "clipsNotFound": "Klipler bulunamadı",
   "emptyWatchHistory": "İzleme geçmişi boş",
-  "unlockNow": "Şimdi aç",
-  "commentsNotFound": "Henüz yorum yok",
-  "allEpisodes": "tüm {{numEpisodes}} bölüm"
+  "unlockNow": "Şimdi aç"
 }

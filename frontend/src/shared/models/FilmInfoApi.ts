@@ -17,12 +17,6 @@ export interface FilmInfoResponse {
   vertical_photo: string | null; // Могут быть строки или null
 }
 
-export interface PriceResponseForSerial {
-  serail_id: string;
-  price_in_rubles: number;
-  price_in_stars: number;
-}
-
 export interface CreateCommentQueryParams {
   serial_id: number;
   text: string;

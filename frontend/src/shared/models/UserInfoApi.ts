@@ -83,27 +83,10 @@ export interface ListLikeItem {
 
 export interface CreatePaymentParams {
   paymentToken: string;
-  subType: string;
-}
-
-export interface CreatePaymentSerialParams {
-  paymentToken: string;
-  serial_id: string | number;
+  subType: SubscriptionSubtype;
 }
 
 export interface PaymentCreateStatusResponse {
   payment_id: number;
   status: string;
-}
-
-export function isSubscriptionSubtype(
-  value: any
-): value is SubscriptionSubtype {
-  return Object.values(SubscriptionSubtype).includes(value);
-}
-
-export interface TGStarsPaymentResponse {
-  payment_link: string;
-  ready_to_pay: boolean;
-  payload_token: number;
 }

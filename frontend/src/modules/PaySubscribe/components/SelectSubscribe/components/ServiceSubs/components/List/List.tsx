@@ -7,7 +7,6 @@ import styles from "./styles.module.scss";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/reduxTypes";
 import { setTypeSubscribe } from "@/modules/PaySubscribe/slices/slice";
-import { useGetSubPricesForSerialQuery } from "@/api/userApi";
 
 export const ServiceSubList = ({ data }: { data: SubscriptionPlanObject }) => {
   const { t } = useTranslation();
@@ -16,13 +15,6 @@ export const ServiceSubList = ({ data }: { data: SubscriptionPlanObject }) => {
   const handleType = (el: SubscriptionSubtype) => () => {
     dispatch(setTypeSubscribe(el));
   };
-
-  const searchParams = new URLSearchParams(window.location.search);
-
-  const { data: serialSubData } = useGetSubPricesForSerialQuery(
-    searchParams.get("serial_id") ? String(searchParams.get("serial_id")) : "",
-    { skip: searchParams.get("serial_id") ? false : true }
-  );
   return (
     <>
       {data[SubscriptionSubtype.TEMPORARILY_WEEK] && (
@@ -69,19 +61,6 @@ export const ServiceSubList = ({ data }: { data: SubscriptionPlanObject }) => {
             </span>
           }
           isActive={typeSub === SubscriptionSubtype.TEMPORARILY_YEAR}
-        />
-      )}
-
-      {serialSubData && (
-        <TypeSubscribeBanner
-          onClick={() => {
-            dispatch(setTypeSubscribe(serialSubData.serail_id));
-          }}
-          className={styles.subItem}
-          header={"Купить сериал"}
-          description={"Безлимитный доступ к сериалу"}
-          price={<span>{serialSubData.price_in_rubles}₽ </span>}
-          isActive={typeSub === serialSubData.serail_id}
         />
       )}
     </>

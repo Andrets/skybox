@@ -4,37 +4,14 @@ import starIMG from "@images/star.png";
 import { Button } from "@mui/material";
 
 import styles from "./styles.module.scss";
-import { ReactComponent as ArrowRight } from "@icons/ArrowRight.svg";
-import { useTelegram } from "@/shared/hooks/useTelegram";
-import { useCreateTGStarsPaymentMutation } from "@/api/userApi";
-import { useAppSelector } from "@/shared/hooks/reduxTypes";
-import { isSubscriptionSubtype } from "@/shared/models/UserInfoApi";
+import { ReactComponent as ArrowRight } from "@icons/ArrowRight.svg"
 
 export const SelectPayment = () => {
-  const { webApp } = useTelegram();
-  const [createTGStarsPayment] = useCreateTGStarsPaymentMutation();
-  const subType = useAppSelector((state) => state.paySubscribe.type_subscribe);
-  const handleTGStars = () => {
-    const func = async () => {
-      if (isSubscriptionSubtype(subType)) {
-        const response = await createTGStarsPayment(subType);
-        const { data } = response;
-        if (data) {
-          webApp.openInvoice(data?.payment_link, (data: unknown) => {
-            console.log(data);
-          });
-        }
-      }
-    };
-
-    func();
-  };
   return (
     <div className={styles.container}>
       <AddCardForm className={styles.cardForm} />
       <Button
         className={styles.tgBtn}
-        onClick={handleTGStars}
         sx={{
           maxHeight: undefined,
           maxWidth: undefined,

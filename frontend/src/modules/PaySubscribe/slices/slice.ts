@@ -2,7 +2,7 @@ import { SubscriptionSubtype } from "@/shared/models/UserInfoApi";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface PaySubscribeSliceModel {
-  type_subscribe: SubscriptionSubtype | string;
+  type_subscribe: SubscriptionSubtype;
 }
 
 const initialState: PaySubscribeSliceModel = {
@@ -13,10 +13,7 @@ export const paySubscribeSlice = createSlice({
   initialState,
   name: "paySubscribe",
   reducers: {
-    setTypeSubscribe: (
-      state,
-      action: PayloadAction<SubscriptionSubtype | string>
-    ) => {
+    setTypeSubscribe: (state, action: PayloadAction<SubscriptionSubtype>) => {
       state.type_subscribe = action.payload; // Устанавливаем новое значение type_subscribe
     },
   },

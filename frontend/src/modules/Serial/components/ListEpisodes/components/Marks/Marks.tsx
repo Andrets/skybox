@@ -2,9 +2,7 @@ import AttentionMark from "@/ui/marks/Attention/AttentionMark";
 import StandartMark from "@/ui/marks/Standart/StandartMark";
 import styles from "./styles.module.scss";
 import { MarksProps } from "../../model/MarksProps";
-import { useTranslation } from "react-i18next";
 const Marks = ({ is_new, numEpisodes }: MarksProps) => {
-  const { t } = useTranslation();
   return (
     <ul className={styles.marksList}>
       {is_new && (
@@ -14,7 +12,7 @@ const Marks = ({ is_new, numEpisodes }: MarksProps) => {
       )}
 
       <li>
-        <StandartMark> {t("allEpisodes", { numEpisodes })} </StandartMark>
+        <StandartMark>all {numEpisodes} episodes</StandartMark>
       </li>
     </ul>
   );
