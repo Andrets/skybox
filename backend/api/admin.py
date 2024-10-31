@@ -118,6 +118,7 @@ class SerailAdmin(admin.ModelAdmin):
         'horizontal_photo8',
         'horizontal_photo9',
         'genre',
+        'likes',
         'rating',
         'description',
         'is_original',

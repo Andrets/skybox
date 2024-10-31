@@ -61,6 +61,8 @@ import uuid
 from datetime import date 
 
 from urllib.parse import unquote
+
+
 class UsersViewSet(viewsets.ModelViewSet): 
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
@@ -245,26 +247,23 @@ class SerailViewSet(viewsets.ModelViewSet):
         return translated.text
 
     @action(detail=False, methods=['get'])
-    def get_serail_details(self, request):
+    def get_serial_details(self, request):
         user_lang = self.get_user_language()
         data = request.query_params.get('data', None)
         
         if data is not None:
             try:
                 serails = Serail.objects.prefetch_related(
-                    'comments', 
                     'genre', 
                     'statusnew'
                 ).filter(id=int(data))
             except ValueError:
                 serails = Serail.objects.prefetch_related(
-                    'comments', 
                     'genre', 
                     'statusnew'
                 ).filter(name__icontains=data)
         else:
             serails = Serail.objects.prefetch_related(
-                'comments', 
                 'genre', 
                 'statusnew'
             ).all()
@@ -286,23 +285,13 @@ class SerailViewSet(viewsets.ModelViewSet):
             user_rating = UserRating.objects.filter(user=user, serail=serail).first()
             user_specific_rating = user_rating.rating if user_rating else None  # Defaults to None if no rating found
 
-            comments_data = []
-            for comment in serail.comments.all():
-                comment_data = {
-                    'text': self.translate_it(comment.text, user_lang),
-                    'user_avatar': comment.user.photo.url if comment.user.photo else None,
-                    'tg_username': comment.user.tg_username
-                }
-                comments_data.append(comment_data)
-
             serail_data = {
                 'name': name_translated,
                 'genre': genre_translated,
                 'rating': round(float(serail.rating)) if serail.rating else None,
-                'user_rating': int(user_specific_rating) if user_specific_rating else None,  # Рейтинг, который поставил пользователь
-                'user_has_liked': user_has_liked,  # True if user liked the serial, False otherwise
+                'user_rating': int(user_specific_rating) if user_specific_rating else None,
+                'user_has_liked': user_has_liked,
                 'description': description_translated,
-                'comments': comments_data,
                 'likes': serail.likes,
                 'is_new': serail.statusnew.exists(),
                 'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,
@@ -312,6 +301,35 @@ class SerailViewSet(viewsets.ModelViewSet):
             result_data.append(serail_data)
 
         return Response(result_data)
+
+    @action(detail=False, methods=['get'])
+    def get_serial_comments(self, request):
+        user_lang = self.get_user_language()
+        
+        # Получаем значение `data` из query-параметров
+        data = request.query_params.get('data', None)
+        
+        # Проверяем, был ли передан параметр `data`
+        if not data:
+            return Response({'error': 'Parameter `data` is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Ищем сериал по `id` или по имени
+        try:
+            serail = Serail.objects.prefetch_related('comments').get(id=int(data))
+        except ValueError:
+            serail = get_object_or_404(Serail, name__icontains=data)
+        
+        # Формируем список комментариев с учетом языка пользователя
+        comments_data = []
+        for comment in serail.comments.all():
+            comment_data = {
+                'text': self.translate_it(comment.text, user_lang),
+                'user_avatar': comment.user.photo.url if comment.user.photo else None,
+                'tg_username': comment.user.tg_username
+            }
+            comments_data.append(comment_data)
+        
+        return Response(comments_data)
 
     @action(detail=False, methods=['get'])
     def get_top_3(self, request):
@@ -460,7 +478,6 @@ class SerailViewSet(viewsets.ModelViewSet):
         data = request.query_params.get('data')
 
         count = 18
-        print(data)
 
         if data == 'popular':
             serials = Serail.objects.order_by('-views')[:count]
@@ -917,7 +934,7 @@ class SeriesViewSet(viewsets.ModelViewSet):
         # Подбираем 20% с топа и 80% случайных
         count = queryset.count()
         top_20_percent_count = max(1, int(count * 0.2))
-        random_80_percent_count = 10 - top_20_percent_count
+        random_80_percent_count = max(0, 10 - top_20_percent_count)  # Проверка на отрицательное значение
 
         top_20_percent = queryset.order_by('-likes')[:top_20_percent_count]
         remaining_series = queryset.exclude(id__in=top_20_percent.values_list('id', flat=True))
@@ -1148,6 +1165,42 @@ class PaymentsViewSet(viewsets.ModelViewSet):
     serializer_class = PaymentsSerializer
 
 
+    def get_discounted_price(self, base_price, percent_discount):
+        """Расчет цены со скидкой."""
+        return round(float(base_price) * (1 - float(percent_discount) / 100), 2)
+
+    def get_feast_discount(self):
+        """Получение скидки на сегодня из праздников."""
+        today = date.today()  # Теперь date определен
+        feast = Feasts.objects.filter(date=today).first()
+        if feast:
+            return {
+                "percent": float(feast.percent),
+                "stars_percent": float(feast.stars_percent)
+            }
+        return {"percent": 0, "stars_percent": 0}
+
+
+    def get_personal_price(self, tg_id):
+        """Проверка и получение персональной цены для пользователя."""
+        newprice_entries = Newprice.objects.filter(updtype=Newprice.StatusEnum.PERSONAL)
+
+        for entry in newprice_entries:
+            if tg_id in entry.data:
+                return entry
+            
+        return None
+
+    def get_group_price(self, tg_id):
+        """Проверка и получение групповой цены для пользователя."""
+        newprice_entries = Newprice.objects.filter(updtype=Newprice.StatusEnum.GROUP)
+
+        for entry in newprice_entries:
+            if tg_id in entry.data:
+                return entry
+            
+        return None
+
 
     @action(detail=False, methods=['post'])
     def create_payment(self, request):
@@ -1163,13 +1216,55 @@ class PaymentsViewSet(viewsets.ModelViewSet):
         # Получение подписки по типу
         subscription = get_object_or_404(Subscriptions, subtype=subscription_type)
 
-        # Формирование idempotence_key
+        """ # Формирование idempotence_key
         idempotence_key = str(uuid.uuid4())
+        # Получаем базовые цены подписок
+        subscriptions = Subscriptions.objects.all()  # Получаем все записи подписок
 
+        results = []
+        feast_discount = self.get_feast_discount()  # Получение скидки на праздники
+
+        # Получаем персональную и групповую цены, если существуют
+        personal_price = self.get_personal_price(tg_id)
+
+        group_price = self.get_group_price(tg_id)
+
+        for subscription in subscriptions:
+            base_price = float(subscription.price)
+            stars_base_price = float(subscription.stars_price)
+
+            # Если есть персональная цена, используем её
+            if personal_price:
+
+                
+                if subscription.subtype == personal_price.periodtype:
+
+                    base_price = float(personal_price.price)
+                    stars_base_price = float(personal_price.stars_price)
+
+            # Если нет персональной цены, проверяем групповую
+            elif group_price:
+                if subscription.subtype in group_price.data:  # Проверка принадлежности к группе
+                    base_price = float(group_price.price)
+                    stars_base_price = float(group_price.stars_price)
+
+            # Применяем скидки
+            price_with_discount = self.get_discounted_price(base_price, int(subscription.percent))
+            stars_price_with_discount = self.get_discounted_price(stars_base_price, int(subscription.stars_percent))
+
+            # Добавляем праздничные скидки
+            price_with_discount = self.get_discounted_price(price_with_discount, feast_discount['percent'])
+            stars_price_with_discount = self.get_discounted_price(stars_price_with_discount, feast_discount['stars_percent'])
+
+            results.append({
+                "subtype": subscription.subtype,
+                "price_in_rubles": round(price_with_discount, 2),
+                "price_in_stars": round(stars_price_with_discount, 2),
+            }) """
         try:
             # Получение цены подписки из модели
             price_value = subscription.price
-
+            """ print(results) """
             # Создание платежа
             payment = Payment.create({
                 "payment_token": payment_id,
