@@ -14,6 +14,7 @@ import { useEffect } from "react";
 import { resetState } from "./slices/FilmVideoSlice";
 
 const Serial = () => {
+
   const dispatch = useAppDispatch();
   const isViewSlider = useAppSelector(
     (state) => state.filmVideo.isViewControlVideo
@@ -27,6 +28,8 @@ const Serial = () => {
     useGetAllSeriesQuery(id ? id : "", {
       skip: id === undefined ? true : false,
     });
+
+
 
   useBlockScroll();
   useAddHistory();

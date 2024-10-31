@@ -8,16 +8,23 @@ import { useGetToken } from "./helpers/useGetToken";
 import useBackButton from "@/shared/hooks/useBackButton";
 import { YooMoneyCheckoutErrorList } from "@/shared/constants/constants";
 import { ReactComponent as LoaderSpinner } from "@icons/Loader.svg";
-import { useCreatePaymentMutation } from "@/api/userApi";
+import {
+  useCreatePaymentForSerialMutation,
+  useCreatePaymentMutation,
+} from "@/api/userApi";
 import { useAppSelector } from "@/shared/hooks/reduxTypes";
 import { useNavigate } from "react-router-dom";
+import { SubscriptionSubtype } from "@/shared/models/UserInfoApi";
 export const PaySubscribe = () => {
+  useBackButton();
+  const searchParams = new URLSearchParams(window.location.search);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
   const subType = useAppSelector((state) => state.paySubscribe.type_subscribe);
 
   const [createPaymentQuery] = useCreatePaymentMutation();
+  const [createPaymentSerial] = useCreatePaymentForSerialMutation();
   const {
     formHook: {
       formState: { isValid },
@@ -29,21 +36,39 @@ export const PaySubscribe = () => {
 
   const getToken = useGetToken();
 
-  useBackButton();
-
   const paymentFunc = async () => {
     const resp = await getToken();
 
     if (resp?.data) {
       setLoading(true);
-      const paymentInfo = await createPaymentQuery({
-        paymentToken: resp.data.response.paymentToken,
-        subType: subType,
-      });
+      if (
+        subType === SubscriptionSubtype.TEMPORARILY_MONTH ||
+        subType === SubscriptionSubtype.TEMPORARILY_WEEK ||
+        subType === SubscriptionSubtype.TEMPORARILY_YEAR
+      ) {
+        const paymentInfo = await createPaymentQuery({
+          paymentToken: resp.data.response.paymentToken,
+          subType: subType,
+        });
 
-      if (paymentInfo && paymentInfo?.data) {
-        if (paymentInfo?.data.status === "succeeded") {
-          navigate("/successPayment");
+        if (paymentInfo && paymentInfo?.data) {
+          if (paymentInfo?.data.status === "succeeded") {
+            navigate("/successPayment");
+          }
+        }
+      } else {
+        const serial_id = searchParams.get("serial_id");
+        if (serial_id) {
+          const paymentInfo = await createPaymentSerial({
+            paymentToken: resp.data.response.paymentToken,
+            serial_id: serial_id,
+          });
+
+          if (paymentInfo && paymentInfo?.data) {
+            if (paymentInfo?.data.status === "succeeded") {
+              navigate("/successPayment");
+            }
+          }
         }
       }
     }

@@ -34,8 +34,10 @@
   "payment": "지불",
   "month": "월",
   "year": "년",
+  "week": "주",
   "subscribeServiceMonthDescription": "1개월 동안 무제한 시리즈 접근",
   "subscribeServiceYearDescription": "1년 동안 무제한 시리즈 접근",
+  "subscribeServiceWeekDescription": "1주일 동안 무제한 시리즈 접근",
   "cardNumber": "카드 번호",
   "validityPeriod": "유효 기간",
   "payCard": "카드로 결제",
@@ -60,5 +62,7 @@
   "rateFilm": "영화 평가",
   "clipsNotFound": "클립을 찾을 수 없습니다",
   "emptyWatchHistory": "시청 기록이 비어 있습니다",
-  "unlockNow": "지금 잠금 해제"
+  "unlockNow": "지금 잠금 해제",
+  "commentsNotFound": "아직 댓글이 없습니다.",
+  "allEpisodes": "총 {{numEpisodes}} 에피소드"
 }

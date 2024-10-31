@@ -1,11 +1,14 @@
 import { apiSlice } from "@/app/store/api";
 import { LANGUAGESLIST } from "@/shared/constants/constants";
+import { PriceResponseForSerial } from "@/shared/models/FilmInfoApi";
 import {
   CreatePaymentParams,
+  CreatePaymentSerialParams,
   ListLikeItem,
   PaymentCreateStatusResponse,
   SubscriptionPlanModel,
   SubscriptionPlanObject,
+  TGStarsPaymentResponse,
   TransformUserInfoResponseItem,
   UserInfoResponseItem,
   WatchHistoryItem,
@@ -80,11 +83,22 @@ export const userApiSlice = apiSlice.injectEndpoints({
         return subscriptionPlanObject;
       },
     }),
+    getSubPricesForSerial: builder.query<
+      PriceResponseForSerial,
+      string | number
+    >({
+      query: (params) => {
+        return {
+          method: "GET",
+          url: `/serailprice/get_price_by_serail_id?serail_id=${params}`,
+        };
+      },
+    }),
     getLikes: builder.query<ListLikeItem[], void>({
       query: () => {
         return { url: "favorite/get_my_list", method: "GET" };
       },
-      providesTags: ["Likes"]
+      providesTags: ["Likes"],
     }),
     createPayment: builder.mutation<
       PaymentCreateStatusResponse,
@@ -94,6 +108,27 @@ export const userApiSlice = apiSlice.injectEndpoints({
         return {
           method: "POST",
           url: `payments/create_payment/?payment_id=${params.paymentToken}&subscription_type=${params.subType}`,
+        };
+      },
+    }),
+
+    createTGStarsPayment: builder.mutation<TGStarsPaymentResponse, string>({
+      query: (params) => {
+        return {
+          method: "POST",
+          url: `/payments/create_payment_stars/?subscription_type=${params}`,
+        };
+      },
+    }),
+
+    createPaymentForSerial: builder.mutation<
+      PaymentCreateStatusResponse,
+      CreatePaymentSerialParams
+    >({
+      query: (params) => {
+        return {
+          method: "POST",
+          url: `payments/create_payment_serail/?payment_id=${params.paymentToken}&serail_id=${params.serial_id}`,
         };
       },
     }),
@@ -108,5 +143,8 @@ export const {
   useGetHistoryQuery,
   useGetSubPricesQuery,
   useCreatePaymentMutation,
+  useCreatePaymentForSerialMutation,
+  useGetSubPricesForSerialQuery,
+  useCreateTGStarsPaymentMutation,
   useGetLikesQuery,
 } = userApiSlice;

@@ -63,5 +63,7 @@
   "rateFilm": "Оцени фильм",
   "clipsNotFound": "Клипы не найдены",
   "emptyWatchHistory": "История просмотров пуста",
-  "unlockNow": "Разблокировать сейчас"
+  "unlockNow": "Разблокировать сейчас",
+  "commentsNotFound": "Комментариев пока нет",
+  "allEpisodes": "все {{numEpisodes}} серий"
 }
