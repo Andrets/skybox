@@ -148,20 +148,20 @@ async def start_message(message: Message, bot: Bot):
         photo=photo, 
         lang_code=language_code  
     )
-    """ if not user_reg:
+    if not user_reg:
         text = "Хотите указать дату рождения?\n Напишите /birthday {Ваш день рождения в формате 13.06}"
         text = await translate_it(text, language_code)
-        await message.answer(text) """
+        await message.answer(text)
 
 
 @user_private.message(F.successful_payment)
 async def successful_payment_handler(message: Message):
     successful_payment: SuccessfulPayment = message.successful_payment
 
-    total_amount = successful_payment.total_amount  # Сумма платежа
-    currency = successful_payment.currency  # Валюта платежа
-    invoice_payload = successful_payment.invoice_payload  # Полезная нагрузка
-
+    total_amount = successful_payment.total_amount
+    currency = successful_payment.currency
+    invoice_payload = successful_payment.invoice_payload
+    print(invoice_payload)
     await update_payment_status(int(invoice_payload))
 
 
@@ -170,7 +170,7 @@ async def successful_payment_handler(message: Message):
 async def pre_checkout_query(pre_checkout_q: PreCheckoutQuery):
     await bot.answer_pre_checkout_query(pre_checkout_q.id, ok=True)
 
-    
+
 
 @user_private.message(Command(commands="birthday"))
 async def set_birthday(message: Message):

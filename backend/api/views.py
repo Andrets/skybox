@@ -1129,7 +1129,12 @@ class DocsTextsViewSet(viewsets.ModelViewSet):
         return 'en'
 
     def translate_it(self, text, target_lang):
-        return text 
+        if not text:
+            return '' 
+
+        translator = Translator()
+        translated = translator.translate(text, dest=target_lang)
+        return translated.text
 
     @action(detail=False, methods=['get'])
     def get_docs(self, request):
@@ -1374,7 +1379,7 @@ class PaymentsViewSet(viewsets.ModelViewSet):
         payment_link = bot.create_invoice_link(
             title="Image Purchase",
             description="Purchase an image for 1 star!",
-            payload='payload',
+            payload=payload,
             provider_token="",
             currency="XTR",
             prices=prices
