@@ -30,7 +30,7 @@ def admin_panel() -> InlineKeyboardMarkup:
 
     keyboard.button(text='Статистика', callback_data='statistics')
     keyboard.button(text='Рассылка', callback_data='mailing')
-    keyboard.button(text='Добавить сериал', callback_data='add_serial')
+    #keyboard.button(text='Добавить сериал', callback_data='add_serial')
     keyboard.button(text='Скачать базу данных', callback_data='download_db')
     keyboard.button(text='Управление акциями', callback_data='controll')
     return keyboard.adjust(1).as_markup()

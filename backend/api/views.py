@@ -71,7 +71,7 @@ class UsersViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post']
 
     def get_queryset(self):
-        tg_id = self.request.tg_user_data['tg_id']
+        tg_id = int(self.request.tg_user_data['tg_id'])
 
         if tg_id:
             return Users.objects.filter(tg_id=tg_id)
@@ -1214,9 +1214,9 @@ class PaymentsViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Payment ID is required'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Получение подписки по типу
-        subscription = get_object_or_404(Subscriptions, subtype=subscription_type)
+        subscriptionel = get_object_or_404(Subscriptions, subtype=subscription_type)
 
-        """ # Формирование idempotence_key
+        # Формирование idempotence_key
         # Получаем базовые цены подписок
         subscriptions = Subscriptions.objects.all()  # Получаем все записи подписок
 
@@ -1259,12 +1259,14 @@ class PaymentsViewSet(viewsets.ModelViewSet):
                 "subtype": subscription.subtype,
                 "price_in_rubles": round(price_with_discount, 2),
                 "price_in_stars": round(stars_price_with_discount, 2),
-            }) """
+            })
         try:
             # Получение цены подписки из модели
-            price_value = subscription.price
-            """ print(results) """
-            # Создание платежа
+            price_value = 0
+            for el in results:
+                if el['subtype'] == f'{subscriptionel.subtype}':
+                    price_value = el['price_in_rubles']
+                    break
             idempotence_key = str(uuid.uuid4())
             payment = Payment.create({
                 "payment_token": payment_id,
@@ -1277,7 +1279,7 @@ class PaymentsViewSet(viewsets.ModelViewSet):
                     "return_url": "https://skybox.video/"
                 },
                 "capture": True,
-                "description": f"Заказ для подписки {subscription.subtype}"
+                "description": f"Заказ для подписки {subscriptionel.subtype}"
             }, idempotence_key)
             confirmation_url = payment.confirmation.confirmation_url if payment.confirmation else None
 
@@ -1286,7 +1288,9 @@ class PaymentsViewSet(viewsets.ModelViewSet):
                 summa=int(price_value),
                 status=subscription_type  
             )
-
+            if not user.isActive:
+                user.isActive = True
+                user.save()
             return Response({'status': payment.status, 'payment_id': new_payment.id}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
@@ -1355,7 +1359,9 @@ class PaymentsViewSet(viewsets.ModelViewSet):
             print(series_list)
             for series in series_list:
                 PermissionsModel.objects.create(series=series, user=user)
-
+            if not user.isActive:
+                user.isActive = True
+                user.save()
             return Response({'status': payment.status, 'payment_id': new_payment.id}, status=status.HTTP_201_CREATED)
 
         except Exception as e:

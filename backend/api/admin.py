@@ -185,10 +185,7 @@ class PaymentsAdmin(admin.ModelAdmin):
             return ['user', 'summa', ]
         return []
 
-    def has_delete_permission(self, request, obj=None):
-        return False
 
-    
 
     class Meta:
         model = Payments
