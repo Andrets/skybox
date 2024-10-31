@@ -11,7 +11,6 @@ import { RatingFilm } from "./components/Rating/Rating";
 
 const Info = ({
   description,
-  comments,
   name,
   is_new,
   genre,
@@ -41,7 +40,7 @@ const Info = ({
           {t("comments")}
         </SectionHeader>
 
-        <CommentsBlock comments={comments} />
+        <CommentsBlock  />
 
         <SectionHeader className={styles.sectHeader}>
           {t("addComment")}

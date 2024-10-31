@@ -4,7 +4,7 @@ import { VideoTimeSlider } from "./components/TimeSlider/VideoTimeSlider";
 import { VideoSeries } from "./components/VideoSeries/VideoSeries";
 import useBlockScroll from "@/shared/hooks/useBlockScroll";
 import { useVideoSeriesClick } from "./helpers/useVideoSeriesClick";
-import { useGetAllSeriesQuery } from "@/api/FilmInfoApi";
+import { filmInfoApiSlice, useGetAllSeriesQuery } from "@/api/FilmInfoApi";
 import { useParams } from "react-router-dom";
 import { useAddHistory } from "./helpers/useAddHistory";
 import { LoaderSpinner } from "@/ui/Icons";
@@ -34,6 +34,12 @@ const Serial = () => {
 
   useEffect(() => {
     dispatch(resetState());
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      dispatch(filmInfoApiSlice.util.invalidateTags(["Likes", "Language"]));
+    };
   }, []);
 
   if (filmSeriesLoading) {

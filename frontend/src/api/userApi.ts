@@ -84,6 +84,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
       query: () => {
         return { url: "favorite/get_my_list", method: "GET" };
       },
+      providesTags: ["Likes"]
     }),
     createPayment: builder.mutation<
       PaymentCreateStatusResponse,

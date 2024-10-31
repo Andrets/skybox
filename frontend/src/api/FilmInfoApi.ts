@@ -1,5 +1,6 @@
 import { apiSlice } from "@/app/store/api";
 import {
+  CommentInfo,
   CreateCommentQueryParams,
   FilmInfoResponse,
   SeriesItem,
@@ -14,7 +15,7 @@ export const filmInfoApiSlice = apiSlice.injectEndpoints({
     getFilmInfo: builder.query<FilmInfoResponse, string | number>({
       query: (params) => {
         return {
-          url: `serail/get_serail_details?data=${params}`,
+          url: `serail/get_serial_details?data=${params}`,
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -26,6 +27,16 @@ export const filmInfoApiSlice = apiSlice.injectEndpoints({
       transformResponse: (response: FilmInfoResponse[]) => {
         return response[0];
       },
+    }),
+
+    getFilmComments: builder.query<CommentInfo[], string | number>({
+      query: (params) => {
+        return {
+          url: `serail/get_serial_comments?data=${params}`,
+          method: "GET",
+        };
+      },
+      providesTags: ["Language"],
     }),
 
     getAllSeries: builder.query<SeriesItem[], string | number>({
@@ -88,4 +99,5 @@ export const {
   useUpdateRatingMutation,
   useAddHistoryMutation,
   useLikeSerialMutation,
+  useGetFilmCommentsQuery,
 } = filmInfoApiSlice;

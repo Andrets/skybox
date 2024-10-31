@@ -5,7 +5,6 @@ export interface CommentInfo {
 }
 
 export interface FilmInfoResponse {
-  comments: CommentInfo[];
   description: string;
   genre: string;
   horizontal_photos: string[]; // Массив строк для URL-адресов фотографий

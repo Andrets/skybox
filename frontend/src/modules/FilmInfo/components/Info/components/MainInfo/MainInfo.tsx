@@ -4,14 +4,14 @@ import { Rating } from "@mui/material";
 import FilmDescription from "./Description/Description";
 import AttentionMark from "@/ui/marks/Attention/AttentionMark";
 import StandartMark from "@/ui/marks/Standart/StandartMark";
-import { FilmMainInfoProps } from "@/modules/FilmInfo/model/models";
+import { FilmInfoProps } from "@/modules/FilmInfo/model/models";
 const MainInfo = ({
   name,
   rating,
   description,
   genre,
   is_new,
-}: Omit<FilmMainInfoProps, "user_rating">) => {
+}: Omit<FilmInfoProps, "user_rating">) => {
   return (
     <div className={styles.main}>
       <SectionHeader className={styles.title}>{name}</SectionHeader>

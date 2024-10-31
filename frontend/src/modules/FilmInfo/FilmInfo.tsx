@@ -21,7 +21,6 @@ const FilmInfo = () => {
           <FilmAssets photos={data.horizontal_photos} />
         </div>
         <Info
-          comments={data.comments}
           description={data.description}
           is_new={data.is_new}
           genre={data.genre}
