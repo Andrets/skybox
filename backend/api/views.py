@@ -1290,6 +1290,7 @@ class PaymentsViewSet(viewsets.ModelViewSet):
             )
             if not user.isActive:
                 user.isActive = True
+                user.paid = True
                 user.save()
             return Response({'status': payment.status, 'payment_id': new_payment.id}, status=status.HTTP_201_CREATED)
 
@@ -1361,6 +1362,7 @@ class PaymentsViewSet(viewsets.ModelViewSet):
                 PermissionsModel.objects.create(series=series, user=user)
             if not user.isActive:
                 user.isActive = True
+                user.paid = True
                 user.save()
             return Response({'status': payment.status, 'payment_id': new_payment.id}, status=status.HTTP_201_CREATED)
 

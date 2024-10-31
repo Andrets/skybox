@@ -18,7 +18,7 @@ class Language(models.Model):
 
 class Country(models.Model):
     country_name = models.CharField('Имя страны на анг.',null=True, max_length=300, blank=True)
-    country_lang = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True)
+    country_lang = models.ForeignKey(Language, on_delete=models.CASCADE, null=True)
 
     list_per_page = 500
 
@@ -36,8 +36,8 @@ class Users(models.Model):
     tg_username = models.CharField('Имя пользователя',null=True, max_length=300, blank=True)
     name = models.CharField('Имя', max_length=300,null=True, blank=True)
     photo = models.ImageField('Аватарка пользователя',null=True, upload_to='static/media/users/')
-    lang = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True)
-    country = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True)
+    lang = models.ForeignKey(Language, on_delete=models.CASCADE, null=True)
+    country = models.ForeignKey(Country, on_delete=models.CASCADE, null=True)
     isActive = models.BooleanField('Активен', default=False)
     paid = models.BooleanField('Имел/Имеет платную подписку', default=False)
     search_history = models.JSONField(default=list, verbose_name='История поиска')
@@ -93,7 +93,7 @@ class Serail(models.Model):
     horizontal_photo7 = models.ImageField('Горизонтальная обложка 8', null=True, upload_to='static/media/serail/', blank=True)
     horizontal_photo8 = models.ImageField('Горизонтальная обложка 9', null=True, upload_to='static/media/serail/', blank=True)
     horizontal_photo9 = models.ImageField('Горизонтальная обложка 10', null=True, upload_to='static/media/serail/', blank=True)
-    genre = models.ForeignKey(Genre, on_delete=models.SET_NULL, null=True, related_name='serails')
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE, null=True, related_name='serails')
     rating = models.CharField('Рейтинг', max_length=500, null=True, blank=True)
     likes = models.BigIntegerField('Лайки', default=0, null=True)
     description = models.TextField('Описание', null=True, blank=True)
@@ -111,7 +111,7 @@ class Serail(models.Model):
 
 
 class StatusNew(models.Model):
-    serail = models.ForeignKey(Serail, on_delete=models.SET_NULL, null=True, related_name='statusnew')
+    serail = models.ForeignKey(Serail, on_delete=models.CASCADE, null=True, related_name='statusnew')
     added_date = models.DateField('Дата добавления статуса', auto_now_add=True)
     list_per_page = 500
 
@@ -141,7 +141,7 @@ class Comments(models.Model):
 
 
 class History(models.Model):
-    serail = models.ForeignKey(Serail, on_delete=models.SET_NULL, null=True)
+    serail = models.ForeignKey(Serail, on_delete=models.CASCADE, null=True)
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -191,7 +191,7 @@ class Payments(models.Model):
         ALWAYS = 'ALWAYS', _('ALWAYS')
         ONCE = 'ONCE', _('ONCE')
         
-    user = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, null=True)
     summa = models.BigIntegerField('Сумма оплаты', default=0, null=True)
     status = models.CharField('Тип', choices=StatusEnum.choices, max_length=250)
 
