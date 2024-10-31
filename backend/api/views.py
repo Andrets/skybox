@@ -66,7 +66,7 @@ from aiogram.client.bot import DefaultBotProperties
 from aiogram.enums import ParseMode
 from asgiref.sync import sync_to_async, async_to_sync
 from aiogram.types import LabeledPrice, PreCheckoutQuery, SuccessfulPayment, ContentType
-
+import telebot
 
 class UsersViewSet(viewsets.ModelViewSet): 
     queryset = Users.objects.all()
@@ -1164,8 +1164,8 @@ class DocsTextsViewSet(viewsets.ModelViewSet):
 Configuration.account_id = '465363'
 Configuration.secret_key = 'test_UoRVwVuT-qtHat2h6NW4V2Y3lsRmfFBtapATvT7Vf6s'
 
-bot = Bot('8090358352:AAHqI7UIDxQSgAr0MUKug8Ixc0OeozWGv7I', default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-
+#bot = Bot('8090358352:AAHqI7UIDxQSgAr0MUKug8Ixc0OeozWGv7I', default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+bot = telebot.TeleBot("8090358352:AAHqI7UIDxQSgAr0MUKug8Ixc0OeozWGv7I")
 
 
 
@@ -1380,19 +1380,20 @@ class PaymentsViewSet(viewsets.ModelViewSet):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-    async def create_invoice(self, amount, payload):
-        prices = [LabeledPrice(label="SKYBOX PAYMENTS", amount=amount)]
-        payment_link = await bot.create_invoice_link(
-            title="Оплата по Telegram Stars",
-            description="Покупка подписки/сериала за Telegram Stars",
-            payload=str(payload),
+    def create_invoice(self, price_value, payload):
+        prices = [telebot.types.LabeledPrice(label="Image Purchase", amount=int(price_value))]  # сумма в минимальных единицах валюты, например, 100 = 1.00 XTR
+
+        # Создаем ссылку на оплату
+        payment_link = bot.create_invoice_link(
+            title="Image Purchase",
+            description="Purchase an image for 1 star!",
+            payload='payload',
             provider_token="",
             currency="XTR",
             prices=prices
         )
         return payment_link
 
-    @sync_to_async
     def create_token(self, user):
         payload_token = random.randint(10**15, 10**16 - 1)
         token = Tokens.objects.create(user=user, payloadtoken=payload_token, is_paid=False)
@@ -1442,8 +1443,8 @@ class PaymentsViewSet(viewsets.ModelViewSet):
                 return Response({'error': 'Price not found'}, status=status.HTTP_404_NOT_FOUND)
 
             new_payment = Payments.objects.create(user=user, summa=int(price_value), status=subscription_type)
-            payload_token = async_to_sync(self.create_token)(user)
-            payment_link = async_to_sync(self.create_invoice)(price_value, payload=payload_token)
+            payload_token = self.create_token(user)
+            payment_link = self.create_invoice(price_value, payload_token)
 
             if not user.isActive:
                 user.isActive = True
