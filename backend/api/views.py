@@ -243,13 +243,10 @@ class SerailViewSet(viewsets.ModelViewSet):
             return str(user.lang.lang_name)
         return 'en'
 
-    def translate_it(self, text, target_lang):
-        if not text:
-            return '' 
 
-        translator = Translator()
-        translated = translator.translate(text, dest=target_lang)
-        return translated.text
+
+    def translate_it(self, text, target_lang):
+        return text 
 
     @action(detail=False, methods=['get'])
     def get_serial_details(self, request):
@@ -869,12 +866,7 @@ class SeriesViewSet(viewsets.ModelViewSet):
         return 'en'
 
     def translate_it(self, text, target_lang):
-        if not text:
-            return '' 
-
-        translator = Translator()
-        translated = translator.translate(text, dest=target_lang)
-        return translated.text
+        return text 
 
     def get_queryset(self):
         tg_id = getattr(self.request, 'tg_id', None)
@@ -1137,12 +1129,7 @@ class DocsTextsViewSet(viewsets.ModelViewSet):
         return 'en'
 
     def translate_it(self, text, target_lang):
-        if not text:
-            return '' 
-
-        translator = Translator()
-        translated = translator.translate(text, dest=target_lang)
-        return translated.text
+        return text 
 
     @action(detail=False, methods=['get'])
     def get_docs(self, request):
