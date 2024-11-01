@@ -231,7 +231,7 @@ async def set_birthday(message: Message):
 
 
 @user_private.message(Command("refund"))
-async def cmd_refund(message: Message, bot: Bot, command: CommandObject,):
+async def cmd_refund(message: Message):
     # ID транзакции для рефанда
     # по ней можно понять, какой товар/услугу возвращает человек
     # и по правилам ТГ, вы можете ОТКАЗАТЬ в рефанде
