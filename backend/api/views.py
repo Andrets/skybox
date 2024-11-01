@@ -423,7 +423,7 @@ class SerailViewSet(viewsets.ModelViewSet):
                         'genre': str(serail.genre),
                         'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,
                         'rating': serail.rating,
-                        'description': new_description
+                        'description': serail.description
                     }
                     result_data.append(serail_data)
                     unique_series_ids.add(serail.id)  # Добавляем идентификатор в множество уникальных сериалов
