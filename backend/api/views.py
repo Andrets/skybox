@@ -1646,14 +1646,9 @@ class PaymentsViewSet(viewsets.ModelViewSet):
             if price_value is None:
                 return Response({'error': 'Price not found'}, status=status.HTTP_404_NOT_FOUND)
 
-            new_payment = Payments.objects.create(user=user, summa=int(price_value), status=subscription_type)
             payload_token = self.create_token(user)
             payment_link = self.create_invoice(price_value, payload_token)
             
-            if not user.isActive:
-                user.isActive = True
-                user.paid = True
-                user.save()
             
             return Response({'payment_link': payment_link, 'payload_token': payload_token, 'ready_to_pay': True}, status=status.HTTP_201_CREATED)
 
