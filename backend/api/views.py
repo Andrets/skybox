@@ -1684,22 +1684,9 @@ class PaymentsViewSet(viewsets.ModelViewSet):
         if price_with_discount is None:
             return Response({'error': 'Price not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        new_payment = Payments.objects.create(
-            user=user,
-            summa=int(price_with_discount),
-            status=Payments.StatusEnum.ONCE
-        )
         payload_token = self.create_token(user)
         payment_link = self.create_invoice(price_with_discount, payload_token)
-        series_in_serial = Series.objects.filter(serail_id=serail_id)  # Проверьте, что это правильное поле
-
-        # Выдача доступа к каждой серии
-        for series in series_in_serial:
-            PermissionsModel.objects.create(user=user, series=series)
-        if not user.isActive:
-            user.isActive = True
-            user.paid = True
-            user.save()
+        
             
         return Response({'payment_link': payment_link, 'payload_token': payload_token, 'ready_to_pay': True}, status=status.HTTP_201_CREATED)
 
@@ -1768,6 +1755,68 @@ class PaymentsViewSet(viewsets.ModelViewSet):
                 new_payment = Payments.objects.create(user=user, summa=price_value, status=subscription_type)
                 
                 # Обновляем статус пользователя
+                if not user.isActive:
+                    user.isActive = True
+                    user.paid = True
+                    user.save()
+                    
+                return Response({'is_paid': result['is_paid']}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': result['message']}, status=status.HTTP_404_NOT_FOUND)
+
+
+    @action(detail=False, methods=['get'])
+    def check_token_status_serail(self, request):
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        user = Users.objects.filter(tg_id=tg_id).first()
+        payload_token = request.query_params.get('payload_token', None)
+
+        if not payload_token:
+            return Response({'error': 'payload_token is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            payload_token = int(payload_token)
+        except ValueError:
+            return Response({'error': 'Invalid payload_token format'}, status=status.HTTP_400_BAD_REQUEST)
+        # Получение ID сериала
+        serail_id = request.query_params.get('serail_id')
+        if not serail_id:
+            return Response({"detail": "serail_id parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Получение цены сериала
+        serail_price = SerailPrice.objects.filter(serail_id=serail_id).first()
+        if not serail_price:
+            return Response({"detail": "Price for the specified serial not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        base_price = int(serail_price.price)
+        stars_base_price = int(serail_price.stars_price)
+
+        # Применение праздничной скидки
+        feast_discount = self.get_feast_discount()
+        price_with_discount = self.get_discounted_price(stars_base_price, feast_discount['percent'])
+
+        if price_with_discount is None:
+            return Response({'error': 'Price not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        
+        result = self.get_token_status(payload_token)
+        subscriptionel = get_object_or_404(Subscriptions, subtype=subscription_type)
+        subscriptions = Subscriptions.objects.all()
+        results = []
+
+       
+        if result['status'] == 'success':
+            if result['is_paid']:
+                new_payment = Payments.objects.create(
+                    user=user,
+                    summa=int(price_with_discount),
+                    status=Payments.StatusEnum.ONCE
+                )
+                series_in_serial = Series.objects.filter(serail_id=serail_id)  # Проверьте, что это правильное поле
+
+                for series in series_in_serial:
+                    PermissionsModel.objects.create(user=user, series=series)
+                    
                 if not user.isActive:
                     user.isActive = True
                     user.paid = True
