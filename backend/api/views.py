@@ -1721,7 +1721,6 @@ class PaymentsViewSet(viewsets.ModelViewSet):
         user = Users.objects.filter(tg_id=tg_id).first()
         payload_token = request.query_params.get('payload_token', None)
         subscription_type = request.query_params.get('subscription_type', None)
-        summa = request.query_params.get('summa', None)
 
         if not payload_token:
             return Response({'error': 'payload_token is required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -1732,11 +1731,45 @@ class PaymentsViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Invalid payload_token format'}, status=status.HTTP_400_BAD_REQUEST)
 
         result = self.get_token_status(payload_token)
+        subscriptionel = get_object_or_404(Subscriptions, subtype=subscription_type)
+        subscriptions = Subscriptions.objects.all()
+        results = []
+
+        # Получаем скидки и цены
+        feast_discount = self.get_feast_discount()
+        personal_price = self.get_personal_price(tg_id)
+        group_price = self.get_group_price(tg_id)
+        
+        for subscription in subscriptions:
+            base_price = float(subscription.price)
+            stars_base_price = float(subscription.stars_price)
+            
+            if personal_price and subscription.subtype == personal_price.periodtype:
+                base_price = float(personal_price.price)
+                stars_base_price = float(personal_price.stars_price)
+            elif group_price and subscription.subtype in group_price.data:
+                base_price = float(group_price.price)
+                stars_base_price = float(group_price.stars_price)
+            
+            price_with_discount = self.get_discounted_price(base_price, int(subscription.percent))
+            stars_price_with_discount = self.get_discounted_price(stars_base_price, int(subscription.stars_percent))
+            
+            price_with_discount = self.get_discounted_price(price_with_discount, feast_discount['percent'])
+            stars_price_with_discount = self.get_discounted_price(stars_price_with_discount, feast_discount['stars_percent'])
+
+            results.append({
+                "subtype": subscription.subtype,
+                "price_in_rubles": round(price_with_discount, 2),
+                "price_in_stars": round(stars_price_with_discount, 2),
+            })
+        price_value = next((el['price_in_stars'] for el in results if el['subtype'] == subscriptionel.subtype), None)
+        if price_value is None:
+            return Response({'error': 'Price not found'}, status=status.HTTP_404_NOT_FOUND)
 
         if result['status'] == 'success':
             if result['is_paid']:
                 # Если платеж успешный, создаем запись о платеже
-                price_value = int(summa)  # Используем переданное значение summa
+                price_value = int(price_value)  # Используем переданное значение summa
                 new_payment = Payments.objects.create(user=user, summa=price_value, status=subscription_type)
                 
                 # Обновляем статус пользователя
