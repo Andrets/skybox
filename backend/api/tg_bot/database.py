@@ -5,8 +5,12 @@ from django.utils import timezone
 from django.db.models import Count
 from django.core.exceptions import ObjectDoesNotExist
 from googletrans import Translator
-
+from django.db import IntegrityError
+from typing import List, Dict
 import json
+from requests.exceptions import JSONDecodeError
+import requests
+
 
 # ---------------------
 # GET
@@ -15,12 +19,33 @@ import json
 
 @sync_to_async
 def translate_it(text, target_lang):
-        if not text:
-            return '' 
+        body = {
+            "targetLanguageCode": target_lang,
+            "texts": text,
+            "folderId": 'b1guislt64fc1r7f3jab',
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Api-Key AQVNxoGgtern_AjgdVitH5_aWDlG5sVcRK2Gc8gx"
+        }
 
-        translator = Translator()
-        translated = translator.translate(text, dest=target_lang)
-        return translated.text
+        try:
+            response = requests.post(
+                'https://translate.api.cloud.yandex.net/translate/v2/translate',
+                json=body,
+                headers=headers
+            )
+            response.raise_for_status()
+            data = response.json()
+            return data.get('translations', [{'text': t} for t in text])  
+
+        except JSONDecodeError:
+            print("Не удалось декодировать JSON от API перевода.")
+            return [{'text': t} for t in text]  
+
+        except requests.RequestException as e:
+            print(f"Ошибка запроса: {e}")
+            return [{'text': t} for t in text]  
 
 @sync_to_async
 def check_admin(user_id):
@@ -54,19 +79,20 @@ def get_total_payments():
 @sync_to_async
 def get_today_payments():
     today = timezone.now().date()
-    return Payments.objects.filter(create_date__date=today).count()
+    return Payments.objects.filter(created_date__date=today).count()
 
 @sync_to_async
-def get_week_bookings_count():
+def get_week_payments():
     today = timezone.now().date()
     week_start = today - timedelta(days=today.weekday())
-    return Payments.objects.filter(create_date__date__gte=week_start, create_date__date__lte=today).count()
+    return Payments.objects.filter(created_date__date__gte=week_start, created_date__date__lte=today).count()
 
 @sync_to_async
 def get_month_payments():
-    today = timezone.now().date()
-    month_start = today.replace(day=1)
-    return Payments.objects.filter(create_date__date__gte=month_start, create_date__date__lte=today).count()
+    today = timezone.localtime(timezone.now()).date()  # Текущая локальная дата
+    month_ago = today - timedelta(days=30)  # Дата 30 дней назад
+    return Payments.objects.filter(created_date__date__gte=month_ago, created_date__date__lte=today).count()
+
 
 @sync_to_async
 def get_language(language_code):
@@ -76,6 +102,15 @@ def get_language(language_code):
     except ObjectDoesNotExist:
         return None  
 
+@sync_to_async
+def get_users_by_subscription(segment):
+
+    if segment == 'paid':
+        return list(Users.objects.filter(paid=True).values_list('tg_id', flat=True))
+    elif segment == 'free':
+        return list(Users.objects.filter(paid=False).values_list('tg_id', flat=True))
+    else:
+        return []
 # ---------------------
 # POST
 # ---------------------
@@ -109,19 +144,27 @@ def add_user_data(tg_id, tg_username, name, photo, lang_code):
 @sync_to_async
 def update_price_personal(types, user_data, price, stars_price):
     # Попробуем найти пользователя по tg_username
+
     if user_data.startswith('@'):
         user_data = user_data[1:]  # Убираем "@" из имени пользователя
 
         try:
-            user = User.objects.get(tg_username=user_data)  # Ищем пользователя по tg_username
+            print(user_data)
+            user = Users.objects.get(tg_username=user_data)  # Ищем пользователя по tg_username
             tg_id = user.tg_id  # Получаем tg_id пользователя
         except User.DoesNotExist:
             return None  # Если пользователь не найден, возвращаем None
     else:
         tg_id = int(user_data)
+    if types == "year":
+        nt = Newprice.StatusEnum2.TEMPORARILY_YEAR
+    elif types == "month":
+        nt = Newprice.StatusEnum2.TEMPORARILY_MONTH
+    elif types == "week":
+        nt = Newprice.StatusEnum2.TEMPORARILY_WEEK
     new_price = Newprice.objects.create(
         updtype=Newprice.StatusEnum.PERSONAL,
-        periodtype=Newprice.StatusEnum2.PERSONAL,
+        periodtype=nt,
         price=price,
         stars_price=stars_price,
         data=[tg_id]  # Сохраняем tg_id вместо user_data
@@ -129,7 +172,7 @@ def update_price_personal(types, user_data, price, stars_price):
     return new_price
     
 @sync_to_async
-def update_price_personal(types, user_data, price, stars_price):
+def update_price_personal2(types, user_data, price, stars_price):
     # Попробуем найти пользователя по tg_username
     if user_data.startswith('@'):
         user_data = user_data[1:]  # Убираем "@" из имени пользователя
@@ -141,7 +184,12 @@ def update_price_personal(types, user_data, price, stars_price):
             return None  # Если пользователь не найден, возвращаем None
     else:
         tg_id = int(user_data)
-    
+    if types == "year":
+        nt = Newprice.StatusEnum2.TEMPORARILY_YEAR
+    elif types == "month":
+        nt = Newprice.StatusEnum2.TEMPORARILY_MONTH
+    elif types == "week":
+        nt = Newprice.StatusEnum2.TEMPORARILY_WEEK
     new_price = Newprice.objects.create(
         updtype=Newprice.StatusEnum.GROUP,  # Обновлено для групп
         periodtype=types,
@@ -157,12 +205,23 @@ def update_price_personal(types, user_data, price, stars_price):
 
 @sync_to_async
 def update_user_birthday(tg_id, date):
+    if len(date) != 5:
+        return False
+    if not "." in date:
+        return False
+    if "-" in date:
+        return False
+    date_list = date.split(".")
+    if int(date_list[0]) > 31 or int(date_list[1]) > 12:
+        return False
     try:
-        user = User.objects.get(tg_id=tg_id)
+        user = Users.objects.get(tg_id=tg_id)
+        if user.birthday:
+            return 2
         user.birthday = date
         user.save()
         return True
-    except User.DoesNotExist:
+    except Users.DoesNotExist:
         return False
 
 @sync_to_async
@@ -174,6 +233,54 @@ def update_payment_status(payload_token):
         return True
     except Tokens.DoesNotExist:
         return False
+
+@sync_to_async
+def update_price_for_all(types, rubs, stars):
+    # Определяем соответствие между аргументом types и полем subtype
+    subtype_mapping = {
+        "year": Subscriptions.StatusEnum.TEMPORARILY_YEAR,
+        "month": Subscriptions.StatusEnum.TEMPORARILY_MONTH,
+        "week": Subscriptions.StatusEnum.TEMPORARILY_WEEK,
+        "always": Subscriptions.StatusEnum.ALWAYS,
+        "once": Subscriptions.StatusEnum.ONCE,
+    }
+    
+    # Получаем значение subtype из mapping, соответствующее аргументу types
+    subtype_value = subtype_mapping.get(types.lower())
+    
+    # Проверяем, существует ли соответствующий тип подписки
+    if not subtype_value:
+        return f"Тип подписки '{types}' не найден."
+    
+    # Обновляем цены для всех подписок с указанным типом
+    Subscriptions.objects.filter(subtype=subtype_value).update(price=str(rubs), stars_price=str(stars))
+    return True
+
+@sync_to_async
+def update_price_for_serail(serail_name, rubs, stars):
+    try:
+        # Ищем сериал по имени
+        serail = Serail.objects.get(name=serail_name)
+        
+        # Пытаемся найти или создать запись SerailPrice для этого сериала
+        serail_price, created = SerailPrice.objects.update_or_create(
+            serail=serail,
+            defaults={
+                'price': str(rubs),
+                'stars_price': str(stars)
+            }
+        )
+        
+        # Сообщение об успешном обновлении или создании
+        if created:
+            return f"Запись для сериала '{serail_name}' создана с ценой {rubs} руб./{stars} stars."
+        else:
+            return f"Цена для сериала '{serail_name}' обновлена до {rubs} руб./{stars} stars."
+    
+    except Serail.DoesNotExist:
+        return f"Сериал с именем '{serail_name}' не найден."
+    except IntegrityError:
+        return "Произошла ошибка при обновлении или создании записи."
 # ---------------------
 # DELETE
 # ---------------------

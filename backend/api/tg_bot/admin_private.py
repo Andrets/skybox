@@ -177,40 +177,41 @@ async def procces_ask(message: Message, state: FSMContext):
                                     '\n'
                                     'Все верно?',
                                     reply_markup=kb.choice_button())
-
-
 @admin_private.message(Admin.confirm_yes)
 async def procces_post_yes(message: Message, state: FSMContext):
     await state.update_data(confirm_yes=message.text)
     data = await state.get_data()
     text = data['confirm_yes']
     segment = data.get('segment')
-    if text == 'Да, выполнить':
-        z = await state.get_data()
 
-        users = await get_users_by_subscription(segment)
+    if text == 'Да, выполнить':
+        users = await get_users_by_subscription(segment)  # Получаем список tg_id
+
         if 'mailing_photo' in data:
             counter = 0
             caption = data['mailing_text']
             photo = data['mailing_photo']
-            paid_stype = data['segment']
 
             for user in users:
-                await message.bot.send_photo(user['tg_id'], photo=data['mailing_photo'], caption=caption, reply_markup=kb.get_order_post())
-                ccounter += 1
+                tg_id = user.tg_id
+                await message.bot.send_photo(tg_id, photo=photo, caption=caption, reply_markup=kb.get_order_post())
+                counter += 1
+
             await message.answer('Рассылка завершена \n'
-                                f'Отправлено: <b>{counter} сообщений</b>',
-                                reply_markup=ReplyKeyboardRemove())
+                                 f'Отправлено: <b>{counter} сообщений</b>',
+                                 reply_markup=ReplyKeyboardRemove())
             await message.answer('Вы вернулись в меню', reply_markup=kb.admin_panel())
             await state.clear()
         else:
             counter = 0
             for user in users:
-                await message.bot.send_message(user['tg_id'],f'{data["mailing_text"]}',reply_markup=kb.get_order_post())
+                tg_id = user.tg_id
+                await message.bot.send_message(tg_id, f'{data["mailing_text"]}', reply_markup=kb.get_order_post())
                 counter += 1
+
             await message.answer('Рассылка завершена \n'
-                                f'Отправлено: <b>{counter} сообщений</b>',
-                                reply_markup=ReplyKeyboardRemove())
+                                 f'Отправлено: <b>{counter} сообщений</b>',
+                                 reply_markup=ReplyKeyboardRemove())
             await message.answer('Вы вернулись в меню', reply_markup=kb.admin_panel())
             await state.clear()
 
@@ -220,45 +221,43 @@ async def procces_post_yes(message: Message, state: FSMContext):
 
 @admin_private.message(Admin.confirm_no)
 async def procces_post_no(message: Message, state: FSMContext):
-
     await state.update_data(confirm_yes=message.text)
     data = await state.get_data()
     text = data['confirm_yes']
     segment = data.get('segment')
 
     if text == 'Да, выполнить':
-        z = await state.get_data()
+        users = await get_users_by_subscription(segment)  # Получаем список tg_id
 
-        users = await get_users_by_subscription(segment)
-
-
-        
         if 'mailing_photo' in data:
             counter = 0
             caption = data['mailing_text']
             photo = data['mailing_photo']
             for user in users:
-                await message.bot.send_photo(user['tg_id'], photo=data['mailing_photo'], caption=caption)
+                tg_id = user.tg_id
+                await message.bot.send_photo(tg_id, photo=photo, caption=caption)
                 counter += 1
             await message.answer('Рассылка завершена \n'
-                                f'Отправлено: <b>{counter} сообщений</b>',
-                                reply_markup=ReplyKeyboardRemove())
+                                 f'Отправлено: <b>{counter} сообщений</b>',
+                                 reply_markup=ReplyKeyboardRemove())
             await message.answer('Вы вернулись в меню', reply_markup=kb.admin_panel())
             await state.clear()
         else:
             counter = 0
             for user in users:
-                await message.bot.send_message(user['tg_id'],f'{data["mailing_text"]}')
+                tg_id = user.tg_id
+                await message.bot.send_message(tg_id, f'{data["mailing_text"]}')
                 counter += 1
             await message.answer('Рассылка завершена \n'
-                                f'Отправлено: <b>{counter} сообщений</b>',
-                                reply_markup=ReplyKeyboardRemove())
+                                 f'Отправлено: <b>{counter} сообщений</b>',
+                                 reply_markup=ReplyKeyboardRemove())
             await message.answer('Вы вернулись в меню', reply_markup=kb.admin_panel())
             await state.clear()
 
     if text == 'Нет, вернуться':
         await message.answer('Вы вернулись в меню', reply_markup=ReplyKeyboardRemove())
         await message.answer('🔒 Админ-панель', reply_markup=kb.admin_panel())
+
 
 
 @admin_private.callback_query(F.data == 'download_db')
@@ -336,7 +335,7 @@ async def update_group_price_func(message: Message):
         try:
             new_price_instances = []
             for user_id in user_ids:
-                new_price_instance = await update_price_personal(types, user_id, price, stars_price)
+                new_price_instance = await update_price_personal2(types, user_id, price, stars_price)
                 if new_price_instance:
                     new_price_instances.append(new_price_instance)
             
@@ -349,13 +348,58 @@ async def update_group_price_func(message: Message):
             await message.answer(f'Ошибка при создании изменения цен: {str(e)}', reply_markup=kb.admin_panel())
 
 
+@admin_private.callback_query(F.data == 'update_price')
+async def update_price_all(callback: CallbackQuery):
+    await callback.answer()
+    await callback.message.answer(r'Напишите сообщение /update_all_price {ТИП} {ЦЕНА} {ЦЕНА В TG Stars}\n или\n /update_all_price_serial {ПОЛНОЕ ИМЯ} {ЦЕНА} {ЦЕНА В TG Stars} - для сериала'
+                                  '\n\nНапример: \n/update_all_price month 100 10', 
+                                  reply_markup=kb.admin_panel())
 
 
 
 
 
+@admin_private.message(Command('update_all_price'))
+async def update_group_price_func(message: Message):
+    is_admin = await check_admin(message.from_user.id)
+    if is_admin:
+        text = message.text
+        text2 = text.split(' ')
+        
+        if len(text2) != 4:
+            await message.answer(f'Неправильный формат update_all_price, повторите попытку', reply_markup=kb.admin_panel())
+            return
+        
+        types = text2[1]  
+        rubs = text2[2]  
+        stars = text2[3]
 
+        try:
+            new_price_instance = await update_price_for_all(types, rubs, stars)
+            await message.answer(f'Цены успешно изменились', reply_markup=kb.admin_panel())
+        except Exception as e:
+            await message.answer(f'Ошибка при создании изменения цен: {str(e)}', reply_markup=kb.admin_panel())
 
+@admin_private.message(Command('update_all_price_serial'))
+async def update_group_price_func(message: Message):
+    is_admin = await check_admin(message.from_user.id)
+    if is_admin:
+        text = message.text
+        text2 = text.split(' ')
+        
+        if len(text2) != 4:
+            await message.answer(f'Неправильный формат update_all_price_serial, повторите попытку', reply_markup=kb.admin_panel())
+            return
+        
+        serail_name = text2[1]  
+        rubs = text2[2]  
+        stars = text2[3]
+
+        try:
+            new_price_instance = await update_price_for_serail(serail_name, rubs, stars)
+            await message.answer(f'Цены успешно изменились', reply_markup=kb.admin_panel())
+        except Exception as e:
+            await message.answer(f'Ошибка при создании изменения цен: {str(e)}', reply_markup=kb.admin_panel())
 
 
 

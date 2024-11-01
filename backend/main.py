@@ -62,7 +62,7 @@ async def main():
 
     tasks = [
         asyncio.create_task(start_bot()),
-        #asyncio.create_task(start_tracking_orders()),
+        asyncio.create_task(start_tracking_orders()),
 
     ]
 

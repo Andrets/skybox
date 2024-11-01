@@ -149,9 +149,9 @@ async def start_message(message: Message, bot: Bot):
         lang_code=language_code  
     )
     if not user_reg:
-        text = "Хотите указать дату рождения?\n Напишите /birthday {Ваш день рождения в формате 13.06}"
-        text = await translate_it(text, language_code)
-        await message.answer(text)
+        text = "Хотите указать дату рождения?\nНапишите /birthday {Ваш день рождения в формате 13.06}"
+        text = await translate_it([text], str(language_code))
+        await message.answer(text[0]['text'])
 
 
 @user_private.message(F.successful_payment)
@@ -161,7 +161,6 @@ async def successful_payment_handler(message: Message):
     total_amount = successful_payment.total_amount
     currency = successful_payment.currency
     invoice_payload = successful_payment.invoice_payload
-    print(invoice_payload)
     await update_payment_status(int(invoice_payload))
 
 
@@ -179,17 +178,27 @@ async def set_birthday(message: Message):
     success_message = "🎉 Дата рождения успешно сохранена!"
     format_error_message = "⛔ Пожалуйста, введите дату рождения в формате DD.MM (например, 13.06)."
     invalid_format_message = "⛔ Неверный формат. Введите дату рождения в формате DD.MM."
+    invalid_format_message_birth = "⛔ Вы не можете менять дату рождения"
+
 
     if re.match(r"\d{2}\.\d{2}", birthday_text):
         try:
-            await update_user_birthday(message.from_user.id, birthday_text)
-            translated_success = await translate_it(success_message, message.from_user.language_code)
-            await message.answer(translated_success)
+            is_have = await update_user_birthday(message.from_user.id, birthday_text)
+            if is_have:
+                if is_have == 2:
+                    translated_success = await translate_it([invalid_format_message_birth], message.from_user.language_code)
+                    await message.answer(translated_success[0]['text'])
+                    return
+                translated_success = await translate_it([success_message], message.from_user.language_code)
+                await message.answer(translated_success[0]['text'])
+            else:
+                translated_format_error = await translate_it([format_error_message], message.from_user.language_code)
+                await message.answer(translated_format_error[0]['text'])
         except ValueError:
-            translated_format_error = await translate_it(format_error_message, message.from_user.language_code)
-            await message.answer(translated_format_error)
+            translated_format_error = await translate_it([format_error_message], message.from_user.language_code)
+            await message.answer(translated_format_error[0]['text'])
     else:
-        translated_invalid_format = await translate_it(invalid_format_message, message.from_user.language_code)
-        await message.answer(translated_invalid_format)
+        translated_invalid_format = await translate_it([invalid_format_message], message.from_user.language_code)
+        await message.answer(translated_invalid_format[0]['text'])
 
 

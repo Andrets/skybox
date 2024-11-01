@@ -52,7 +52,6 @@ from datetime import timedelta
 from django.db.models import Count, F, Min, OuterRef, Prefetch, Q, Subquery, Max
 from django.http import StreamingHttpResponse
 from django.shortcuts import get_object_or_404
-from googletrans import Translator
 from django.db.models.functions import Coalesce
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status as rest_status
@@ -67,6 +66,28 @@ from aiogram.enums import ParseMode
 from asgiref.sync import sync_to_async, async_to_sync
 from aiogram.types import LabeledPrice, PreCheckoutQuery, SuccessfulPayment, ContentType
 import telebot
+from requests.exceptions import JSONDecodeError
+
+def levenshtein_distance(s1, s2):
+    """Calculate the Levenshtein distance between two strings."""
+    if len(s1) < len(s2):
+        return levenshtein_distance(s2, s1)
+
+    if len(s2) == 0:
+        return len(s1)
+
+    previous_row = range(len(s2) + 1)
+
+    for i, c1 in enumerate(s1):
+        current_row = [i + 1]
+        for j, c2 in enumerate(s2):
+            insertions = previous_row[j + 1] + 1
+            deletions = current_row[j] + 1
+            substitutions = previous_row[j] + (c1 != c2)
+            current_row.append(min(insertions, deletions, substitutions))
+        previous_row = current_row
+
+    return previous_row[-1]
 
 class UsersViewSet(viewsets.ModelViewSet): 
     queryset = Users.objects.all()
@@ -245,8 +266,38 @@ class SerailViewSet(viewsets.ModelViewSet):
 
 
 
+
     def translate_it(self, text, target_lang):
-        return text 
+        body = {
+            "targetLanguageCode": target_lang,
+            "texts": text,
+            "folderId": 'b1guislt64fc1r7f3jab',
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Api-Key AQVNxoGgtern_AjgdVitH5_aWDlG5sVcRK2Gc8gx"
+        }
+
+        try:
+            response = requests.post(
+                'https://translate.api.cloud.yandex.net/translate/v2/translate',
+                json=body,
+                headers=headers
+            )
+            response.raise_for_status()
+            data = response.json()
+            return data.get('translations', [{'text': t} for t in text])  
+
+        except JSONDecodeError:
+            print("Не удалось декодировать JSON от API перевода.")
+            return [{'text': t} for t in text]  
+
+        except requests.RequestException as e:
+            print(f"Ошибка запроса: {e}")
+            return [{'text': t} for t in text]  
+
+
+
 
     @action(detail=False, methods=['get'])
     def get_serial_details(self, request):
@@ -276,24 +327,24 @@ class SerailViewSet(viewsets.ModelViewSet):
 
         result_data = []
         for serail in serails:
-            name_translated = self.translate_it(serail.name, user_lang)
-            description_translated = self.translate_it(serail.description, user_lang)
-            genre_translated = str(self.translate_it(str(serail.genre), user_lang)) if serail.genre else None
+            texts = [serail.name, serail.description, str(serail.genre)]
+            newtext = self.translate_it(texts, user_lang)
+            new_name = newtext[0]['text']
+            new_description = newtext[1]['text']
+            new_genre = newtext[2]['text']
 
-            # Check if the user has liked this serial
             user_has_liked = Favorite.objects.filter(user=user, serail=serail).exists()
 
-            # Retrieve the user's rating for this serial, if it exists
             user_rating = UserRating.objects.filter(user=user, serail=serail).first()
             user_specific_rating = user_rating.rating if user_rating else None  # Defaults to None if no rating found
 
             serail_data = {
-                'name': name_translated,
-                'genre': genre_translated,
+                'name': new_name,
+                'genre': new_genre,
                 'rating': round(float(serail.rating)) if serail.rating else None,
                 'user_rating': int(user_specific_rating) if user_specific_rating else None,
                 'user_has_liked': user_has_liked,
-                'description': description_translated,
+                'description': new_description,
                 'likes': serail.likes,
                 'is_new': serail.statusnew.exists(),
                 'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,
@@ -324,8 +375,11 @@ class SerailViewSet(viewsets.ModelViewSet):
         # Формируем список комментариев с учетом языка пользователя
         comments_data = []
         for comment in serail.comments.all():
+            texts = [comment.text]
+            newtext = self.translate_it(texts, user_lang)
+            comment_text = newtext[0]['text']
             comment_data = {
-                'text': self.translate_it(comment.text, user_lang),
+                'text': comment_text,
                 'user_avatar': comment.user.photo.url if comment.user.photo else None,
                 'tg_username': comment.user.tg_username
             }
@@ -357,17 +411,18 @@ class SerailViewSet(viewsets.ModelViewSet):
         for serail in top_series:
             if serail is not None:  # Проверяем, что сериал существует
                 if serail.id not in unique_series_ids:  # Проверяем, уникален ли сериал
-                    name_translated = self.translate_it(serail.name, user_lang) if serail.name else ''
-                    description_translated = self.translate_it(serail.description, user_lang) if serail.description else ''                
-                    genre_translated = str(self.translate_it(str(serail.genre), user_lang)) if serail.genre else None
-
+                    texts = [serail.name, serail.description, str(serail.genre)]
+                    newtext = self.translate_it(texts, user_lang)
+                    new_name = newtext[0]['text']
+                    new_description = newtext[1]['text']
+                    new_genre = newtext[2]['text']
                     serail_data = {
                         'id': serail.id,
-                        'name': name_translated,
-                        'genre': str(genre_translated) if genre_translated else None,
+                        'name': new_name,
+                        'genre': new_genre,
                         'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,
                         'rating': serail.rating,
-                        'description': description_translated
+                        'description': new_description
                     }
                     result_data.append(serail_data)
                     unique_series_ids.add(serail.id)  # Добавляем идентификатор в множество уникальных сериалов
@@ -384,16 +439,18 @@ class SerailViewSet(viewsets.ModelViewSet):
                 random_series = random.sample(list(available_random_series), min(remaining_count, available_random_series.count()))
 
                 for serail in random_series:
-                    name_translated = self.translate_it(serail.name, user_lang) if serail.name else ''
-                    description_translated = self.translate_it(serail.description, user_lang) if serail.description else ''
-                    genre_translated = str(self.translate_it(str(serail.genre), user_lang)) if serail.genre else None
+                    texts = [serail.name, serail.description, str(serail.genre)]
+                    newtext = self.translate_it(texts, user_lang)
+                    new_name = newtext[0]['text']
+                    new_description = newtext[1]['text']
+                    new_genre = newtext[2]['text']
                     serail_data = {
                         'id': serail.id,
-                        'name': name_translated,
-                        'genre': str(genre_translated) if genre_translated else None,
+                        'name': new_name,
+                        'genre': new_genre,
                         'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,
                         'rating': serail.rating,
-                        'description': description_translated
+                        'description': new_description
                     }
                     result_data.append(serail_data)
                     unique_series_ids.add(serail.id)  # Добавляем идентификатор в множество уникальных сериалов
@@ -411,16 +468,19 @@ class SerailViewSet(viewsets.ModelViewSet):
             all_series = Serail.objects.all()
             result_data = []
             for serail in all_series:
-                name_translated = self.translate_it(serail.name, user_lang) if serail.name else None
-                description_translated = self.translate_it(serail.description, user_lang) if serail.description else None
-                genre_translated = str(self.translate_it(str(serail.genre), user_lang)) if serail.genre else None
+                texts = [serail.name, serail.description, str(serail.genre)]
+                newtext = self.translate_it(texts, user_lang)
+                new_name = newtext[0]['text']
+                new_description = newtext[1]['text']
+                new_genre = newtext[2]['text']
+                    
                 serail_data = {
                     'id': serail.id,
-                    'name': name_translated,
-                    'genre': genre_translated,
+                    'name': new_name,
+                    'genre': new_genre,
                     'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,
                     'rating': serail.rating,
-                    'description': description_translated
+                    'description': new_description
                 }
                 result_data.append(serail_data)
             return Response({'you_might_like': result_data})
@@ -458,16 +518,19 @@ class SerailViewSet(viewsets.ModelViewSet):
         # Формируем итоговые данные с переводом только тех полей, которые нужно перевести
         result_data = []
         for serail in result_series:
-            name_translated = self.translate_it(serail.name, user_lang) if serail.name else None
-            description_translated = self.translate_it(serail.description, user_lang) if serail.description else None
-            genre_translated = str(self.translate_it(str(serail.genre), user_lang)) if serail.genre else None
+            texts = [serail.name, serail.description, str(serail.genre)]
+            newtext = self.translate_it(texts, user_lang)
+            new_name = newtext[0]['text']
+            new_description = newtext[1]['text']
+            new_genre = newtext[2]['text']
+                    
             serail_data = {
                 'id': serail.id,
-                'name': name_translated,
-                'genre': genre_translated,
+                'name': new_name,
+                'genre': new_genre,
                 'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,
                 'rating': serail.rating,
-                'description': description_translated
+                'description': new_description
             }
             result_data.append(serail_data)
 
@@ -488,26 +551,28 @@ class SerailViewSet(viewsets.ModelViewSet):
         elif data == 'original':
             serials = Serail.objects.filter(is_original=True)[:count]
         elif data == 'men':
-            men_genre = get_object_or_404(Genre, genre="Male")
+            men_genre = get_object_or_404(Genre, genre="Men")
             serials = Serail.objects.filter(genre=men_genre)[:count]
         elif data == 'women':
-            women_genre = get_object_or_404(Genre, genre="Female")
+            women_genre = get_object_or_404(Genre, genre="Women")
             serials = Serail.objects.filter(genre=women_genre)[:count]  
         else:
             return Response({'error': 'Invalid or missing data parameter'}, status=400)
 
         result_data = []
         for serail in serials:
-            name_translated = self.translate_it(serail.name, user_lang)
-            description_translated = self.translate_it(serail.description, user_lang)
-            genre_translated = str(self.translate_it(str(serail.genre), user_lang)) if serail.genre else None
+            texts = [serail.name, serail.description, str(serail.genre)]
+            newtext = self.translate_it(texts, user_lang)
+            new_name = newtext[0]['text']
+            new_description = newtext[1]['text']
+            new_genre = newtext[2]['text']
             serail_data = {
                 'id': serail.id,
-                'name': name_translated,
-                'genre': str(genre_translated) if genre_translated else None,
+                'name': new_name,
+                'genre': new_genre,
                 'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,
                 'rating': serail.rating,
-                'description': description_translated,
+                'description': new_description,
                 'views': serail.views
             }
             result_data.append(serail_data)
@@ -524,10 +589,13 @@ class SerailViewSet(viewsets.ModelViewSet):
         user_lang = self.get_user_language()
         search_query = unquote(search_query)
         # Переводим поисковый запрос на английский (если язык пользователя не английский)
-        if user_lang != 'en':
-            search_query_translated = self.translate_it(search_query, 'en')
-        else:
-            search_query_translated = search_query
+
+
+        texts = [search_query]
+        newtext = self.translate_it(texts, 'en')
+        search_query_translated = newtext[0]['text']
+        print(search_query_translated)
+
         # Выполняем поиск по переведенному запросу
         serails = Serail.objects.filter(
             Q(name__icontains=search_query_translated) | Q(description__icontains=search_query_translated)
@@ -535,17 +603,19 @@ class SerailViewSet(viewsets.ModelViewSet):
 
         result_data = []
         for serail in serails:
-            name_translated = self.translate_it(serail.name, user_lang)
-            description_translated = self.translate_it(serail.description, user_lang)
-            genre_translated = str(self.translate_it(str(serail.genre), user_lang)) if serail.genre else None
+            texts = [serail.name, serail.description, str(serail.genre)]
+            newtext = self.translate_it(texts, user_lang)
+            new_name = newtext[0]['text']
+            new_description = newtext[1]['text']
+            new_genre = newtext[2]['text']
             
             serail_data = {
                 'id': serail.id,
-                'name': name_translated,
-                'genre': genre_translated,
+                'name': new_name,
+                'genre': new_genre,
                 'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,
                 'rating': serail.rating,
-                'description': description_translated,
+                'description': new_description,
                 'views': serail.views
             }
             result_data.append(serail_data)
@@ -564,6 +634,95 @@ class SerailViewSet(viewsets.ModelViewSet):
             user.save()
 
         return Response({'results': result_data}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], url_path='search')
+    def search_serails(self, request):
+        search_query = request.query_params.get('query', None)
+
+        if not search_query:
+            return Response({'error': 'Не указан параметр query'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_lang = self.get_user_language()
+        search_query = unquote(search_query)
+
+        texts = [search_query]
+        newtext = self.translate_it(texts, 'en')
+        search_query_translated = newtext[0]['text']
+
+        serails = Serail.objects.filter(
+            Q(name__icontains=search_query_translated) | Q(description__icontains=search_query_translated)
+        )
+
+        result_data = []
+
+        if serails.exists():
+            for serail in serails:
+                text = [serail.name, serail.description, str(serail.genre)]
+                translated_texts = self.translate_it(text, user_lang)
+
+                name_translated = translated_texts[0]['text']
+                description_translated = translated_texts[1]['text']
+                genre_translated = translated_texts[2]['text']
+                
+
+                serail_data = {
+                    'id': serail.id,
+                    'name': name_translated,
+                    'genre': genre_translated,
+                    'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,
+                    'rating': serail.rating,
+                    'description': description_translated,
+                    'views': serail.views
+                }
+                result_data.append(serail_data)
+
+        # Если нет результатов по точному совпадению, применяем алгоритм Левенштейна
+        else:
+            serails = Serail.objects.all()
+            threshold = 0.4  # 70% схожести
+            for serail in serails:
+                name_distance = levenshtein_distance(serail.name, search_query_translated)
+                description_distance = levenshtein_distance(serail.description, search_query_translated)
+
+                name_similarity = name_distance / max(len(serail.name), len(search_query_translated))
+                description_similarity = description_distance / max(len(serail.description), len(search_query_translated))
+
+                # Проверка на схожесть
+                if name_similarity <= threshold or description_similarity <= threshold:
+                    text = [serail.name, serail.description, str(serail.genre)]
+                    translated_texts = self.translate_it(text, user_lang)
+
+                    name_translated = translated_texts[0]['text']
+                    description_translated = translated_texts[1]['text']
+                    genre_translated = translated_texts[2]['text']
+                    
+
+                    serail_data = {
+                        'id': serail.id,
+                        'name': name_translated,
+                        'genre': genre_translated,
+                        'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,
+                        'rating': serail.rating,
+                        'description': description_translated,
+                        'views': serail.views
+                    }
+                    result_data.append(serail_data)
+
+        # Сохраняем историю поиска для пользователя
+        tg_id = request.tg_user_data.get('tg_id', None)
+        if tg_id:
+            user = get_object_or_404(Users, tg_id=tg_id)
+            search_history = user.search_history or []
+            search_history.insert(0, search_query)
+
+            if len(search_history) > 10:
+                search_history = search_history[:10]
+
+            user.search_history = search_history
+            user.save()
+
+        return Response({'results': result_data}, status=status.HTTP_200_OK)
+
 
     @action(detail=False, methods=['post'])
     def update_rating(self, request):
@@ -602,6 +761,7 @@ class SerailViewSet(viewsets.ModelViewSet):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
     def has_active_subscription(self, user):
         now = timezone.now()
         one_year_ago = now - timedelta(days=365)
@@ -615,6 +775,7 @@ class SerailViewSet(viewsets.ModelViewSet):
             (Q(status=Payments.StatusEnum.TEMPORARILY_MONTH) & Q(created_date__gte=one_month_ago))  
         ).exists()
         return active_payment
+
 
     @action(detail=False, methods=['get'])
     def view_searil(self, request):
@@ -651,8 +812,9 @@ class SerailViewSet(viewsets.ModelViewSet):
             status = has_subscription or has_permission or series_item.episode <= 10
 
             # Переводим название серии
-            name_translated = self.translate_it(series_item.name, user_lang)
-
+            text = [series_item.name]
+            translated_texts = self.translate_it(text, user_lang)
+            name_translated = translated_texts[0]['text']
             # Формируем данные для каждой серии
             series_data = {
                 "id": series_item.id,
@@ -668,6 +830,7 @@ class SerailViewSet(viewsets.ModelViewSet):
             result.append(series_data)
 
         return Response(result)
+
 
     @action(detail=False, methods=['get'])
     def like_it(self, request):
@@ -752,6 +915,8 @@ class CommentsViewSet(viewsets.ModelViewSet):
 
     http_method_names = ['post']
 
+
+
     @swagger_auto_schema(auto_schema=None)
     def create(self, request):
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
@@ -791,6 +956,43 @@ class HistoryViewSet(viewsets.ModelViewSet):
     queryset = History.objects.all()
     serializer_class = HistorySerializer
 
+    def translate_it(self, text, target_lang):
+        body = {
+            "targetLanguageCode": target_lang,
+            "texts": text,
+            "folderId": 'b1guislt64fc1r7f3jab',
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Api-Key AQVNxoGgtern_AjgdVitH5_aWDlG5sVcRK2Gc8gx"
+        }
+
+        try:
+            response = requests.post(
+                'https://translate.api.cloud.yandex.net/translate/v2/translate',
+                json=body,
+                headers=headers
+            )
+            response.raise_for_status()
+            data = response.json()
+            return data.get('translations', [{'text': t} for t in text])  
+
+        except JSONDecodeError:
+            print("Не удалось декодировать JSON от API перевода.")
+            return [{'text': t} for t in text]  
+
+        except requests.RequestException as e:
+            print(f"Ошибка запроса: {e}")
+            return [{'text': t} for t in text]  
+
+    def get_user_language(self):
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        user = Users.objects.filter(tg_id=tg_id).first()
+        if user and user.lang:
+            return str(user.lang.lang_name)
+        return 'en'
+
+
     @action(detail=False, methods=['post'])
     def add_to_history(self, request):
         # Получаем tg_id пользователя из request
@@ -826,6 +1028,7 @@ class HistoryViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def get_history(self, request):
         # Получаем tg_id пользователя из request
+        user_lang = self.get_user_language()
         tg_id = int(self.request.tg_user_data.get('tg_id', 0))
         if not tg_id:
             return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -842,9 +1045,12 @@ class HistoryViewSet(viewsets.ModelViewSet):
         history_data = []
         for entry in history_entries:
             if entry.serail:  # Проверяем, что сериал существует
+                text = [entry.serail.name]
+                translated_texts = self.translate_it(text, user_lang)
+                name_translated = translated_texts[0]['text']
                 history_data.append({
                     "id": entry.serail.id,
-                    "name": entry.serail.name,
+                    "name": name_translated,
                     "cover": entry.serail.vertical_photo.url if entry.serail.vertical_photo else None,
                 })
 
@@ -866,7 +1072,33 @@ class SeriesViewSet(viewsets.ModelViewSet):
         return 'en'
 
     def translate_it(self, text, target_lang):
-        return text 
+        body = {
+            "targetLanguageCode": target_lang,
+            "texts": text,
+            "folderId": 'b1guislt64fc1r7f3jab',
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Api-Key AQVNxoGgtern_AjgdVitH5_aWDlG5sVcRK2Gc8gx"
+        }
+
+        try:
+            response = requests.post(
+                'https://translate.api.cloud.yandex.net/translate/v2/translate',
+                json=body,
+                headers=headers
+            )
+            response.raise_for_status()
+            data = response.json()
+            return data.get('translations', [{'text': t} for t in text])  
+
+        except JSONDecodeError:
+            print("Не удалось декодировать JSON от API перевода.")
+            return [{'text': t} for t in text]  
+
+        except requests.RequestException as e:
+            print(f"Ошибка запроса: {e}")
+            return [{'text': t} for t in text]  
 
     def get_queryset(self):
         tg_id = getattr(self.request, 'tg_id', None)
@@ -931,7 +1163,7 @@ class SeriesViewSet(viewsets.ModelViewSet):
         # Подбираем 20% с топа и 80% случайных
         count = queryset.count()
         top_20_percent_count = max(1, int(count * 0.2))
-        random_80_percent_count = max(0, 10 - top_20_percent_count)  # Проверка на отрицательное значение
+        random_80_percent_count = max(0, 10 - top_20_percent_count)
 
         top_20_percent = queryset.order_by('-likes')[:top_20_percent_count]
         remaining_series = queryset.exclude(id__in=top_20_percent.values_list('id', flat=True))
@@ -949,15 +1181,26 @@ class SeriesViewSet(viewsets.ModelViewSet):
             if has_access:
                 filtered_series.append(series)
 
-        # Сериализация данных с добавлением serail_id и is_liked
-        serialized_data = [
-            {
+        # Сериализация данных с добавлением serail_id и is_liked, а также переводом нужных полей
+        user_lang = self.get_user_language()
+        serialized_data = []
+        for series in filtered_series:
+            # Переводим только `serail.name` и `series.name`
+            texts = [series.serail.name, series.name]
+            newtext = self.translate_it(texts, user_lang)
+
+            new_serail_name = newtext[0]['text']
+            new_series_name = newtext[1]['text']
+
+            # Формируем сериализованные данные
+            series_data = {
                 **self.get_serializer(series).data,
                 "serail_id": series.serail.id,  # Добавляем ID сериала
-                "is_liked": Favorite.objects.filter(user=user, serail=series.serail).exists()  # Проверка, добавлен ли сериал в избранное
+                "is_liked": Favorite.objects.filter(user=user, serail=series.serail).exists(),  # Проверка, добавлен ли сериал в избранное
+                "serail_name": new_serail_name,
+                "name": new_series_name
             }
-            for series in filtered_series
-        ]
+            serialized_data.append(series_data)
 
         return Response(serialized_data)
 
@@ -1030,10 +1273,13 @@ class SeriesViewSet(viewsets.ModelViewSet):
             has_permission = PermissionsModel.objects.filter(user=user, series=series_item).exists()
             status = has_subscription or has_permission or series_item.episode <= 10
 
-            # Переводим название серии на язык пользователя
-            name_translated = self.translate_it(series_item.name, user_lang)
-            serail_name_translated = self.translate_it(serail.name, user_lang)
+            texts = [series_item.serail.name, series_item.name] 
+            newtext = self.translate_it(texts, user_lang)
+        
+            serail_name_translated = newtext[0]['text']
+            name_translated = newtext[1]['text']
 
+       
             # Формируем ответные данные для каждой серии
             if status:
                 series_data = {
@@ -1057,6 +1303,7 @@ class SeriesViewSet(viewsets.ModelViewSet):
             translated_series.append(series_data)
 
         return Response(translated_series)
+
     @action(detail=False, methods=['get'])
     def get_all_series_from_serail(self, request):
         data = request.query_params.get('data', None)
@@ -1129,12 +1376,33 @@ class DocsTextsViewSet(viewsets.ModelViewSet):
         return 'en'
 
     def translate_it(self, text, target_lang):
-        if not text:
-            return '' 
+        body = {
+            "targetLanguageCode": target_lang,
+            "texts": text,
+            "folderId": 'b1guislt64fc1r7f3jab',
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Api-Key AQVNxoGgtern_AjgdVitH5_aWDlG5sVcRK2Gc8gx"
+        }
 
-        translator = Translator()
-        translated = translator.translate(text, dest=target_lang)
-        return translated.text
+        try:
+            response = requests.post(
+                'https://translate.api.cloud.yandex.net/translate/v2/translate',
+                json=body,
+                headers=headers
+            )
+            response.raise_for_status()
+            data = response.json()
+            return data.get('translations', [{'text': t} for t in text])  
+
+        except JSONDecodeError:
+            print("Не удалось декодировать JSON от API перевода.")
+            return [{'text': t} for t in text]  
+
+        except requests.RequestException as e:
+            print(f"Ошибка запроса: {e}")
+            return [{'text': t} for t in text]  
 
     @action(detail=False, methods=['get'])
     def get_docs(self, request):
@@ -1457,6 +1725,8 @@ class PaymentsViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def check_token_status(self, request):
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        user = Users.objects.filter(tg_id=tg_id).first()
         payload_token = request.query_params.get('payload_token', None)
         
         if not payload_token:
@@ -1470,6 +1740,11 @@ class PaymentsViewSet(viewsets.ModelViewSet):
         result = self.get_token_status(payload_token)
         
         if result['status'] == 'success':
+            if result['is_paid']:
+                if not user.isActive:
+                    user.isActive = True
+                    user.paid = True
+                    user.save()
             return Response({'is_paid': result['is_paid']}, status=status.HTTP_200_OK)
         else:
             return Response({'error': result['message']}, status=status.HTTP_404_NOT_FOUND)
@@ -1493,8 +1768,45 @@ class FavoriteViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         return Response({"detail": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+    def get_user_language(self):
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        user = Users.objects.filter(tg_id=tg_id).first()
+        if user and user.lang:
+            return str(user.lang.lang_name)
+        return 'en'
+
+    def translate_it(self, text, target_lang):
+        body = {
+            "targetLanguageCode": target_lang,
+            "texts": text,
+            "folderId": 'b1guislt64fc1r7f3jab',
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Api-Key AQVNxoGgtern_AjgdVitH5_aWDlG5sVcRK2Gc8gx"
+        }
+
+        try:
+            response = requests.post(
+                'https://translate.api.cloud.yandex.net/translate/v2/translate',
+                json=body,
+                headers=headers
+            )
+            response.raise_for_status()
+            data = response.json()
+            return data.get('translations', [{'text': t} for t in text])  
+
+        except JSONDecodeError:
+            print("Не удалось декодировать JSON от API перевода.")
+            return [{'text': t} for t in text]  
+
+        except requests.RequestException as e:
+            print(f"Ошибка запроса: {e}")
+            return [{'text': t} for t in text]  
+
     @action(detail=False, methods=['get'])
     def get_my_list(self, request):
+        user_lang = self.get_user_language()
         tg_id = int(self.request.tg_user_data.get('tg_id', 0))
         if not tg_id:
             return Response({"detail": "User not found."}, status=404)
@@ -1507,15 +1819,18 @@ class FavoriteViewSet(viewsets.ModelViewSet):
 
         if not favorite_series.exists():
             return Response([], status=200)
-
-        serialized_data = [
-            {
+        serialized_data = []
+        for favorite in favorite_series:
+            translated_text = self.translate_it([favorite.serail.name], user_lang)
+            data = {
                 "id": favorite.serail.id,
-                "name": favorite.serail.name,
+                "name": translated_text[0]['text'],
                 "cover": favorite.serail.vertical_photo.url if favorite.serail.vertical_photo else None
             }
-            for favorite in favorite_series
-        ]
+            serialized_data.append(data)
+
+                
+            
 
         return Response(serialized_data)
 
@@ -1623,6 +1938,42 @@ class SerailPriceViewSet(viewsets.ModelViewSet):
     serializer_class = SerailPriceSerializer
     http_method_names = ['get']
 
+    def get_user_language(self):
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        user = Users.objects.filter(tg_id=tg_id).first()
+        if user and user.lang:
+            return str(user.lang.lang_name)
+        return 'en'
+
+    def translate_it(self, text, target_lang):
+        body = {
+            "targetLanguageCode": target_lang,
+            "texts": text,
+            "folderId": 'b1guislt64fc1r7f3jab',
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Api-Key AQVNxoGgtern_AjgdVitH5_aWDlG5sVcRK2Gc8gx"
+        }
+
+        try:
+            response = requests.post(
+                'https://translate.api.cloud.yandex.net/translate/v2/translate',
+                json=body,
+                headers=headers
+            )
+            response.raise_for_status()
+            data = response.json()
+            return data.get('translations', [{'text': t} for t in text])  
+
+        except JSONDecodeError:
+            print("Не удалось декодировать JSON от API перевода.")
+            return [{'text': t} for t in text]  
+
+        except requests.RequestException as e:
+            print(f"Ошибка запроса: {e}")
+            return [{'text': t} for t in text]  
+
     def get_discounted_price(self, base_price, percent_discount):
         """Расчет цены со скидкой."""
         return round(float(base_price) * (1 - float(percent_discount) / 100), 2)
@@ -1640,9 +1991,12 @@ class SerailPriceViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def get_price_by_serail_id(self, request):
+        user_lang = self.get_user_language()
+
         serail_id = request.query_params.get('serail_id')
         if not serail_id:
             return Response({"detail": "serail_id parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+        serailel = Serail.objects.filter(id=serail_id).first()
 
         serail_price = SerailPrice.objects.filter(serail_id=serail_id).first()
         if not serail_price:
@@ -1656,11 +2010,12 @@ class SerailPriceViewSet(viewsets.ModelViewSet):
         feast_discount = self.get_feast_discount()
         price_with_discount = self.get_discounted_price(base_price, feast_discount['percent'])
         stars_price_with_discount = self.get_discounted_price(stars_base_price, feast_discount['stars_percent'])
+        translated_text = self.translate_it([serailel.name], user_lang)
+
 
         result = {
             "serail_id": serail_id,
-            "serail_name": serail_price.name,
-
+            "serail_name": translated_text[0]['text'],
             "price_in_rubles": price_with_discount,
             "price_in_stars": stars_price_with_discount
         }

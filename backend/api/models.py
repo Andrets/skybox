@@ -356,3 +356,15 @@ class Tokens(models.Model):
     class Meta:
         verbose_name = 'Токен'
         verbose_name_plural = 'Токены'
+
+
+class Messages(models.Model):
+    tg_id = models.CharField('TG ID', max_length=300)
+    data = models.TextField('Text')
+
+    def __str__(self):
+        return f'{self.payloadtoken} - {self.user.tg_username}'
+
+    class Meta:
+        verbose_name = 'Сообщение'
+        verbose_name_plural = 'Сообщения'

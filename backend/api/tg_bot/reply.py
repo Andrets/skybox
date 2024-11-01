@@ -75,8 +75,16 @@ def post_type2() -> ReplyKeyboardMarkup:
 def price_controll() -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
-    keyboard.button(text='Подарок пользователю', callback_data='user_present')
+    keyboard.button(text='Акции пользователю', callback_data='user_present')
     keyboard.button(text='Акции группе', callback_data='group_present')
-    keyboard.button(text='Изменить цены/Акции', callback_data='update_price')
+    keyboard.button(text='Изменить цены', callback_data='update_price')
+
+    return keyboard.adjust(1).as_markup()
+
+
+def get_order_post() -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardBuilder()
+
+    keyboard.button(text=f'Смотреть', web_app=WebAppInfo(text='Начать', url='https://skybox.video/'))
 
     return keyboard.adjust(1).as_markup()
