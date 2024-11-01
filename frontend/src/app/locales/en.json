@@ -1,6 +1,5 @@
 {
   "search": "Search",
-
   "exclusiveOriginals": "Exclusive originals",
   "youMightLike": "You Might Like",
   "comments": "Comments",
@@ -68,5 +67,6 @@
   "commentsNotFound": "No comments yet",
   "allEpisodes": "all {{numEpisodes}} episodes",
   "paymentSuccess": "Payment successful",
-  "backToHome": "Back to home"
+  "backToHome": "Back to home",
+  "new": "New"
 }

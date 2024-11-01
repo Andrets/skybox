@@ -5,6 +5,7 @@ import FilmDescription from "./Description/Description";
 import AttentionMark from "@/ui/marks/Attention/AttentionMark";
 import StandartMark from "@/ui/marks/Standart/StandartMark";
 import { FilmInfoProps } from "@/modules/FilmInfo/model/models";
+import { useTranslation } from "react-i18next";
 const MainInfo = ({
   name,
   rating,
@@ -12,6 +13,7 @@ const MainInfo = ({
   genre,
   is_new,
 }: Omit<FilmInfoProps, "user_rating">) => {
+  const { t } = useTranslation();
   return (
     <div className={styles.main}>
       <SectionHeader className={styles.title}>{name}</SectionHeader>
@@ -29,7 +31,7 @@ const MainInfo = ({
       <ul className={styles.marks}>
         {is_new && (
           <li className={styles.markItem}>
-            <AttentionMark>New</AttentionMark>
+            <AttentionMark>{t("new")}</AttentionMark>
           </li>
         )}
 

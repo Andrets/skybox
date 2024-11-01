@@ -14,7 +14,7 @@ export const shortsApiSlice = apiSlice.injectEndpoints({
           method: "GET",
         };
       },
-      transformResponse: (res: ShortsItemModel[]) => { 
+      transformResponse: (res: ShortsItemModel[]) => {
         return res;
       },
       transformErrorResponse: (err) => {
@@ -39,7 +39,7 @@ export const shortsApiSlice = apiSlice.injectEndpoints({
     sendLike: builder.mutation<unknown, SendLikeQueryParams>({
       query: (params) => {
         return {
-          url: `serail/like_it?series_id=${params.serail_id}`,
+          url: `serail/like_it?series_id=${params.shorts_id}`,
           method: "GET",
         };
       },

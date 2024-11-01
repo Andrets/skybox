@@ -13,12 +13,13 @@ export const ExclusiveFilmCard: FC<ExclusiveCardProps> = ({
   status,
   to,
 }) => {
-
   return (
     <Link to={to}>
       <Poster poster={poster} className={styles.poster}>
         <StandartMark className={styles.category}>{category}</StandartMark>
-        <AttentionMark className={styles.status}>{status}</AttentionMark>
+        {status && (
+          <AttentionMark className={styles.status}>{status}</AttentionMark>
+        )}
       </Poster>
 
       <p className={styles.name}>{name}</p>

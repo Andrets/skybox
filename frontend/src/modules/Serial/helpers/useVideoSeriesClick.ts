@@ -21,7 +21,7 @@ export const useVideoSeriesClick = () => {
       dispatch(toggleViewControlVideo(!isViewVideoController));
       viewTimerRef.current = setTimeout(() => {
         if (viewTimerRef.current) {
-          console.log("blyaaaa");
+   
           dispatch(toggleViewControlVideo(false));
           clearTimeout(viewTimerRef.current);
         }
@@ -35,7 +35,7 @@ export const useVideoSeriesClick = () => {
   };
 
   const onTouchStart = () => {
-    console.log("blyaegrwefdw");
+
     if (videoIsPlay) {
       if (viewTimerRef.current) {
         clearTimeout(viewTimerRef.current);

@@ -67,5 +67,6 @@
   "commentsNotFound": "Комментариев пока нет",
   "allEpisodes": "все {{numEpisodes}} серий",
   "paymentSuccess": "Оплата успешно прошла",
-  "backToHome": "Выйти на главную"
+  "backToHome": "Выйти на главную",
+  "new": "Новый"
 }

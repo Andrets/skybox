@@ -107,3 +107,7 @@ export interface TGStarsPaymentResponse {
   ready_to_pay: boolean;
   payload_token: number;
 }
+
+export interface TGStarsCheckTokenStatus {
+  is_paid: boolean;
+}

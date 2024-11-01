@@ -9,7 +9,7 @@ const Marks = ({ is_new, numEpisodes }: MarksProps) => {
     <ul className={styles.marksList}>
       {is_new && (
         <li>
-          <AttentionMark>NEW</AttentionMark>
+          <AttentionMark>{t("new")}</AttentionMark>
         </li>
       )}
 

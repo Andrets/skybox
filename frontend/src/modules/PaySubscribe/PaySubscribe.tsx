@@ -1,7 +1,7 @@
 import { SelectPayment, SelectSubscribe } from "./components";
 import { Button } from "@mui/material";
 import styles from "./styles.module.scss";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AddCardContext } from "@/reusable-in-pages/contexts/AddCardContext/context";
 import { useTranslation } from "react-i18next";
 import { useGetToken } from "./helpers/useGetToken";
@@ -12,15 +12,16 @@ import {
   useCreatePaymentForSerialMutation,
   useCreatePaymentMutation,
 } from "@/api/userApi";
-import { useAppSelector } from "@/shared/hooks/reduxTypes";
+import { useAppDispatch, useAppSelector } from "@/shared/hooks/reduxTypes";
 import { useNavigate } from "react-router-dom";
 import { SubscriptionSubtype } from "@/shared/models/UserInfoApi";
+import { filmInfoApiSlice } from "@/api/FilmInfoApi";
 export const PaySubscribe = () => {
   useBackButton();
   const searchParams = new URLSearchParams(window.location.search);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-
+  const dispatch = useAppDispatch();
   const subType = useAppSelector((state) => state.paySubscribe.type_subscribe);
 
   const [createPaymentQuery] = useCreatePaymentMutation();
@@ -53,6 +54,7 @@ export const PaySubscribe = () => {
 
         if (paymentInfo && paymentInfo?.data) {
           if (paymentInfo?.data.status === "succeeded") {
+            dispatch(filmInfoApiSlice.util.invalidateTags(["Pay"]));
             navigate("/successPayment");
           }
         }
@@ -66,6 +68,7 @@ export const PaySubscribe = () => {
 
           if (paymentInfo && paymentInfo?.data) {
             if (paymentInfo?.data.status === "succeeded") {
+              dispatch(filmInfoApiSlice.util.invalidateTags(["Pay"]));
               navigate("/successPayment");
             }
           }
@@ -97,6 +100,10 @@ export const PaySubscribe = () => {
       }
     }
   };
+
+  useEffect(() => {
+    document.body.style.overflow = "auto";
+  }, []);
 
   return (
     <form

@@ -17,13 +17,11 @@ export const ExclusiveList = ({ data }: ExclusiveListProps) => {
       {data.map((el) => {
         return (
           <SwiperSlide key={el.id} className={styles.slide}>
-            
             <ExclusiveFilmCard
               to={`/filmInfo/${el.id}`}
               poster={String(el.vertical_photo)}
               name={el.name}
               category={el.genre}
-              status={"New"}
             />
           </SwiperSlide>
         );

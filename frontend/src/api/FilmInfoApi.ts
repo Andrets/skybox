@@ -46,6 +46,7 @@ export const filmInfoApiSlice = apiSlice.injectEndpoints({
           method: "GET",
         };
       },
+      providesTags: ["Pay"],
     }),
 
     createComment: builder.mutation<unknown, CreateCommentQueryParams>({

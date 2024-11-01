@@ -1,6 +1,10 @@
 import { apiSlice } from "@/app/store/api";
 import { LANGUAGESLIST } from "@/shared/constants/constants";
-import { PriceResponseForSerial } from "@/shared/models/FilmInfoApi";
+import {
+  CheckTokenSearchQuery,
+  CheckTokenSearchQueryForSub,
+  PriceResponseForSerial,
+} from "@/shared/models/FilmInfoApi";
 import {
   CreatePaymentParams,
   CreatePaymentSerialParams,
@@ -8,6 +12,7 @@ import {
   PaymentCreateStatusResponse,
   SubscriptionPlanModel,
   SubscriptionPlanObject,
+  TGStarsCheckTokenStatus,
   TGStarsPaymentResponse,
   TransformUserInfoResponseItem,
   UserInfoResponseItem,
@@ -37,6 +42,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
 
         return result;
       },
+      providesTags: ["Pay"],
     }),
     getWatchHistory: builder.query<unknown, void>({
       query: () => {
@@ -121,6 +127,18 @@ export const userApiSlice = apiSlice.injectEndpoints({
       },
     }),
 
+    createTGStarsPaymentForSerial: builder.mutation<
+      TGStarsPaymentResponse,
+      string
+    >({
+      query: (params) => {
+        return {
+          method: "POST",
+          url: `payments/create_payment_stars_serail/?serail_id=${params}`,
+        };
+      },
+    }),
+
     createPaymentForSerial: builder.mutation<
       PaymentCreateStatusResponse,
       CreatePaymentSerialParams
@@ -129,6 +147,30 @@ export const userApiSlice = apiSlice.injectEndpoints({
         return {
           method: "POST",
           url: `payments/create_payment_serail/?payment_id=${params.paymentToken}&serail_id=${params.serial_id}`,
+        };
+      },
+    }),
+
+    checkTokenStatusTGStarsForSerial: builder.mutation<
+      TGStarsCheckTokenStatus,
+      CheckTokenSearchQuery
+    >({
+      query: (params) => {
+        return {
+          method: "GET",
+          url: `payments/check_token_status_serail?serail_id=${params.serial_id}&payload_token=${params.payloadToken}`,
+        };
+      },
+    }),
+
+    checkTokenStatusTGStars: builder.mutation<
+      TGStarsCheckTokenStatus,
+      CheckTokenSearchQueryForSub
+    >({
+      query: (params) => {
+        return {
+          method: "GET",
+          url: `payments/check_token_status?payload_token=${params.payloadToken}&subscription_type=${params.subType}`,
         };
       },
     }),
@@ -147,4 +189,7 @@ export const {
   useGetSubPricesForSerialQuery,
   useCreateTGStarsPaymentMutation,
   useGetLikesQuery,
+  useCreateTGStarsPaymentForSerialMutation,
+  useCheckTokenStatusTGStarsForSerialMutation,
+  useCheckTokenStatusTGStarsMutation,
 } = userApiSlice;

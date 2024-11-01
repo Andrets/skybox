@@ -1,3 +1,5 @@
+import { SubscriptionSubtype } from "./UserInfoApi";
+
 export interface CommentInfo {
   text: string;
   tg_username: string;
@@ -41,4 +43,14 @@ export interface SeriesItem {
   serail_name: string;
   status: boolean;
   video?: string; // Видео может отсутствовать
+}
+
+export interface CheckTokenSearchQuery {
+  serial_id: string;
+  payloadToken: string;
+}
+
+export interface CheckTokenSearchQueryForSub {
+  subType: SubscriptionSubtype;
+  payloadToken: string;
 }

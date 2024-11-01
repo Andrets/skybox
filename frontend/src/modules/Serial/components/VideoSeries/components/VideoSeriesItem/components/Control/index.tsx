@@ -19,7 +19,7 @@ export const Control = ({
     skip: id ? false : true,
   });
 
-  console.log("hhhh", filmInfoData);
+
   return (
     <>
       <div {...restProps} className={styles.control}>

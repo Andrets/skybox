@@ -9,7 +9,7 @@ export const FooterLinks = () => {
   const navigate = useNavigate();
 
   const onClickHelpBtn = () => {
-    WebApp.openLink("https://t.me/xss1de", { try_instant_view: true });
+    WebApp.openLink("https://t.me/eugenekrasnov", { try_instant_view: true });
   };
 
   const onClickSettings = () => {

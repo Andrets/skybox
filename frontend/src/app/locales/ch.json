@@ -67,5 +67,6 @@
   "commentsNotFound": "还没有评论",
   "allEpisodes": "全部 {{numEpisodes}} 集",
   "paymentSuccess": "付款成功",
-  "backToHome": "返回主页"
+  "backToHome": "返回主页",
+  "new": "新的"
 }

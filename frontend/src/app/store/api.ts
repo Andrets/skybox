@@ -10,6 +10,6 @@ export const apiSlice = createApi({
       InitData: `${encodedToken}`,
     },
   }),
-  tagTypes: ["Language", "Likes"],
+  tagTypes: ["Language", "Likes", "Pay"],
   endpoints: () => ({}),
 });
