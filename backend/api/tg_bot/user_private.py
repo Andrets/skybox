@@ -39,6 +39,28 @@ user_private = Router()
 
 bot = Bot('8090358352:AAHqI7UIDxQSgAr0MUKug8Ixc0OeozWGv7I', default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
+async def gift_most_liked_serial(user):
+    serial_by_series_likes = (
+        Serail.objects.annotate(total_likes=Sum('series__likes'))
+        .order_by('-total_likes')
+        .first()
+    )
+    
+    popular_serial = Serail.objects.filter(likes=Serail.objects.aggregate(max_likes=Max('likes')).get('max_likes')).first()
+
+    if serial_by_series_likes and popular_serial:
+        most_liked_serial = (
+            serial_by_series_likes if serial_by_series_likes.total_likes >= popular_serial.likes else popular_serial
+        )
+    else:
+        most_liked_serial = serial_by_series_likes or popular_serial
+
+    if most_liked_serial:
+        series = Series.objects.filter(serail=most_liked_serial)
+        for episode in series:
+            PermissionsModel.objects.create(series=episode, user=user)
+        return True
+    return False
 
 
 @user_private.message(CommandStart())
@@ -149,6 +171,12 @@ async def start_message(message: Message, bot: Bot):
         lang_code=language_code  
     )
     if not user_reg:
+        success = await gift_most_liked_serial(user=user_reg)
+        if success:
+            text2 = "За регистрацию Вам подарен самый популярный сериал!"
+            text2 = await translate_it([text2], str(language_code))
+            await message.answer(text2[0]['text'])
+
         text = "Хотите указать дату рождения?\nНапишите /birthday {Ваш день рождения в формате 13.06}"
         text = await translate_it([text], str(language_code))
         await message.answer(text[0]['text'])
@@ -201,4 +229,37 @@ async def set_birthday(message: Message):
         translated_invalid_format = await translate_it([invalid_format_message], message.from_user.language_code)
         await message.answer(translated_invalid_format[0]['text'])
 
+
+@user_private.message(Command("refund"))
+async def cmd_refund(message: Message, bot: Bot, command: CommandObject,):
+    # ID транзакции для рефанда
+    # по ней можно понять, какой товар/услугу возвращает человек
+    # и по правилам ТГ, вы можете ОТКАЗАТЬ в рефанде
+    # но только в том случае, если условия отказа прописаны в Terms of Service вашего бота
+    # ...
+    # для примера, мы будем разрешать любой возврат звезд в любое время
+    m = message.spilt(" ")
+    t_id = m[1]
+
+    # чекаем, указан ли ID транзакции
+    if t_id is None:
+        await message.answer('Укажите айди')
+        return
+
+    # пытаемся сделать рефанд
+    try:
+        await bot.refund_star_payment(
+            user_id=message.from_user.id,
+            telegram_payment_charge_id=t_id
+        )
+        await message.answer('Успешно у тебя')
+
+    except TelegramBadRequest as e:
+        err_text = "Не найден код "
+
+        if "CHARGE_ALREADY_REFUNDED" in e.message:
+            err_text = "Твои деньги уже у тебя"
+
+        await message.answer(err_text)
+        return
 

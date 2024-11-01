@@ -1648,7 +1648,7 @@ class PaymentsViewSet(viewsets.ModelViewSet):
             new_payment = Payments.objects.create(user=user, summa=int(price_value), status=subscription_type)
             payload_token = self.create_token(user)
             payment_link = self.create_invoice(price_value, payload_token)
-
+            
             if not user.isActive:
                 user.isActive = True
                 user.paid = True
@@ -1695,7 +1695,11 @@ class PaymentsViewSet(viewsets.ModelViewSet):
         )
         payload_token = self.create_token(user)
         payment_link = self.create_invoice(price_with_discount, payload_token)
+        series_in_serial = Series.objects.filter(serial_id=serail_id)
 
+        # Выдача доступа к каждой серии
+        for series in series_in_serial:
+            PermissionsModel.objects.create(user=user, series=series)
         if not user.isActive:
             user.isActive = True
             user.paid = True
