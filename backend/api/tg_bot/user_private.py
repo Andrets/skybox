@@ -239,8 +239,8 @@ async def cmd_refund(message: Message):
     # ...
     # для примера, мы будем разрешать любой возврат звезд в любое время
     text = message.text
-    m = text.spilt(" ")
-    t_id = m[1]
+    m = text.replace('/refund', '')
+    t_id = m
 
     # чекаем, указан ли ID транзакции
     if t_id is None:
