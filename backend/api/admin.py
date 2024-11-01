@@ -40,7 +40,7 @@ admin.site.unregister(User)
 class UsersAdmin(admin.ModelAdmin):
     list_per_page = 500
     list_filter = ['isActive']
-    fields = ('tg_id', 'tg_username', 'name', 'photo', 'lang', 'country', 'isActive', 'paid', 'search_history')
+    fields = ('tg_id', 'tg_username', 'name', 'birthday', 'photo', 'lang', 'country', 'isActive', 'paid', 'search_history')
 
     def get_readonly_fields(self, request, obj=None):
         if obj:  

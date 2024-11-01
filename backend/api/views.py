@@ -1474,6 +1474,7 @@ class PaymentsViewSet(viewsets.ModelViewSet):
         else:
             return Response({'error': result['message']}, status=status.HTTP_404_NOT_FOUND)
 
+
 class FavoriteViewSet(viewsets.ModelViewSet):
     queryset = Favorite.objects.all()
     serializer_class = FavoriteSerializer
@@ -1665,7 +1666,6 @@ class SerailPriceViewSet(viewsets.ModelViewSet):
         }
 
         return Response(result, status=status.HTTP_200_OK)
-
 
 
 

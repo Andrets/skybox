@@ -176,7 +176,6 @@ async def pre_checkout_query(pre_checkout_q: PreCheckoutQuery):
 async def set_birthday(message: Message):
     birthday_text = message.text.split("/birthday ")[-1].strip()
     
-    # Translation messages
     success_message = "🎉 Дата рождения успешно сохранена!"
     format_error_message = "⛔ Пожалуйста, введите дату рождения в формате DD.MM (например, 13.06)."
     invalid_format_message = "⛔ Неверный формат. Введите дату рождения в формате DD.MM."
