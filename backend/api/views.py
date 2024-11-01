@@ -1663,13 +1663,9 @@ class PaymentsViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def create_payment_stars_serail(self, request):
         # Получение payment_id и типа подписки из параметров запроса
-        payment_id = request.query_params.get('payment_id', None)
         tg_id = int(self.request.tg_user_data.get('tg_id', 0))
         user = Users.objects.filter(tg_id=tg_id).first()
-        
-        # Проверка наличия payment_id и пользователя
-        if not payment_id:
-            return Response({'error': 'Payment ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
         if not user:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
