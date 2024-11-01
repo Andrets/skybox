@@ -393,7 +393,7 @@ class SerailViewSet(viewsets.ModelViewSet):
         user_lang = self.get_user_language()
 
         # Получаем сериал с максимальными просмотрами
-        top_by_views = Serail.objects.order_by('-views').first()
+        top_by_views = Serail.objects.order_by('-rating').first()
 
         # Получаем сериал с максимальными лайками в его сериях
         top_by_likes = Serail.objects.annotate(max_likes=Coalesce(Max('series__likes'), 0)).order_by('-max_likes').first()
@@ -539,9 +539,7 @@ class SerailViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def get_category_serials(self, request):
         user_lang = self.get_user_language()
-
         data = request.query_params.get('data')
-
         count = 18
 
         if data == 'popular':
@@ -566,6 +564,7 @@ class SerailViewSet(viewsets.ModelViewSet):
             new_name = newtext[0]['text']
             new_description = newtext[1]['text']
             new_genre = newtext[2]['text']
+            
             serail_data = {
                 'id': serail.id,
                 'name': new_name,
@@ -573,7 +572,8 @@ class SerailViewSet(viewsets.ModelViewSet):
                 'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,
                 'rating': serail.rating,
                 'description': new_description,
-                'views': serail.views
+                'views': serail.views,
+                'is_new': serail.statusnew is not None
             }
             result_data.append(serail_data)
 
