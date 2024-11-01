@@ -238,7 +238,8 @@ async def cmd_refund(message: Message):
     # но только в том случае, если условия отказа прописаны в Terms of Service вашего бота
     # ...
     # для примера, мы будем разрешать любой возврат звезд в любое время
-    m = message.spilt(" ")
+    text = message.text
+    m = text.spilt(" ")
     t_id = m[1]
 
     # чекаем, указан ли ID транзакции
