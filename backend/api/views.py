@@ -41,6 +41,7 @@ from .serializers import (
     SubscriptionPriceSerializer,
     SerailPriceSerializer,
 )
+
 import requests
 import random
 from rest_framework import status, viewsets, permissions, mixins
@@ -801,15 +802,15 @@ class SerailViewSet(viewsets.ModelViewSet):
         if favorite:
             # Если сериал уже в избранном, удаляем его
             favorite.delete()
-            series.likes -= 1  # Уменьшаем количество лайков
-            series.save()  # Сохраняем изменения
+            # Уменьшаем количество лайков для всех серий данного сериала
+            series_count = Series.objects.filter(serail=serail).update(likes=F('likes') - 1)
             return Response({"detail": f'Serial "{serail.name}" removed from favorites.'}, status=status.HTTP_200_OK)
         else:
             # Если нет — добавляем сериал в избранное
             Favorite.objects.create(user=user, serail=serail)
-            series.likes += 1  # Увеличиваем количество лайков
-            series.save()  # Сохраняем изменения
-            return Response({"detail": f'Serial "{serail.name}" added to favorites.'}, status=status.HTTP_201_CREATED) 
+            # Увеличиваем количество лайков для всех серий данного сериала
+            series_count = Series.objects.filter(serail=serail).update(likes=F('likes') + 1)
+            return Response({"detail": f'Serial "{serail.name}" added to favorites.'}, status=status.HTTP_201_CREATED)
 
 
     @action(detail=False, methods=['get'])
