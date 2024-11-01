@@ -340,7 +340,7 @@ class SerailViewSet(viewsets.ModelViewSet):
 
             serail_data = {
                 'name': new_name,
-                'genre': newtext,
+                'genre': new_genre,
                 'rating': round(float(serail.rating)) if serail.rating else None,
                 'user_rating': int(user_specific_rating) if user_specific_rating else None,
                 'user_has_liked': user_has_liked,
