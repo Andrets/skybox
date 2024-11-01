@@ -1690,13 +1690,13 @@ class PaymentsViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Price not found'}, status=status.HTTP_404_NOT_FOUND)
 
         new_payment = Payments.objects.create(
-                user=user,
-                summa=int(price_with_discount),
-                status=Payments.StatusEnum.ONCE
+            user=user,
+            summa=int(price_with_discount),
+            status=Payments.StatusEnum.ONCE
         )
         payload_token = self.create_token(user)
         payment_link = self.create_invoice(price_with_discount, payload_token)
-        series_in_serial = Series.objects.filter(serial_id=serail_id)
+        series_in_serial = Series.objects.filter(serail_id=serail_id)  # Проверьте, что это правильное поле
 
         # Выдача доступа к каждой серии
         for series in series_in_serial:
