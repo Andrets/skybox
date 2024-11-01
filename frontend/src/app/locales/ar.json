@@ -65,5 +65,8 @@
   "emptyWatchHistory": "سجل المشاهدة فارغ",
   "unlockNow": "افتح الآن",
   "commentsNotFound": "لا توجد تعليقات حتى الآن",
-  "allEpisodes": "جميع {{numEpisodes}} حلقة"
+  "allEpisodes": "جميع {{numEpisodes}} حلقة",
+  "paymentSuccess": "تم الدفع بنجاح",
+  "backToHome": "العودة إلى الصفحة الرئيسية"
+  
 }

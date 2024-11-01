@@ -64,5 +64,7 @@
   "emptyWatchHistory": "시청 기록이 비어 있습니다",
   "unlockNow": "지금 잠금 해제",
   "commentsNotFound": "아직 댓글이 없습니다.",
-  "allEpisodes": "총 {{numEpisodes}} 에피소드"
+  "allEpisodes": "총 {{numEpisodes}} 에피소드",
+  "paymentSuccess": "결제가 완료되었습니다.",
+  "backToHome": "홈으로 돌아가기"
 }

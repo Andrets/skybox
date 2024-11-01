@@ -1,5 +1,6 @@
 {
   "search": "Search",
+
   "exclusiveOriginals": "Exclusive originals",
   "youMightLike": "You Might Like",
   "comments": "Comments",
@@ -65,5 +66,7 @@
   "emptyWatchHistory": "Watch history is empty",
   "unlockNow": "Unlock now",
   "commentsNotFound": "No comments yet",
-  "allEpisodes": "all {{numEpisodes}} episodes"
+  "allEpisodes": "all {{numEpisodes}} episodes",
+  "paymentSuccess": "Payment successful",
+  "backToHome": "Back to home"
 }

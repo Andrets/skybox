@@ -9,9 +9,11 @@ import { useTelegram } from "@/shared/hooks/useTelegram";
 import { useCreateTGStarsPaymentMutation } from "@/api/userApi";
 import { useAppSelector } from "@/shared/hooks/reduxTypes";
 import { isSubscriptionSubtype } from "@/shared/models/UserInfoApi";
+import { useNavigate } from "react-router-dom";
 
 export const SelectPayment = () => {
   const { webApp } = useTelegram();
+  const navigate = useNavigate();
   const [createTGStarsPayment] = useCreateTGStarsPaymentMutation();
   const subType = useAppSelector((state) => state.paySubscribe.type_subscribe);
   const handleTGStars = () => {
@@ -21,7 +23,9 @@ export const SelectPayment = () => {
         const { data } = response;
         if (data) {
           webApp.openInvoice(data?.payment_link, (data: unknown) => {
-            console.log(data);
+            if (data === "paid") {
+              navigate("/successPayment");
+            }
           });
         }
       }

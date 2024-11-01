@@ -9,4 +9,16 @@
     font-weight: 700;
     font-size: 24px;
   }
+
+  .backButton {
+    background-color: var(--main-theme-color-2);
+    width: 100%;
+    max-width: 270px;
+    color: white;
+    margin: 20px 0 0 0;
+
+    &:hover {
+      background-color: var(--main-theme-color-2);
+    }
+  }
 }

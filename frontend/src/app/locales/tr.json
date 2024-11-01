@@ -66,5 +66,8 @@
   "emptyWatchHistory": "İzleme geçmişi boş",
   "unlockNow": "Şimdi aç",
   "commentsNotFound": "Henüz yorum yok",
-  "allEpisodes": "tüm {{numEpisodes}} bölüm"
+  "allEpisodes": "tüm {{numEpisodes}} bölüm",
+  "paymentSuccess": "Ödeme başarılı",
+  "backToHome": "Ana sayfaya dön"
+  
 }
