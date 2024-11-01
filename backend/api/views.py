@@ -1800,8 +1800,6 @@ class PaymentsViewSet(viewsets.ModelViewSet):
 
         
         result = self.get_token_status(payload_token)
-        subscriptionel = get_object_or_404(Subscriptions, subtype=subscription_type)
-        subscriptions = Subscriptions.objects.all()
         results = []
 
        
@@ -1816,7 +1814,7 @@ class PaymentsViewSet(viewsets.ModelViewSet):
 
                 for series in series_in_serial:
                     PermissionsModel.objects.create(user=user, series=series)
-                    
+
                 if not user.isActive:
                     user.isActive = True
                     user.paid = True
