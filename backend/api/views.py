@@ -579,61 +579,6 @@ class SerailViewSet(viewsets.ModelViewSet):
 
         return Response({'serials': result_data})
     
-    @action(detail=False, methods=['get'], url_path='search')
-    def search_serails(self, request):
-        search_query = request.query_params.get('query', None)
-
-        if not search_query:
-            return Response({'error': 'Не указан параметр query'}, status=status.HTTP_400_BAD_REQUEST)
-
-        user_lang = self.get_user_language()
-        search_query = unquote(search_query)
-        # Переводим поисковый запрос на английский (если язык пользователя не английский)
-
-
-        texts = [search_query]
-        newtext = self.translate_it(texts, 'en')
-        search_query_translated = newtext[0]['text']
-        print(search_query_translated)
-
-        # Выполняем поиск по переведенному запросу
-        serails = Serail.objects.filter(
-            Q(name__icontains=search_query_translated) | Q(description__icontains=search_query_translated)
-        )
-
-        result_data = []
-        for serail in serails:
-            texts = [serail.name, serail.description, str(serail.genre)]
-            newtext = self.translate_it(texts, user_lang)
-            new_name = newtext[0]['text']
-            new_description = newtext[1]['text']
-            new_genre = newtext[2]['text']
-            
-            serail_data = {
-                'id': serail.id,
-                'name': new_name,
-                'genre': new_genre,
-                'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,
-                'rating': serail.rating,
-                'description': new_description,
-                'views': serail.views
-            }
-            result_data.append(serail_data)
-
-        # Сохраняем историю поиска для пользователя
-        tg_id = request.tg_user_data.get('tg_id', None)
-        if tg_id:
-            user = get_object_or_404(Users, tg_id=tg_id)
-            search_history = user.search_history or []
-            search_history.insert(0, search_query)
-
-            if len(search_history) > 10:
-                search_history = search_history[:10]
-
-            user.search_history = search_history
-            user.save()
-
-        return Response({'results': result_data}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get'], url_path='search')
     def search_serails(self, request):
@@ -1627,7 +1572,6 @@ class PaymentsViewSet(viewsets.ModelViewSet):
 
             # Получаем все серии для указанного сериала и создаем доступ для каждой
             series_list = Series.objects.filter(serail_id=serail_id)
-            print(series_list)
             for series in series_list:
                 PermissionsModel.objects.create(series=series, user=user)
             if not user.isActive:
@@ -1715,6 +1659,54 @@ class PaymentsViewSet(viewsets.ModelViewSet):
 
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['post'])
+    def create_payment_stars_serail(self, request):
+        # Получение payment_id и типа подписки из параметров запроса
+        payment_id = request.query_params.get('payment_id', None)
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        user = Users.objects.filter(tg_id=tg_id).first()
+        
+        # Проверка наличия payment_id и пользователя
+        if not payment_id:
+            return Response({'error': 'Payment ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+        if not user:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Получение ID сериала
+        serail_id = request.query_params.get('serail_id')
+        if not serail_id:
+            return Response({"detail": "serail_id parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Получение цены сериала
+        serail_price = SerailPrice.objects.filter(serail_id=serail_id).first()
+        if not serail_price:
+            return Response({"detail": "Price for the specified serial not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        base_price = int(serail_price.price)
+        stars_base_price = int(serail_price.stars_price)
+
+        # Применение праздничной скидки
+        feast_discount = self.get_feast_discount()
+        price_with_discount = self.get_discounted_price(stars_base_price, feast_discount['percent'])
+
+        if price_with_discount is None:
+            return Response({'error': 'Price not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        new_payment = Payments.objects.create(
+                user=user,
+                summa=int(price_with_discount),
+                status=Payments.StatusEnum.ONCE
+        )
+        payload_token = self.create_token(user)
+        payment_link = self.create_invoice(price_with_discount, payload_token)
+
+        if not user.isActive:
+            user.isActive = True
+            user.paid = True
+            user.save()
+            
+        return Response({'payment_link': payment_link, 'payload_token': payload_token, 'ready_to_pay': True}, status=status.HTTP_201_CREATED)
 
     def get_token_status(self, payload_token):
         try:
