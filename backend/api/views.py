@@ -413,12 +413,13 @@ class SerailViewSet(viewsets.ModelViewSet):
                 if serail.id not in unique_series_ids:  # Проверяем, уникален ли сериал
                     texts = [serail.name, serail.description, str(serail.genre)]
                     newtext = self.translate_it(texts, user_lang)
-                    new_name = newtext[0]['text']
-                    new_description = newtext[1]['text']
-                    new_genre = newtext[2]['text']
+                    new_name = newtext[0]['text'] if 'text' in newtext[0] else serail.name
+                    new_description = newtext[1]['text'] if 'text' in newtext[0] else serail.description
+                    new_genre = newtext[2]['text'] if 'text' in newtext[0] else str(serail.genre)
                     serail_data = {
                         'id': serail.id,
                         'name': new_name,
+                        'name2': newtext[0],
                         'genre': new_genre,
                         'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,
                         'rating': serail.rating,
