@@ -247,20 +247,12 @@ async def cmd_refund(message: Message):
         await message.answer('Укажите айди')
         return
 
-    # пытаемся сделать рефанд
-    try:
-        await bot.refund_star_payment(
-            user_id=message.from_user.id,
-            telegram_payment_charge_id=t_id
-        )
-        await message.answer('Успешно у тебя')
 
-    except TelegramBadRequest as e:
-        err_text = "Не найден код "
+    await bot.refund_star_payment(
+        user_id=message.from_user.id,
+        telegram_payment_charge_id=t_id
+    )
+    await message.answer('Успешно у тебя')
 
-        if "CHARGE_ALREADY_REFUNDED" in e.message:
-            err_text = "Твои деньги уже у тебя"
-
-        await message.answer(err_text)
-        return
+    
 
