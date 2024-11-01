@@ -573,12 +573,12 @@ class SerailViewSet(viewsets.ModelViewSet):
                 'rating': serail.rating,
                 'description': new_description,
                 'views': serail.views,
-                'is_new': serail.statusnew is not None
+                'is_new': serail.statusnew.exists()  # Проверка на наличие связанного объекта в StatusNew
             }
             result_data.append(serail_data)
 
         return Response({'serials': result_data})
-    
+
 
     @action(detail=False, methods=['get'], url_path='search')
     def search_serails(self, request):
