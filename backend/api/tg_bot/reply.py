@@ -77,7 +77,7 @@ def price_controll() -> InlineKeyboardMarkup:
 
     keyboard.button(text='Акции пользователю', callback_data='user_present')
     keyboard.button(text='Акции группе', callback_data='group_present')
-    keyboard.button(text='Изменить цены', callback_data='update_price')
+    #keyboard.button(text='Изменить цены', callback_data='update_price')
 
     return keyboard.adjust(1).as_markup()
 

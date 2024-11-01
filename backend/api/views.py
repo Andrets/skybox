@@ -1720,24 +1720,32 @@ class PaymentsViewSet(viewsets.ModelViewSet):
         tg_id = int(self.request.tg_user_data.get('tg_id', 0))
         user = Users.objects.filter(tg_id=tg_id).first()
         payload_token = request.query_params.get('payload_token', None)
-        
+        subscription_type = request.query_params.get('subscription_type', None)
+        summa = request.query_params.get('summa', None)
+
         if not payload_token:
             return Response({'error': 'payload_token is required'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         try:
             payload_token = int(payload_token)
         except ValueError:
             return Response({'error': 'Invalid payload_token format'}, status=status.HTTP_400_BAD_REQUEST)
 
         result = self.get_token_status(payload_token)
-        
+
         if result['status'] == 'success':
             if result['is_paid']:
+                # Если платеж успешный, создаем запись о платеже
+                price_value = int(summa)  # Используем переданное значение summa
+                new_payment = Payments.objects.create(user=user, summa=price_value, status=subscription_type)
+                
+                # Обновляем статус пользователя
                 if not user.isActive:
                     user.isActive = True
                     user.paid = True
                     user.save()
-            return Response({'is_paid': result['is_paid']}, status=status.HTTP_200_OK)
+                    
+                return Response({'is_paid': result['is_paid']}, status=status.HTTP_200_OK)
         else:
             return Response({'error': result['message']}, status=status.HTTP_404_NOT_FOUND)
 
