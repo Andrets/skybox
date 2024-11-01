@@ -419,7 +419,7 @@ class SerailViewSet(viewsets.ModelViewSet):
                     serail_data = {
                         'id': serail.id,
                         'name': serail.name,
-                        'name2': new_name,
+                        'name2': newtext,
                         'genre': str(serail.genre),
                         'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,
                         'rating': serail.rating,
