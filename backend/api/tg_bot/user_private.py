@@ -39,8 +39,8 @@ user_private = Router()
 
 
 bot = Bot('8090358352:AAHqI7UIDxQSgAr0MUKug8Ixc0OeozWGv7I', default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-
-async def gift_most_liked_serial(user):
+@sync_to_async
+def gift_most_liked_serial(user):
     serial_by_series_likes = (
         Serail.objects.annotate(total_likes=Sum('series__likes'))
         .order_by('-total_likes')
