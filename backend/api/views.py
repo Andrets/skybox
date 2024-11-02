@@ -1690,6 +1690,7 @@ class PaymentsViewSet(viewsets.ModelViewSet):
             
         return Response({'payment_link': payment_link, 'payload_token': payload_token, 'ready_to_pay': True}, status=status.HTTP_201_CREATED)
 
+
     def get_token_status(self, payload_token):
         try:
             token_obj = Tokens.objects.get(payloadtoken=payload_token)

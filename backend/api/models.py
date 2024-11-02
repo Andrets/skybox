@@ -172,6 +172,7 @@ class Series(models.Model):
 class PermissionsModel(models.Model):
     series = models.ForeignKey(Series, on_delete=models.CASCADE, null=True)
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
+
     list_per_page = 500
 
     def __str__(self):
@@ -368,3 +369,9 @@ class Messages(models.Model):
     class Meta:
         verbose_name = 'Сообщение'
         verbose_name_plural = 'Сообщения'
+
+
+class ForBirthday(models.Model):
+    permissionid = models.BigIntegerField('ID доступа')
+    created_at = models.DateTimeField(auto_now_add=True)
+    
