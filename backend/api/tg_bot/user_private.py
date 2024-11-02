@@ -68,14 +68,7 @@ def gift_most_liked_serial(user):
 @user_private.message(CommandStart(deep_link=True))
 async def start_message(message: Message, bot: Bot, command: CommandObject):
 
-    args = command.args
-    if args:
-        try:
-            start_bonus = await update_code(args)
-            await message.reply(f"Поздравляем! Бонус активирован по коду {args}. Использований: {start_bonus}")
-        
-        except ObjectDoesNotExist:
-            await message.reply("Извините, данный бонусный код недействителен.")
+    
 
     language_code = str(message.from_user.language_code)
     if language_code == "ru":
@@ -181,6 +174,14 @@ async def start_message(message: Message, bot: Bot, command: CommandObject):
         photo=photo, 
         lang_code=language_code  
     )
+    args = command.args
+    if args:
+        try:
+            start_bonus = await update_code(args)
+            await message.reply(f"Поздравляем! Бонус активирован по коду {args}. Использований: {start_bonus}")
+        
+        except ObjectDoesNotExist:
+            await message.reply("Извините, данный бонусный код недействителен.")
     if user_reg:
         success = await gift_most_liked_serial(user=user_reg)
         if success:
@@ -191,6 +192,7 @@ async def start_message(message: Message, bot: Bot, command: CommandObject):
         text = "Хотите указать дату рождения?\nНапишите /birthday {Ваш день рождения в формате 13.06}"
         text = await translate_it([text], str(language_code))
         await message.answer(text[0]['text'])
+
 
 
 @user_private.message(F.successful_payment)
