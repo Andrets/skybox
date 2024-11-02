@@ -11,6 +11,7 @@ import json
 from requests.exceptions import JSONDecodeError
 import requests
 
+from django.db.models import Sum
 
 # ---------------------
 # GET

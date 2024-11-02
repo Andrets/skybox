@@ -14,8 +14,9 @@ from aiogram.enums import ParseMode
 from asgiref.sync import sync_to_async
 import django.contrib
 from googletrans import Translator
+from django.db.models import Sum
 
-from api.models import Users
+from api.models import Users, Series, Serail, PermissionsModel
 from api.tg_bot.database import  *
 from api.tg_bot.classes_functions import Admin
 import api.tg_bot.reply as kb
