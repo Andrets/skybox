@@ -28,7 +28,7 @@ from dotenv import load_dotenv
 
 from django.db.models import Q
 from datetime import datetime, timedelta
-from django.db.models import Count, F, Min, OuterRef, Prefetch, Q, Subquery, Max
+from django.db.models import Count, Min, OuterRef, Prefetch, Q, Subquery, Max
 
 import requests
 import aiohttp
@@ -184,7 +184,7 @@ async def start_message(message: Message, bot: Bot):
         await message.answer(text[0]['text'])
 
 
-@user_private.message(F.content_type == ContentType.SUCCESSFUL_PAYMENT)
+@user_private.message(F.successful_payment)
 async def successful_payment_handler(message: Message):
     successful_payment: SuccessfulPayment = message.successful_payment
 
