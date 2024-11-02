@@ -1,5 +1,5 @@
 from asgiref.sync import sync_to_async
-from api.models import Users, Admins, Payments, Country, Language, Newprice, Tokens, Serail
+from api.models import Users, Admins, Payments, Country, Language, Newprice, Tokens, Serail, StartBonus
 from datetime import timedelta, datetime
 from django.utils import timezone
 from django.db.models import Count
@@ -282,6 +282,39 @@ def update_price_for_serail(serail_name, rubs, stars):
         return f"Сериал с именем '{serail_name}' не найден."
     except IntegrityError:
         return "Произошла ошибка при обновлении или создании записи."
+
+
+@sync_to_async
+def update_code(user_id, args):
+    try:
+        start_bonus = StartBonus.objects.get(secret_code__icontains=args)
+
+        # Проверка, использован ли уже бонус пользователем
+        if user_id in start_bonus.used_by:
+            return "Этот бонус уже был использован вами."
+
+        # Уменьшаем количество использований
+        start_bonus.used -= 1
+        start_bonus.used_by.append(user_id)
+
+        # Проверяем, если `used` становится равен 0, удаляем запись
+        if start_bonus.used <= 0:
+            start_bonus.delete()
+        else:
+            start_bonus.save()
+        
+        # Создаем объект Payments с типом, основанным на `subtype`
+        payment_status = start_bonus.subtype  # TEMPORARILY_YEAR, TEMPORARILY_MONTH или TEMPORARILY_WEEK
+        Payments.objects.create(
+            user_id=user_id,
+            summa=0,  # Здесь укажите сумму, если она известна
+            status=payment_status
+        )
+
+        return f"Вы получили бонус по типу подписки: {start_bonus.subtype}"
+    
+    except StartBonus.DoesNotExist:
+        return "Неверный секретный код."
 # ---------------------
 # DELETE
 # ---------------------

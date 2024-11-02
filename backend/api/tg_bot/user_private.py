@@ -1,6 +1,6 @@
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
-from aiogram.filters import CommandStart, Command
+from aiogram.filters import CommandStart, Command, CommandObject
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import LabeledPrice, PreCheckoutQuery, SuccessfulPayment, ContentType
@@ -16,7 +16,7 @@ import django.contrib
 from googletrans import Translator
 from django.db.models import Sum
 
-from api.models import Users, Series, Serail, PermissionsModel
+from api.models import Users, Series, Serail, PermissionsModel, StartBonus
 from api.tg_bot.database import  *
 from api.tg_bot.classes_functions import Admin
 import api.tg_bot.reply as kb
@@ -29,7 +29,7 @@ from dotenv import load_dotenv
 from django.db.models import Q
 from datetime import datetime, timedelta
 from django.db.models import Count, Min, OuterRef, Prefetch, Q, Subquery, Max
-
+from django.core.exceptions import ObjectDoesNotExist
 import requests
 import aiohttp
 import json
@@ -65,8 +65,17 @@ def gift_most_liked_serial(user):
     return False
 
 
-@user_private.message(CommandStart())
-async def start_message(message: Message, bot: Bot):
+@user_private.message(CommandStart(deep_link=True))
+async def start_message(message: Message, bot: Bot, command: CommandObject):
+
+    args = command.args
+    if args:
+        try:
+            start_bonus = await update_code(args)
+            await message.reply(f"Поздравляем! Бонус активирован по коду {args}. Использований: {start_bonus}")
+        
+        except ObjectDoesNotExist:
+            await message.reply("Извините, данный бонусный код недействителен.")
 
     language_code = str(message.from_user.language_code)
     if language_code == "ru":

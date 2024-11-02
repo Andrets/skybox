@@ -26,13 +26,14 @@ from .models import (
     SerailPrice,
     UserRating,
     Tokens,
+    StartBonus,
 )
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
 from django.template.defaultfilters import truncatechars
 from django.utils.safestring import mark_safe
 from datetime import datetime
-
+from django.utils.crypto import get_random_string
 admin.site.unregister(Group)
 admin.site.unregister(User)
 
@@ -253,3 +254,19 @@ admin.site.register(Tokens)
 
 
 
+
+@admin.register(StartBonus)
+class StartBonusAdmin(admin.ModelAdmin):
+    list_display = ('subtype', 'used', 'secret_code')
+    fields = ('subtype', 'used', 'secret_code')
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        
+        # Если объект создаётся впервые, генерируем секретный код
+        if not obj:
+            unique_part = get_random_string(10, allowed_chars='abcdefghijlmn1234567')
+            form.base_fields['secret_code'].initial = f"https://t.me/skyboxtvbot?startapp={unique_part}"
+        
+        return form
+    

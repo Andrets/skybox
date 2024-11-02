@@ -2,6 +2,7 @@ from django.db import models
 import rest_framework
 from .storage_backends import VideoStorage, PhotoStorage
 from django.utils.translation import gettext_lazy as _
+from django.utils.crypto import get_random_string
 
 class Language(models.Model):
     lang_name = models.CharField('Имя языка на анг.', null=True, max_length=300, blank=True)
@@ -374,4 +375,21 @@ class Messages(models.Model):
 class ForBirthday(models.Model):
     permissionid = models.BigIntegerField('ID доступа')
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
+
+class StartBonus(models.Model):
+    class StatusEnum(models.TextChoices):
+        TEMPORARILY_YEAR = 'TEMPORARILY_YEAR', _('Год')
+        TEMPORARILY_MONTH = 'TEMPORARILY_MONTH', _('Месяц')
+        TEMPORARILY_WEEK = 'TEMPORARILY_WEEK', _('Неделя')
+
+    subtype = models.CharField('Тип подписки', choices=StatusEnum.choices, max_length=300)
+    used = models.BigIntegerField('Количество использования', default=1)
+    secret_code = models.CharField('Ссылка для копирования', max_length=100, blank=True, default='Generating')
+    used_by = models.JSONField('Пользователи которые уже пользователи', default=list)
+    def __str__(self):
+        return f'{self.secret_code} на {self.subtype} можно использовать {self.used} раз'
+
+    class Meta:
+        verbose_name = 'Бонусная ссылка'
+        verbose_name_plural = 'Бонусные ссылки'
