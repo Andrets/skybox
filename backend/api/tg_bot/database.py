@@ -130,7 +130,7 @@ def add_user_data(tg_id, tg_username, name, photo, lang_code):
     language = Language.objects.filter(lang_name__iexact=lang_code).first()
     
     if not Users.objects.filter(tg_id=tg_id).exists():
-        Users.objects.create(
+        user = Users.objects.create(
             tg_id=tg_id,
             tg_username=tg_username,
             name=name,
@@ -138,7 +138,7 @@ def add_user_data(tg_id, tg_username, name, photo, lang_code):
             lang=language,  
             country=country,
         )
-        return False
+        return user
     return True
 
 
