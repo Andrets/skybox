@@ -10,6 +10,7 @@ class Migration(migrations.Migration):
         ('api', '0036_users_photo'),
     ]
 
+
     operations = [
         migrations.AlterField(
             model_name='serail',
