@@ -18,7 +18,7 @@ from django.db.models import Sum
 # ---------------------
 
 
-@v
+@sync_to_async
 def translate_it(text, target_lang):
         body = {
             "targetLanguageCode": target_lang,
