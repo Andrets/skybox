@@ -174,7 +174,7 @@ async def start_message(message: Message, bot: Bot, command: CommandObject):
         photo=photo, 
         lang_code=language_code  
     )
-    args = command.args
+    args = command.args if command.args else None
     if args:
         try:
             start_bonus = await update_code(args)
