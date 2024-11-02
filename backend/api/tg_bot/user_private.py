@@ -28,6 +28,7 @@ from dotenv import load_dotenv
 
 from django.db.models import Q
 from datetime import datetime, timedelta
+from django.db.models import Count, F, Min, OuterRef, Prefetch, Q, Subquery, Max
 
 import requests
 import aiohttp
