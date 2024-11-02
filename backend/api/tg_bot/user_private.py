@@ -64,11 +64,9 @@ def gift_most_liked_serial(user):
         return True
     return False
 
-
-@user_private.message(CommandStart(deep_link=True))
+#deep_link=True
+@user_private.message(CommandStart())
 async def start_message(message: Message, bot: Bot, command: CommandObject):
-
-    
 
     language_code = str(message.from_user.language_code)
     if language_code == "ru":
@@ -174,14 +172,14 @@ async def start_message(message: Message, bot: Bot, command: CommandObject):
         photo=photo, 
         lang_code=language_code  
     )
-    args = command.args if command.args else None
+    """ args = command.args if command.args else None
     if args:
         try:
             start_bonus = await update_code(args)
             await message.reply(f"Поздравляем! Бонус активирован по коду {args}. Использований: {start_bonus}")
         
         except ObjectDoesNotExist:
-            await message.reply("Извините, данный бонусный код недействителен.")
+            await message.reply("Извините, данный бонусный код недействителен.") """
     if user_reg:
         success = await gift_most_liked_serial(user=user_reg)
         if success:
