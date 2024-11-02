@@ -172,7 +172,7 @@ async def start_message(message: Message, bot: Bot):
         photo=photo, 
         lang_code=language_code  
     )
-    if not user_reg:
+    if user_reg:
         success = await gift_most_liked_serial(user=user_reg)
         if success:
             text2 = "За регистрацию Вам подарен самый популярный сериал!"

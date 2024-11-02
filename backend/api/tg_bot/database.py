@@ -139,7 +139,7 @@ def add_user_data(tg_id, tg_username, name, photo, lang_code):
             country=country,
         )
         return user
-    return True
+    return False
 
 
 @sync_to_async
