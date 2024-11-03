@@ -259,7 +259,7 @@ admin.site.register(Tokens)
 @admin.register(StartBonus)
 class StartBonusAdmin(admin.ModelAdmin):
     list_display = ('subtype', 'used', 'secret_code')
-    fields = ('subtype', 'used', 'secret_code', 'used_by')
+    fields = ('subtype', 'used', 'secret_code')
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
@@ -274,7 +274,7 @@ class StartBonusAdmin(admin.ModelAdmin):
 @admin.register(StartBonusSerail)
 class StartBonusSerailAdmin(admin.ModelAdmin):
     list_display = ('serail', 'used', 'secret_code')
-    fields = ('serail', 'used', 'secret_code', 'used_by')
+    fields = ('serail', 'used', 'secret_code')
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
