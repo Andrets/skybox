@@ -1,6 +1,7 @@
 from asgiref.sync import sync_to_async
-from api.models import Users, Admins, Payments, Country, Language, Newprice, Tokens, Serail, StartBonus
-from datetime import timedelta, datetime
+from api.models import (Users, Admins, Payments, Country, Language, Newprice, Tokens,  Series, 
+Serail, StartBonus, Feasts, Subscriptions, StartBonusSerail, PermissionsModel, SerailPrice)
+from datetime import timedelta, datetime, date
 from django.utils import timezone
 from django.db.models import Count
 from django.core.exceptions import ObjectDoesNotExist
@@ -284,37 +285,162 @@ def update_price_for_serail(serail_name, rubs, stars):
         return "Произошла ошибка при обновлении или создании записи."
 
 
-@sync_to_async
-def update_code(user_id, args):
-    try:
-        start_bonus = StartBonus.objects.get(secret_code__icontains=args)
 
-        # Проверка, использован ли уже бонус пользователем
-        if user_id in start_bonus.used_by:
-            return "Этот бонус уже был использован вами."
 
-        # Уменьшаем количество использований
-        start_bonus.used -= 1
-        start_bonus.used_by.append(user_id)
 
-        # Проверяем, если `used` становится равен 0, удаляем запись
-        if start_bonus.used <= 0:
-            start_bonus.delete()
-        else:
-            start_bonus.save()
+
+def get_discounted_price(base_price, percent_discount):
+    """Расчет цены со скидкой."""
+    return round(float(base_price) * (1 - float(percent_discount) / 100), 2)
+
+def get_feast_discount():
+    """Получение скидки на сегодня из праздников."""
+    today = date.today()
+    feast = Feasts.objects.filter(date=today).first()
+    if feast:
+        return {
+            "percent": float(feast.percent),
+            "stars_percent": float(feast.stars_percent)
+        }
+    return {"percent": 0, "stars_percent": 0}
+
+
+def get_personal_price(tg_id):
+    """Проверка и получение персональной цены для пользователя."""
+    newprice_entries = Newprice.objects.filter(updtype=Newprice.StatusEnum.PERSONAL)
+
+    for entry in newprice_entries:
+        if tg_id in entry.data:
+            return entry           
+    return None
+
+def get_group_price(tg_id):
+    """Проверка и получение групповой цены для пользователя."""
+    newprice_entries = Newprice.objects.filter(updtype=Newprice.StatusEnum.GROUP)
+
+    for entry in newprice_entries:
+        if tg_id in entry.data:
+            return entry
         
-        # Создаем объект Payments с типом, основанным на `subtype`
-        payment_status = start_bonus.subtype  # TEMPORARILY_YEAR, TEMPORARILY_MONTH или TEMPORARILY_WEEK
+    return None
+
+
+@sync_to_async
+def update_code(tg_id, args):
+    try:
+        user = Users.objects.filter(tg_id=int(tg_id)).first()
+        if not user:
+            return "Пользователь не найден."
+
+        start_bonus = None
+        serial_bonus = None
+
+        # Попытка найти код в StartBonus
+        try:
+            start_bonus = StartBonus.objects.get(secret_code__icontains=args)
+        except StartBonus.DoesNotExist:
+            pass
+
+        # Если не найдено в StartBonus, ищем в StartBonusSerail
+        if not start_bonus:
+            try:
+                serial_bonus = StartBonusSerail.objects.get(secret_code__icontains=args)
+            except StartBonusSerail.DoesNotExist:
+                return 400  # Код не найден в обеих таблицах
+        price_value = 0
+        # Логика для обычного бонуса StartBonus
+        if start_bonus:
+            if int(tg_id) in start_bonus.used_by:
+                return 500
+
+            start_bonus.used -= 1
+            start_bonus.used_by.append(int(tg_id))
+            
+            if start_bonus.used <= 0:
+                start_bonus.delete()
+            else:
+                start_bonus.save()
+
+            payment_status = start_bonus.subtype
+
+            # Получаем цену для подписок
+            subscriptions = Subscriptions.objects.all()
+            feast_discount = get_feast_discount()
+            personal_price = get_personal_price(tg_id)
+            group_price = get_group_price(tg_id)
+            results = []
+
+            for subscription in subscriptions:
+                base_price = float(subscription.price)
+                stars_base_price = float(subscription.stars_price)
+
+                if personal_price and subscription.subtype == personal_price.periodtype:
+                    base_price = float(personal_price.price)
+                    stars_base_price = float(personal_price.stars_price)
+                elif group_price and subscription.subtype in group_price.data:
+                    base_price = float(group_price.price)
+                    stars_base_price = float(group_price.stars_price)
+
+                price_with_discount = get_discounted_price(base_price, int(subscription.percent))
+                stars_price_with_discount = get_discounted_price(stars_base_price, int(subscription.stars_percent))
+                price_with_discount = get_discounted_price(price_with_discount, feast_discount['percent'])
+                stars_price_with_discount = get_discounted_price(stars_price_with_discount, feast_discount['stars_percent'])
+
+                results.append({
+                    "subtype": subscription.subtype,
+                    "price_in_rubles": round(price_with_discount, 2),
+                    "price_in_stars": round(stars_price_with_discount, 2),
+                })
+
+            # Определение цены для платежа по типу подписки
+            price_value = next((el['price_in_rubles'] for el in results if el['subtype'] == payment_status), 0)
+
+        # Логика для бонуса сериалов StartBonusSerail
+        elif serial_bonus:
+            if int(tg_id) in serial_bonus.used_by:
+                return 500
+
+            serial_bonus.used -= 1
+            serial_bonus.used_by.append(int(tg_id))
+
+            if serial_bonus.used <= 0:
+                serial_bonus.delete()
+            else:
+                serial_bonus.save()
+
+            # Создание объектов PermissionsModel для всех серий сериала
+            for series in Series.objects.filter(serail=serial_bonus.serail):
+                PermissionsModel.objects.create(series=series, user=user)
+
+            payment_status = "ONCE"  # Статус для сериалов, указанный как ONCE
+
+            # Получаем цену для сериалов из модели Newprice
+            newprice = SerailPrice.objects.filter(
+                serail=serial_bonus.serail, 
+            ).first()
+
+            if newprice:
+                price_value = float(newprice.price)
+
+        # Создание записи в Payments
         Payments.objects.create(
-            user_id=user_id,
-            summa=0,  # Здесь укажите сумму, если она известна
+            user_id=user.id,
+            summa=price_value,
             status=payment_status
         )
 
-        return f"Вы получили бонус по типу подписки: {start_bonus.subtype}"
-    
-    except StartBonus.DoesNotExist:
-        return "Неверный секретный код."
+        # Формирование сообщения об успешном бонусе
+        status_texts = {
+            'TEMPORARILY_YEAR': "на год",
+            'TEMPORARILY_MONTH': "на месяц",
+            'TEMPORARILY_WEEK': "на неделю",
+            'ONCE': "для сериалов"
+        }
+        return f"Вы получили бонус: подписку {status_texts.get(payment_status, '')}"
+
+    except (StartBonus.DoesNotExist, StartBonusSerail.DoesNotExist):
+        return 400  # Неверный секретный код
+
 # ---------------------
 # DELETE
 # ---------------------

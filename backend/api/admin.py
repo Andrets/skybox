@@ -27,6 +27,7 @@ from .models import (
     UserRating,
     Tokens,
     StartBonus,
+    StartBonusSerail,
 )
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
@@ -258,15 +259,29 @@ admin.site.register(Tokens)
 @admin.register(StartBonus)
 class StartBonusAdmin(admin.ModelAdmin):
     list_display = ('subtype', 'used', 'secret_code')
-    fields = ('subtype', 'used', 'secret_code')
+    fields = ('subtype', 'used', 'secret_code', 'used_by')
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
         
         # Если объект создаётся впервые, генерируем секретный код
         if not obj:
-            unique_part = get_random_string(10, allowed_chars='abcdefghijlmn1234567')
-            form.base_fields['secret_code'].initial = f"https://t.me/skyboxtvbot?startapp={unique_part}"
+            unique_part = get_random_string(10, allowed_chars='abcdefghijlmnopqrstuv1234567')
+            form.base_fields['secret_code'].initial = f"https://t.me/skyboxtvbot?start={unique_part}"
         
         return form
     
+@admin.register(StartBonusSerail)
+class StartBonusSerailAdmin(admin.ModelAdmin):
+    list_display = ('serail', 'used', 'secret_code')
+    fields = ('serail', 'used', 'secret_code', 'used_by')
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        
+        # Если объект создаётся впервые, генерируем секретный код
+        if not obj:
+            unique_part = get_random_string(10, allowed_chars='abcdefghijlmnopqrstuv1234567')
+            form.base_fields['secret_code'].initial = f"https://t.me/skyboxtvbot?start={unique_part}"
+        
+        return form

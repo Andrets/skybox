@@ -170,16 +170,21 @@ async def start_message(message: Message, bot: Bot, command: CommandObject):
         tg_username=message.from_user.username, 
         name=message.from_user.first_name, 
         photo=photo, 
-        lang_code=language_code  
+        lang_code=language_code
     )
-    """ args = command.args if command.args else None
+    args = command.args if command.args else None
     if args:
         try:
-            start_bonus = await update_code(args)
-            await message.reply(f"Поздравляем! Бонус активирован по коду {args}. Использований: {start_bonus}")
+            start_bonus = await update_code(message.from_user.id, args)
+            if start_bonus == 500 or start_bonus == 400:  
+                pass
+            else:
+            
+                await message.reply(f"Поздравляем! Бонус активирован! Сообщение от бота: {start_bonus}")
         
         except ObjectDoesNotExist:
-            await message.reply("Извините, данный бонусный код недействителен.") """
+            pass
+
     if user_reg:
         success = await gift_most_liked_serial(user=user_reg)
         if success:

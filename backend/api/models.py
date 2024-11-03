@@ -393,3 +393,15 @@ class StartBonus(models.Model):
     class Meta:
         verbose_name = 'Бонусная ссылка'
         verbose_name_plural = 'Бонусные ссылки'
+
+class StartBonusSerail(models.Model):
+    serail = models.ForeignKey(Serail, on_delete=models.CASCADE, null=True)
+    used = models.BigIntegerField('Количество использования', default=1)
+    secret_code = models.CharField('Ссылка для копирования', max_length=100, blank=True, default='Generating')
+    used_by = models.JSONField('Пользователи которые уже пользователи', default=list)
+    def __str__(self):
+        return f'{self.secret_code} на {self.serail.name} можно использовать {self.used} раз'
+
+    class Meta:
+        verbose_name = 'Бонусная ссылка сериалов'
+        verbose_name_plural = 'Бонусные ссылки сериалов'
