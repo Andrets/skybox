@@ -21,6 +21,7 @@ from .models import (
     SerailPrice,
     UserRating,
     Tokens,
+    SeriesLikes,
 )
 from .serializers import (
     UsersSerializer,
@@ -44,13 +45,15 @@ from .serializers import (
 
 import requests
 import random
+from urllib.parse import quote
+
 from rest_framework import status, viewsets, permissions, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from datetime import timedelta
-from django.db.models import Count, F, Min, OuterRef, Prefetch, Q, Subquery, Max
+from django.db.models import Count, F, Min, OuterRef, Prefetch, Q, Subquery, Max, Sum
 from django.http import StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.db.models.functions import Coalesce
@@ -338,7 +341,7 @@ class SerailViewSet(viewsets.ModelViewSet):
 
             user_rating = UserRating.objects.filter(user=user, serail=serail).first()
             user_specific_rating = user_rating.rating if user_rating else None  # Defaults to None if no rating found
-
+            total_likes = Series.objects.filter(serail=serail).aggregate(total_likes=Sum('likes'))['total_likes'] or 0
             serail_data = {
                 'name': new_name,
                 'genre': new_genre,
@@ -346,7 +349,8 @@ class SerailViewSet(viewsets.ModelViewSet):
                 'user_rating': int(user_specific_rating) if user_specific_rating else None,
                 'user_has_liked': user_has_liked,
                 'description': new_description,
-                'likes': serail.likes,
+                'likes': total_likes,
+                'comments': serail.comments.all().count(),
                 'is_new': serail.statusnew.exists(),
                 'vertical_photo': serail.vertical_photo.url if serail.vertical_photo else None,
                 'horizontal_photos': [getattr(serail, f'horizontal_photo{i}', None).url for i in range(10) if getattr(serail, f'horizontal_photo{i}', None)]
@@ -544,7 +548,12 @@ class SerailViewSet(viewsets.ModelViewSet):
         count = 18
 
         if data == 'popular':
-            serials = Serail.objects.order_by('-views')[:count]
+            serials = (Serail.objects
+                       .annotate(total_likes=Sum('series__likes'))
+                       .filter(total_likes__gt=0)  
+                       .order_by('-total_likes')[:count])
+            if not serials:
+                serials = Serail.objects.order_by('-views')[:count]
         elif data == 'new':
             serials = Serail.objects.filter(statusnew__isnull=False).order_by('-statusnew__added_date')[:count]
         elif data == 'original':
@@ -782,6 +791,42 @@ class SerailViewSet(viewsets.ModelViewSet):
         # Получаем ID серии из запроса
         series_id = request.query_params.get('series_id')
         if not series_id:
+            return Response({'error': 'Parameter "series_id" is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Проверяем, что у пользователя есть Telegram ID
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        if not tg_id:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Получаем пользователя по его Telegram ID
+        user = get_object_or_404(Users, tg_id=tg_id)
+
+        # Получаем серию и сериал, к которому она относится
+        series = get_object_or_404(Series, id=series_id)
+        serail = series.serail  # Сериал, к которому относится серия
+
+        # Проверяем, есть ли лайк на эту серию от данного пользователя
+        like = SeriesLikes.objects.filter(user=user, series=series).first()
+
+        if like:
+            # Если лайк уже существует, удаляем его и уменьшаем количество лайков
+            like.delete()
+            series.likes = F('likes') - 1
+            series.save(update_fields=['likes'])
+            return Response({"detail": f'Serial "{series.name}" removed from favorites.'}, status=status.HTTP_200_OK)
+        else:
+            # Если лайка нет, создаем его и увеличиваем количество лайков
+            SeriesLikes.objects.create(user=user, series=series)
+            series.likes = F('likes') + 1
+            series.save(update_fields=['likes'])
+            return Response({"detail": f'Serial "{series.name}" added to favorites.'}, status=status.HTTP_201_CREATED)
+
+
+    @action(detail=False, methods=['get'])
+    def like_serial(self, request):
+        # Получаем ID серии из запроса
+        series_id = request.query_params.get('series_id')
+        if not series_id:
             return Response({'error': 'Parameter "series_id" is required'}, status=400)
 
         # Проверяем, что у пользователя есть Telegram ID
@@ -792,44 +837,13 @@ class SerailViewSet(viewsets.ModelViewSet):
         # Получаем пользователя по его Telegram ID
         user = get_object_or_404(Users, tg_id=tg_id)
 
-        # Получаем серию и сериал, к которому она относится
+        # Ищем серию по ее ID
         series = get_object_or_404(Series, id=series_id)
-        serail = series.serail  # Сериал, к которому относится серия
 
-        # Проверяем, есть ли сериал в избранном пользователя
-        favorite = Favorite.objects.filter(user=user, serail=serail).first()
-
-        if favorite:
-            # Если сериал уже в избранном, удаляем его
-            favorite.delete()
-            # Уменьшаем количество лайков для всех серий данного сериала
-            series_count = Series.objects.filter(serail=serail).update(likes=F('likes') - 1)
-            return Response({"detail": f'Serial "{serail.name}" removed from favorites.'}, status=status.HTTP_200_OK)
-        else:
-            # Если нет — добавляем сериал в избранное
-            Favorite.objects.create(user=user, serail=serail)
-            # Увеличиваем количество лайков для всех серий данного сериала
-            series_count = Series.objects.filter(serail=serail).update(likes=F('likes') + 1)
-            return Response({"detail": f'Serial "{serail.name}" added to favorites.'}, status=status.HTTP_201_CREATED)
-
-
-    @action(detail=False, methods=['get'])
-    def like_serial(self, request):
-        # Получаем ID сериала из запроса
-        serail_id = request.query_params.get('serail_id')
-        if not serail_id:
-            return Response({'error': 'Parameter "serail_id" is required'}, status=400)
-
-        # Проверяем, что у пользователя есть Telegram ID
-        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
-        if not tg_id:
-            return Response({"detail": "User not found."}, status=404)
-
-        # Получаем пользователя по его Telegram ID
-        user = get_object_or_404(Users, tg_id=tg_id)
-
-        # Получаем сериал по его ID
-        serail = get_object_or_404(Serail, id=serail_id)
+        # Получаем сериал, связанный с этой серией
+        serail = series.serail
+        if not serail:
+            return Response({'error': 'Series does not have an associated serail'}, status=404)
 
         # Проверяем, есть ли сериал в избранном пользователя
         favorite = Favorite.objects.filter(user=user, serail=serail).first()
@@ -846,6 +860,40 @@ class SerailViewSet(viewsets.ModelViewSet):
             serail.likes += 1  # Увеличиваем количество лайков
             serail.save()  # Сохраняем изменения
             return Response({"detail": f'Serial "{serail.name}" added to favorites.'}, status=status.HTTP_201_CREATED)
+
+    @action(detail=False, methods=['get'])
+    def create_share_link(self, request):
+        # Получаем ID серии из запроса
+        series_id = request.query_params.get('series_id')
+        
+        # Проверка наличия series_id
+        if not series_id:
+            return Response({'error': 'series_id parameter is required'}, status=400)
+        
+        # Ищем серию по ID
+        series = get_object_or_404(Series, id=series_id)
+        
+        # Находим связанный сериал
+        serail = series.serail
+        if serail:
+            # Подготовка текста для ссылки
+            text = (
+                "\n"
+                f"Привет! Рекомендую вам посмотреть сериал {serail.name}!\n\n"
+                "🎬🍿Этот сериал получил множество положительных отзывов и наверняка вам понравится. "
+                "Насладитесь захватывающим сюжетом и незабываемыми персонажами.\n"
+                "Приятного просмотра!"
+            )
+            
+            # Кодирование текста для URL
+            encoded_text = quote(text)
+
+            # Формирование URL для дележа, только с закодированным текстом
+            share_link = f'https://t.me/share/url?text={encoded_text}&url=https://t.me/skyboxtvbot'
+            
+            return Response({'link': share_link})
+        else:
+            return Response({'error': 'Series does not have an associated serail'}, status=404)
 
 
 class StatusNewViewSet(viewsets.ModelViewSet):
@@ -1141,7 +1189,7 @@ class SeriesViewSet(viewsets.ModelViewSet):
             series_data = {
                 **self.get_serializer(series).data,
                 "serail_id": series.serail.id,  # Добавляем ID сериала
-                "is_liked": Favorite.objects.filter(user=user, serail=series.serail).exists(),  # Проверка, добавлен ли сериал в избранное
+                "is_liked": SeriesLikes.objects.filter(user=user, series=series).exists(),  # Проверка, добавлен ли сериал в избранное
                 "serail_name": new_serail_name,
                 "name": new_series_name
             }

@@ -405,3 +405,14 @@ class StartBonusSerail(models.Model):
     class Meta:
         verbose_name = 'Бонусная ссылка сериалов'
         verbose_name_plural = 'Бонусные ссылки сериалов'
+
+class SeriesLikes(models.Model):
+    series = models.ForeignKey(Series, on_delete=models.CASCADE)
+    user = models.ForeignKey(Users, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.series.name} - {self.user.tg_username}'
+
+    class Meta:
+        verbose_name = 'Лайк'
+        verbose_name_plural = 'Лайки'
