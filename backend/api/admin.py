@@ -111,20 +111,9 @@ class SerailAdmin(admin.ModelAdmin):
     fields = (
         'name',
         'vertical_photo',
-        'horizontal_photo0',
-        'horizontal_photo1',
-        'horizontal_photo2',
-        'horizontal_photo3',
-        'horizontal_photo4',
-        'horizontal_photo5',
-        'horizontal_photo6',
-        'horizontal_photo7',
-        'horizontal_photo8',
-        'horizontal_photo9',
         'genre',
         'likes',
         'rating',
-        'description',
         'is_original',
         'views',
     )
@@ -243,10 +232,7 @@ class FavoriteAdmin(admin.ModelAdmin):
 admin.site.register(Favorite, FavoriteAdmin)
 
 
-
 admin.site.register(Subscriptions)
-
-
 admin.site.register(Feasts)
 admin.site.register(Newprice)
 admin.site.register(SerailPrice)

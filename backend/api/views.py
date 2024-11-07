@@ -685,32 +685,41 @@ class SerailViewSet(viewsets.ModelViewSet):
             serail_id = serializer.validated_data['serail_id']
             new_rating = serializer.validated_data['rating']
 
+            # Получаем сериал
             serail = get_object_or_404(Serail, id=serail_id)
-            
-            # Calculate the updated rating
-            if serail.rating:
-                current_rating = float(serail.rating)
-                updated_rating = (current_rating + new_rating) / 2
-            else:
-                updated_rating = new_rating
-            
-            serail.rating = str(updated_rating)
-            serail.save()
 
-            # Retrieve the user by Telegram ID
+            # Получаем пользователя по Telegram ID
             tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+            if not tg_id:
+                return Response({"detail": "User not found."}, status=404)
+            
             user = get_object_or_404(Users, tg_id=tg_id)
 
-            # Update or create a rating entry in UserRating
-            UserRating.objects.update_or_create(
+            # Ищем текущую запись рейтинга пользователя для этого сериала
+            user_rating, created = UserRating.objects.update_or_create(
                 user=user,
                 serail=serail,
                 defaults={'rating': new_rating}
             )
 
+            if created:
+                # Если рейтинг только что создан, пересчитываем средний рейтинг с учетом новой оценки
+                total_ratings = UserRating.objects.filter(serail=serail).aggregate(Sum('rating'))['rating__sum']
+                count_ratings = UserRating.objects.filter(serail=serail).count()
+                updated_rating = total_ratings / count_ratings if count_ratings else new_rating
+            else:
+                # Если запись обновлена, просто пересчитываем средний рейтинг заново
+                total_ratings = UserRating.objects.filter(serail=serail).aggregate(Sum('rating'))['rating__sum']
+                count_ratings = UserRating.objects.filter(serail=serail).count()
+                updated_rating = total_ratings / count_ratings if count_ratings else new_rating
+
+            # Обновляем рейтинг сериала
+            serail.rating = str(updated_rating)
+            serail.save()
+
             return Response({
                 "message": "Рейтинг успешно обновлен",
-                "new_rating": round(updated_rating)
+                "rating": int(updated_rating)
             }, status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

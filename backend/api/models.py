@@ -97,7 +97,7 @@ class Serail(models.Model):
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE, null=True, related_name='serails')
     rating = models.CharField('Рейтинг', max_length=500, null=True, blank=True)
     likes = models.BigIntegerField('Лайки', default=0, null=True)
-    description = models.TextField('Описание', null=True, blank=True)
+    description = models.TextField('Описание', default="For example", null=True, blank=True)
     is_original = models.BooleanField('Является оригиналом', default=False)
     views = models.BigIntegerField('Просмотры', default=0)
 
