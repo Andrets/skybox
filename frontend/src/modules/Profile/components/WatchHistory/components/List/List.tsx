@@ -23,7 +23,7 @@ export const List = ({ data }: WatchHistoryListProps) => {
             className={styles.watchItem}
             name={el.name}
             poster={el.cover ? el.cover : ""}
-            to={`/filmInfo/${el.id}`}
+            to={`/filmVideo/${el.id}`}
           />
         );
       })}
