@@ -1203,14 +1203,20 @@ class SeriesViewSet(viewsets.ModelViewSet):
 
             new_serail_name = newtext[0]['text']
             new_series_name = newtext[1]['text']
-
+            serail = series.serail
+            favorite_count = Favorite.objects.filter(serail=serail).count()
+            user_has_favorited = Favorite.objects.filter(user=user, serail=serail).exists()
+            
             # Формируем сериализованные данные
             series_data = {
                 **self.get_serializer(series).data,
                 "serail_id": series.serail.id,  # Добавляем ID сериала
                 "is_liked": SeriesLikes.objects.filter(user=user, series=series).exists(),  # Проверка, добавлен ли сериал в избранное
                 "serail_name": new_serail_name,
-                "name": new_series_name
+                "name": new_series_name,
+                "favorite_count":favorite_count,
+                "user_has_favorited":user_has_favorited
+                
             }
             serialized_data.append(series_data)
 
