@@ -53,6 +53,7 @@ from rest_framework.response import Response
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from datetime import timedelta
+from django.db.models.functions import Cast
 from django.db.models import Count, F, Min, OuterRef, Prefetch, Q, Subquery, Max, Sum
 from django.http import StreamingHttpResponse
 from django.shortcuts import get_object_or_404
@@ -704,7 +705,7 @@ class SerailViewSet(viewsets.ModelViewSet):
 
             if created:
                 # Если рейтинг только что создан, пересчитываем средний рейтинг с учетом новой оценки
-                total_ratings = UserRating.objects.filter(serail=serail).aggregate(Sum('rating'))['rating__sum']
+                
                 count_ratings = UserRating.objects.filter(serail=serail).count()
                 updated_rating = total_ratings / count_ratings if count_ratings else new_rating
             else:
