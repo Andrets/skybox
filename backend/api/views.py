@@ -880,6 +880,7 @@ class SerailViewSet(viewsets.ModelViewSet):
     def create_share_link(self, request):
         # Получаем ID серии из запроса
         series_id = request.query_params.get('series_id')
+        user_lang = self.get_user_language()
         
         # Проверка наличия series_id
         if not series_id:
@@ -892,9 +893,12 @@ class SerailViewSet(viewsets.ModelViewSet):
         serail = series.serail
         if serail:
             # Подготовка текста для ссылки
+            texts = [serail.name]
+            newtext = self.translate_it(texts, user_lang)
+            new_name = newtext[0]['text']
             text = (
                 "\n"
-                f"Привет! Рекомендую вам посмотреть сериал {serail.name}!\n\n"
+                f"Привет! Рекомендую вам посмотреть сериал {new_name}!\n\n"
                 "🎬🍿Этот сериал получил множество положительных отзывов и наверняка вам понравится. "
                 "Насладитесь захватывающим сюжетом и незабываемыми персонажами.\n"
                 "Приятного просмотра!"
