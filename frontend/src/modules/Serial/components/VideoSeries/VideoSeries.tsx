@@ -55,7 +55,7 @@ export const VideoSeries = ({ series }: VideoSeriesProps) => {
         )
       );
     }
-  }, []);
+  }, [series]);
 
   return (
     <>

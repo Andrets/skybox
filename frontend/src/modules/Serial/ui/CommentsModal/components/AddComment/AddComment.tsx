@@ -30,7 +30,7 @@ const AddComment = () => {
           id,
           (draft) => {
             if (draft && userData) {
-              draft.push({
+              draft.unshift({
                 tg_username: userData.tg_username,
                 user_avatar: userData.photo,
                 text: commentText,

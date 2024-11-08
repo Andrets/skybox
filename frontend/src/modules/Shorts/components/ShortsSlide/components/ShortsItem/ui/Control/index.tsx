@@ -7,19 +7,15 @@ import { SideButtons } from "./SideButtons";
 import { ControlProps } from "../../model/ControlProps";
 import { VideoTimeSlider } from "./VideoTimeSlider";
 import { LoaderSpinner } from "@/ui/Icons";
+import { useAppSelector } from "@/shared/hooks/reduxTypes";
 
 export const Control = memo(
-  ({
-    isViewTimeSlider,
-    name,
-    is_liked,
-    likes,
-    episode,
-    shorts_id,
-    serail_id,
-    ...restProps
-  }: ControlProps) => {
+  ({ isViewTimeSlider, ...restProps }: ControlProps) => {
     const { viewPlay, videoIsLoading } = useContext(ShortsItemContext);
+
+    const activeShortsItemInfo = useAppSelector(
+      (state) => state.shorts.activeShortsItemInfo
+    );
 
     return (
       <div {...restProps} className={styles.control}>
@@ -36,7 +32,13 @@ export const Control = memo(
           <LoaderSpinner className={styles.loader} />
         )}
 
-        <FilmName className={styles.film} name={name} episode={episode} />
+        <FilmName
+          className={styles.film}
+          name={activeShortsItemInfo?.serail_name}
+          episode={
+            activeShortsItemInfo?.episode ? activeShortsItemInfo?.episode : ""
+          }
+        />
 
         {isViewTimeSlider && (
           <>
@@ -44,12 +46,7 @@ export const Control = memo(
           </>
         )}
 
-        <SideButtons
-          serail_id={serail_id}
-          id={shorts_id}
-          likes={likes}
-          is_liked={is_liked}
-        />
+        <SideButtons />
       </div>
     );
   }

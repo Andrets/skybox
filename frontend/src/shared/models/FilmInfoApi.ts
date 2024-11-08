@@ -44,6 +44,7 @@ export interface SeriesItem {
   serail_name: string;
   status: boolean;
   video?: string; // Видео может отсутствовать
+  is_liked: boolean;
 }
 
 export interface CheckTokenSearchQuery {

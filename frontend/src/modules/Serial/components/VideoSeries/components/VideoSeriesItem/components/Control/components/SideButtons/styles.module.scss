@@ -20,3 +20,29 @@
     }
   }
 }
+
+.likeActive {
+  path {
+    fill: var(--main-theme-color-2);
+  }
+}
+
+.likeSVG {
+  path {
+    fill: transparent;
+  }
+
+  .serialLike {
+    path {
+      fill: var(--main-theme-color-2) !important;
+      stroke: var(--main-theme-color-2);
+    }
+  }
+}
+
+.serialLikeSvg {
+  path {
+    fill: var(--main-theme-color-2) !important;
+    stroke: var(--main-theme-color-2);
+  }
+}

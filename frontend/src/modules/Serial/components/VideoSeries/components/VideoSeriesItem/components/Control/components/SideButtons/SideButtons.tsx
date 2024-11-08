@@ -19,7 +19,7 @@ import { ReactComponent as LikeSVG } from "@icons/Like.svg";
 import { ReactComponent as CommentSVG } from "@icons/Comment.svg";
 import { ReactComponent as ShareSVG } from "@icons/Share.svg";
 import { ReactComponent as EpisodeSVG } from "@icons/Episode.svg";
-import { ReactComponent as BookmarkSVG } from "@icons/Bookmark.svg";
+import { ReactComponent as BookmarkSVG } from "@icons/BookmarkWidth.svg";
 import { SideButtonPlayer } from "../../../../ui";
 import { useTranslation } from "react-i18next";
 import { useTelegram } from "@/shared/hooks/useTelegram";
@@ -38,9 +38,9 @@ const SideButtons = () => {
     (state) => state.filmVideo.isCurrentSeriesInfoData
   );
 
-  // const activeEpisode = useAppSelector(
-  //   (state) => state.filmVideo.activeEpisode
-  // );
+  const activeEpisode = useAppSelector(
+    (state) => state.filmVideo.activeEpisode
+  );
 
   const handleEpisodeBtn = () => {
     dispatch(toggleListEpisodes(true));
@@ -51,7 +51,12 @@ const SideButtons = () => {
     if (id) {
       dispatch(
         filmInfoApiSlice.util.updateQueryData("getAllSeries", id, (draft) => {
-          return draft;
+          if (draft[activeEpisode].is_liked) {
+            draft[activeEpisode].likes -= 1;
+          } else {
+            draft[activeEpisode].likes += 1;
+          }
+          draft[activeEpisode].is_liked = !draft[activeEpisode].is_liked;
         })
       );
 
@@ -67,11 +72,6 @@ const SideButtons = () => {
       if (id)
         dispatch(
           filmInfoApiSlice.util.updateQueryData("getFilmInfo", id, (draft) => {
-            if (draft.user_has_liked) {
-              draft.likes -= 1;
-            } else {
-              draft.likes += 1;
-            }
             draft.user_has_liked = !draft.user_has_liked;
             return draft;
           })
@@ -104,12 +104,27 @@ const SideButtons = () => {
       </SideButtonPlayer>
 
       <SideButtonPlayer onClick={handleLike}>
-        <LikeSVG stroke="white" width={24} height={24} />
-        25k
+        <LikeSVG
+          className={`${styles.likeSVG} ${
+            activeSeriesItemData?.is_liked ? styles.likeActive : ""
+          }`}
+          stroke={`${
+            activeSeriesItemData?.is_liked
+              ? "var(--main-theme-color-2)"
+              : "white"
+          }`}
+          width={24}
+          height={24}
+        />
+        {activeSeriesItemData?.likes}
       </SideButtonPlayer>
 
       <SideButtonPlayer onClick={handleFav}>
-        <BookmarkSVG width={24} height={30} />
+        <BookmarkSVG
+          className={filmInfoData?.user_has_liked ? styles.serialLikeSvg : ""}
+          width={24}
+          height={30}
+        />
         {t("bottomNavigation.liked")}
       </SideButtonPlayer>
 

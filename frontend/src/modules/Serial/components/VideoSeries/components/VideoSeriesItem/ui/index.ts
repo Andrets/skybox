@@ -1,1 +1,1 @@
-export { SideButtonPlayer } from "./SideButtonPlayer/SideButtonPlayer";
+export { SideButtonPlayer } from "../../../../../../../ui/SideButtonPlayer/SideButtonPlayer";
