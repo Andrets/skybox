@@ -54,7 +54,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from datetime import timedelta
 from django.db.models.functions import Cast
-from django.db.models import Count, F, Min, OuterRef, Prefetch, Q, Subquery, Max, Sum
+from django.db.models import Count, F, Min, OuterRef, Prefetch, Q, Subquery, Max, Sum, FloatField
 from django.http import StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.db.models.functions import Coalesce
