@@ -705,12 +705,16 @@ class SerailViewSet(viewsets.ModelViewSet):
 
             if created:
                 # Если рейтинг только что создан, пересчитываем средний рейтинг с учетом новой оценки
-                
+                total_rating = UserRating.objects.annotate(
+                    rating_as_int=Cast('rating', output_field=FloatField())
+                ).aggregate(Sum('rating_as_float'))
                 count_ratings = UserRating.objects.filter(serail=serail).count()
                 updated_rating = total_ratings / count_ratings if count_ratings else new_rating
             else:
                 # Если запись обновлена, просто пересчитываем средний рейтинг заново
-                total_ratings = UserRating.objects.filter(serail=serail).aggregate(Sum('rating'))['rating__sum']
+                total_rating = UserRating.objects.annotate(
+                    rating_as_int=Cast('rating', output_field=FloatField())
+                ).aggregate(Sum('rating_as_float'))
                 count_ratings = UserRating.objects.filter(serail=serail).count()
                 updated_rating = total_ratings / count_ratings if count_ratings else new_rating
 
