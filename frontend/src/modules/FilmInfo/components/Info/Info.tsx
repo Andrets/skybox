@@ -1,8 +1,8 @@
 import styles from "./styles.module.scss";
 import MainInfo from "./components/MainInfo/MainInfo";
 import { SectionHeader } from "@/ui/SectionHeader";
-import CommentsBlock from "@/modules/FilmInfo/components/Info/components/Comments/Comments";
-import AddComment from "@/modules/FilmInfo/components/Info/components/AddComment/AddComment";
+import CommentsBlock from "@/modules/Serial/ui/CommentsModal/components/Comments/Comments";
+import AddComment from "@/modules/Serial/ui/CommentsModal/components/AddComment/AddComment";
 import { ReactComponent as PlaySVG } from "@icons/Play.svg";
 import { Link, useParams } from "react-router-dom";
 import { FilmInfoProps } from "../../model/models";

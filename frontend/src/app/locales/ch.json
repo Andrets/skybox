@@ -60,7 +60,14 @@
     "male": "男士",
     "female": "女士"
   },
+  "bottomNavigation": {
+    "home": "主页",
+    "shorts": "短视频",
+    "liked": "喜欢",
+    "profile": "个人资料"
+  },
   "rateFilm": "评价电影",
+  "rate": "评价",
   "clipsNotFound": "未找到剪辑",
   "emptyWatchHistory": "观看历史为空",
   "unlockNow": "立即解锁",
@@ -68,5 +75,6 @@
   "allEpisodes": "全部 {{numEpisodes}} 集",
   "paymentSuccess": "付款成功",
   "backToHome": "返回主页",
-  "new": "新的"
+  "new": "新的",
+  "share": "分享"
 }

@@ -11,7 +11,6 @@ div.container {
   }
 
   .playBtn {
-    font-family: "SF Pro Text";
     font-size: 16px;
     font-weight: 400;
     line-height: 22px;
@@ -31,10 +30,10 @@ div.container {
     text-transform: capitalize;
     display: flex;
 
-    .txt{
-        transform: translateY(1px);
+    .txt {
+      transform: translateY(1px);
+      font-family: "Montserrat";
     }
-    
 
     svg {
       margin-right: 8px;

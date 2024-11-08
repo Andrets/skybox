@@ -1,11 +1,14 @@
 .container {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
   grid-gap: 24px 12px;
   margin-top: 16px;
   margin-bottom: 16px;
 
+  @media (max-width: 360px) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
   @media (min-width: 767px) {
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
   }
 }

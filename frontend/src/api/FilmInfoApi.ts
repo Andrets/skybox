@@ -85,9 +85,30 @@ export const filmInfoApiSlice = apiSlice.injectEndpoints({
     likeSerial: builder.mutation<unknown, string | number>({
       query: (params) => {
         return {
-          url: `/serail/like_serial?serail_id=${params}`,
+          url: `/serail/like_serial?series_id=${params}`,
           method: "GET",
         };
+      },
+    }),
+
+    likeSeries: builder.mutation<unknown, string | number>({
+      query: (params) => {
+        return {
+          url: `/serail/like_it?series_id=${params}`,
+          method: "GET",
+        };
+      },
+    }),
+
+    getShareLink: builder.query<string, string | number>({
+      query: (params) => {
+        return {
+          url: `serail/create_share_link?series_id=${params}`,
+          method: "GET",
+        };
+      },
+      transformResponse: (res: { link: string }) => {
+        return res.link;
       },
     }),
   }),
@@ -101,4 +122,6 @@ export const {
   useAddHistoryMutation,
   useLikeSerialMutation,
   useGetFilmCommentsQuery,
+  useLazyGetShareLinkQuery,
+  useLikeSeriesMutation,
 } = filmInfoApiSlice;

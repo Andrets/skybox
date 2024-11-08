@@ -1,5 +1,5 @@
+import { SeriesItem } from "@/shared/models/FilmInfoApi";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
 
 interface InitialStateModel {
   isOpenListEpisodes: boolean;
@@ -10,6 +10,9 @@ interface InitialStateModel {
   activeEpisode: number;
   paginationPage: number;
   isBlockedSlide: boolean;
+  isOpenRating: boolean;
+  isCommentsModalOpen: boolean;
+  isCurrentSeriesInfoData: null | SeriesItem;
 }
 
 const initialState: InitialStateModel = {
@@ -21,6 +24,9 @@ const initialState: InitialStateModel = {
   activeEpisode: 0,
   paginationPage: 0,
   isBlockedSlide: false,
+  isOpenRating: false,
+  isCommentsModalOpen: false,
+  isCurrentSeriesInfoData: null,
 };
 
 const filmVideoSlice = createSlice({
@@ -51,6 +57,18 @@ const filmVideoSlice = createSlice({
     setIsBlockedSlide: (state, action: PayloadAction<boolean>) => {
       state.isBlockedSlide = action.payload;
     },
+    setOpenRating: (state, action: PayloadAction<boolean>) => {
+      state.isOpenRating = action.payload;
+    },
+    setIsCommentsModalOpen: (state, action: PayloadAction<boolean>) => {
+      state.isCommentsModalOpen = action.payload;
+    },
+    setIsCurrentSeriesInfoData: (
+      state,
+      action: PayloadAction<null | SeriesItem>
+    ) => {
+      state.isCurrentSeriesInfoData = action.payload;
+    },
     resetState: () => {
       return { ...initialState };
     },
@@ -66,7 +84,10 @@ export const {
   setActiveEpisode,
   setPaginationPage,
   setIsBlockedSlide,
+  setIsCommentsModalOpen,
   resetState,
+  setOpenRating,
+  setIsCurrentSeriesInfoData,
 } = filmVideoSlice.actions;
 
 export default filmVideoSlice.reducer;

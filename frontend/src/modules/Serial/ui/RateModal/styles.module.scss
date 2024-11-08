@@ -1,0 +1,18 @@
+.childrenCont {
+  width: 100%;
+  max-width: 300px;
+  background: black;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  border-radius: 10px;
+  padding: 20px;
+  gap: 10px;
+
+  .header {
+  }
+
+  path {
+    fill: var(--main-theme-color-2);
+  }
+}

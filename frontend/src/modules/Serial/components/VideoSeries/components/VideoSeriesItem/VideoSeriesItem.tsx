@@ -12,8 +12,7 @@ import { VideoSeriesItemContext } from "@/reusable-in-pages/contexts/VideoSeries
 import { LoaderSpinner } from "@/ui/Icons";
 import { BlockSlide } from "./components";
 import { useCurrentVideoLength } from "./helpers/useCurrentVideoLength";
-import { useParams } from "react-router-dom";
-import { useGetFilmInfoQuery } from "@/api/FilmInfoApi";
+
 
 export const VideoSeriesItem = ({
   isActive = false,
@@ -28,10 +27,8 @@ export const VideoSeriesItem = ({
 
   const { videoRef, videoIsLoading } = useContext(VideoSeriesItemContext);
 
-  const { id } = useParams();
-  const { data: filmInfoData } = useGetFilmInfoQuery(id ? id : "", {
-    skip: id ? false : true,
-  });
+
+
   const {
     handleEndedVideo,
     onClickPlay,
@@ -50,16 +47,7 @@ export const VideoSeriesItem = ({
   const { onClick } = useVideoSeriesClick();
 
   if (!isAvailable) {
-    return (
-      <>
-        {isActive && (
-          <BlockSlide
-            likes={filmInfoData?.likes ? String(filmInfoData?.likes) : ""}
-            isLiked={filmInfoData?.user_has_liked ? true : false}
-          />
-        )}
-      </>
-    );
+    return <>{isActive && <BlockSlide />}</>;
   }
 
   return (

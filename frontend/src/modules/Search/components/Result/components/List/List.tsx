@@ -17,13 +17,13 @@ export const List = ({ data }: { data: SearchResultResponse["results"] }) => {
       {data.map((el) => {
         return (
           <ResultItem
-            to={`/filmInfo/${el.id}`}
+            to={`/filmVideo/${el.id}`}
             key={el.id}
             poster={el.vertical_photo ? el.vertical_photo : ""}
             header={el.name}
             category={el.genre}
             status={""}
-            description={el.description}
+           
           />
         );
       })}

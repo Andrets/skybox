@@ -1,8 +1,20 @@
 .section.header {
   padding: 0 6px;
   margin: 16px 0 0 0;
+  font-family: "Montserrat";
 }
 
-.childContainer{
-    
+.childContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 24px;
+  margin: 16px 0 0 0;
+
+  @media (min-width: 550px) {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
 }

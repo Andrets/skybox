@@ -8,7 +8,6 @@ import { Link } from "react-router-dom";
 
 export const ResultItem: FC<PeopleSearchingItemProps> = ({
   status,
-  description,
   poster,
   category,
   header,
@@ -23,7 +22,7 @@ export const ResultItem: FC<PeopleSearchingItemProps> = ({
           )}
         </>
       </Poster>
-      <Info header={header} status={status} description={description} />
+      <Info header={header} status={status} />
     </Link>
   );
 };

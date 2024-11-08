@@ -2,7 +2,7 @@ import styles from "./styles.module.scss";
 // import { useAppSelector } from "@/shared/hooks/reduxTypes";
 import { FilmName, PlayButton } from "@/reusable-in-pages/components/Video";
 import { SerialControlProps } from "@/reusable-in-pages/components/Video/models/ControlProps";
-import SideButtons from "../../ui/SideButtons/SideButtons";
+import SideButtons from "./components/SideButtons/SideButtons";
 import { useContext } from "react";
 import { VideoSeriesItemContext } from "@/reusable-in-pages/contexts/VideoSeriesItemContext/context";
 import { useParams } from "react-router-dom";
@@ -19,7 +19,6 @@ export const Control = ({
     skip: id ? false : true,
   });
 
-
   return (
     <>
       <div {...restProps} className={styles.control}>
@@ -31,14 +30,7 @@ export const Control = ({
           />
         )}
 
-        <SideButtons
-          likes={
-            typeof filmInfoData?.likes === "number"
-              ? String(filmInfoData?.likes)
-              : ""
-          }
-          isLiked={filmInfoData?.user_has_liked ? true : false}
-        />
+        <SideButtons />
 
         <FilmName
           className={styles.name}

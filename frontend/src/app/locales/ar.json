@@ -60,7 +60,14 @@
     "male": "للرجال",
     "female": "للنساء"
   },
+  "bottomNavigation": {
+    "home": "الصفحة الرئيسية",
+    "shorts": "مقاطع فيديو:ة",
+    "liked": "المفضلة",
+    "profile": "الملف الشخصي"
+  },
   "rateFilm": "قيم الفيلم",
+  "rate": "تقييم",
   "clipsNotFound": "لم يتم العثور على المقاطع",
   "emptyWatchHistory": "سجل المشاهدة فارغ",
   "unlockNow": "افتح الآن",
@@ -68,5 +75,6 @@
   "allEpisodes": "جميع {{numEpisodes}} حلقة",
   "paymentSuccess": "تم الدفع بنجاح",
   "backToHome": "العودة إلى الصفحة الرئيسية",
-  "new": "جديد"
+  "new": "جديد",
+  "share": "مشاركة"
 }

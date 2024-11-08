@@ -59,7 +59,14 @@
     "male": "남성",
     "female": "여성"
   },
+  "bottomNavigation": {
+    "home": "홈",
+    "shorts": "짧은 동영상",
+    "liked": "좋아요",
+    "profile": "프로필"
+  },
   "rateFilm": "영화 평가",
+  "rate": "평가",
   "clipsNotFound": "클립을 찾을 수 없습니다",
   "emptyWatchHistory": "시청 기록이 비어 있습니다",
   "unlockNow": "지금 잠금 해제",
@@ -67,5 +74,6 @@
   "allEpisodes": "총 {{numEpisodes}} 에피소드",
   "paymentSuccess": "결제가 완료되었습니다.",
   "backToHome": "홈으로 돌아가기",
-  "new": "새로운"
+  "new": "새로운",
+  "share": "공유"
 }

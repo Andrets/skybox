@@ -1,15 +1,17 @@
 import { BottomNavigation, BottomNavigationAction } from "@mui/material";
-import { ReactComponent as EarthIcon } from "@icons/Earth.svg";
 import { ReactComponent as ClipsIcon } from "@icons/Clips.svg";
 // import ClipsIcon from "@/ui/icons/clips/ClipsIcon";
 import styles from "./styles.module.scss";
 import { createPortal } from "react-dom";
 import { ReactComponent as BookmarkIcon } from "@icons/BookmarkWidth.svg";
 import { ReactComponent as ProfileIcon } from "@icons/Human.svg";
+import { ReactComponent as HomeSVG } from "@icons/Home.svg";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 const BottomNavigationComponent = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
 
   return (
     <>
@@ -21,11 +23,21 @@ const BottomNavigationComponent = () => {
               navigate("/");
             }}
             icon={
-              <EarthIcon
-                className={`${styles.icon} ${styles.home} ${
-                  location.pathname === "/" && styles.active
-                }`}
-              />
+              <>
+                <HomeSVG
+                  className={`${styles.icon} ${styles.home} ${
+                    location.pathname === "/" && styles.active
+                  }`}
+                />
+
+                <span
+                  className={`${styles.text} ${
+                    location.pathname === "/" && styles.active
+                  } `}
+                >
+                  {t("bottomNavigation.home")}
+                </span>
+              </>
             }
           />
           <BottomNavigationAction
@@ -34,11 +46,22 @@ const BottomNavigationComponent = () => {
               navigate("/shorts");
             }}
             icon={
-              <ClipsIcon
-                className={`${styles.clips} ${
-                  location.pathname?.includes("shorts") && styles.active
-                }`}
-              />
+              <>
+                <ClipsIcon
+                  width={23}
+                  height={23}
+                  className={`${styles.clips} ${
+                    location.pathname?.includes("shorts") && styles.active
+                  }`}
+                />
+                <span
+                  className={`${styles.text} ${
+                    location.pathname?.includes("shorts") && styles.active
+                  }`}
+                >
+                  {t("bottomNavigation.shorts")}
+                </span>
+              </>
             }
           />
 
@@ -48,11 +71,22 @@ const BottomNavigationComponent = () => {
               navigate("/likes");
             }}
             icon={
-              <BookmarkIcon
-                className={`${styles.icon} ${styles.bookmark} ${
-                  location.pathname.includes("likes") && styles.active
-                }`}
-              />
+              <>
+                <BookmarkIcon
+                  width={15}
+                  height={23}
+                  className={`${styles.icon} ${styles.bookmark} ${
+                    location.pathname.includes("likes") && styles.active
+                  }`}
+                />
+                <span
+                  className={`${styles.text} ${
+                    location.pathname.includes("likes") && styles.active
+                  }`}
+                >
+                  {t("bottomNavigation.liked")}
+                </span>
+              </>
             }
           />
 
@@ -62,11 +96,22 @@ const BottomNavigationComponent = () => {
               navigate("profile");
             }}
             icon={
-              <ProfileIcon
-                className={`${styles.icon}  ${styles.profile} ${
-                  location.pathname.includes("profile") && styles.active
-                }`}
-              />
+              <>
+                <ProfileIcon
+                  width={23}
+                  height={23}
+                  className={`${styles.icon}  ${styles.profile} ${
+                    location.pathname.includes("profile") && styles.active
+                  }`}
+                />
+                <span
+                  className={`${styles.text} ${
+                    location.pathname.includes("profile") && styles.active
+                  }`}
+                >
+                  {t("bottomNavigation.profile")}
+                </span>
+              </>
             }
           />
         </BottomNavigation>,

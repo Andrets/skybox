@@ -57,10 +57,17 @@
     "popular": "Популярные",
     "original": "Оригиналы",
     "new": "Новые",
-    "male": "Мужское",
-    "female": "Женское"
+    "male": "Он",
+    "female": "Она"
+  },
+  "bottomNavigation": {
+    "home": "Главная",
+    "shorts": "Ролики",
+    "liked": "Избранное",
+    "profile": "Профиль"
   },
   "rateFilm": "Оцени фильм",
+  "rate": "Оценить",
   "clipsNotFound": "Клипы не найдены",
   "emptyWatchHistory": "История просмотров пуста",
   "unlockNow": "Разблокировать сейчас",
@@ -68,5 +75,6 @@
   "allEpisodes": "все {{numEpisodes}} серий",
   "paymentSuccess": "Оплата успешно прошла",
   "backToHome": "Выйти на главную",
-  "new": "Новый"
+  "new": "Новый",
+  "share": "Поделиться"
 }

@@ -60,7 +60,14 @@
     "male": "Male",
     "female": "Female"
   },
+  "bottomNavigation": {
+    "home": "Home",
+    "shorts": "Shorts",
+    "liked": "Liked",
+    "profile": "Profile"
+  },
   "rateFilm": "Rate film",
+  "rate": "Rate",
   "clipsNotFound": "Clips not found",
   "emptyWatchHistory": "Watch history is empty",
   "unlockNow": "Unlock now",
@@ -68,5 +75,6 @@
   "allEpisodes": "all {{numEpisodes}} episodes",
   "paymentSuccess": "Payment successful",
   "backToHome": "Back to home",
-  "new": "New"
+  "new": "New",
+  "share": "Share"
 }

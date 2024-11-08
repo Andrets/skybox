@@ -61,7 +61,14 @@
     "male": "Erkekler",
     "female": "Kadınlar"
   },
+  "bottomNavigation": {
+    "home": "Ana Sayfa",
+    "shorts": "Kısa Videolar",
+    "liked": "Beğenilenler",
+    "profile": "Profil"
+  },
   "rateFilm": "Filmi değerlendir",
+  "rate": "Değerlendir",
   "clipsNotFound": "Klipler bulunamadı",
   "emptyWatchHistory": "İzleme geçmişi boş",
   "unlockNow": "Şimdi aç",
@@ -69,5 +76,6 @@
   "allEpisodes": "tüm {{numEpisodes}} bölüm",
   "paymentSuccess": "Ödeme başarılı",
   "backToHome": "Ana sayfaya dön",
-  "new": "Yeni"
+  "new": "Yeni",
+  "share": "Paylaş"
 }

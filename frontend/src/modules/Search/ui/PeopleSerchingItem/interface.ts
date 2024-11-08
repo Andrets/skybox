@@ -5,7 +5,6 @@ export interface IPeopleSearchingItem {
   category?: string;
   status?: string;
   header: string;
-  description: string;
 }
 
 export interface PeopleSearchingItemProps

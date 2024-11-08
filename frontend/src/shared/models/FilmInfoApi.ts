@@ -16,6 +16,7 @@ export interface FilmInfoResponse {
   is_new: boolean;
   name: string;
   rating: number;
+  comments: number;
   vertical_photo: string | null; // Могут быть строки или null
 }
 

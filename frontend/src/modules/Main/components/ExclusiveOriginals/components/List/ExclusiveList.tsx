@@ -18,7 +18,7 @@ export const ExclusiveList = ({ data }: ExclusiveListProps) => {
         return (
           <SwiperSlide key={el.id} className={styles.slide}>
             <ExclusiveFilmCard
-              to={`/filmInfo/${el.id}`}
+              to={`/filmVideo/${el.id}`}
               poster={String(el.vertical_photo)}
               name={el.name}
               category={el.genre}

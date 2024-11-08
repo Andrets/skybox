@@ -14,7 +14,6 @@ export const styleRootPreventScroll: EffectCallback = () => {
   return () => {
     document.body.style.height = "";
     document.body.style.overflow = "auto";
-    console.log('huy')
     if (root) {
       root.classList.toggle("prevent-scroll");
     }

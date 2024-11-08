@@ -1,7 +1,6 @@
-
 .list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 
   &:last-child {
     margin: 0 0 24px 0;
