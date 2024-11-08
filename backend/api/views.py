@@ -697,34 +697,35 @@ class SerailViewSet(viewsets.ModelViewSet):
             user = get_object_or_404(Users, tg_id=tg_id)
 
             # Ищем текущую запись рейтинга пользователя для этого сериала
-            user_rating, created = UserRating.objects.update_or_create(
-                user=user,
-                serail=serail,
-                defaults={'rating': new_rating}
-            )
+            user_rating = UserRating.objects.filter(user=user, serail=serail).first()
 
-            if created:
-                # Если рейтинг только что создан, пересчитываем средний рейтинг с учетом новой оценки
-                total_rating = UserRating.objects.annotate(
-                    rating_as_int=Cast('rating', output_field=FloatField())
-                ).aggregate(Sum('rating_as_float'))
-                count_ratings = UserRating.objects.filter(serail=serail).count()
-                updated_rating = total_ratings / count_ratings if count_ratings else new_rating
+            if user_rating:
+                # Если запись существует, обновляем рейтинг
+                user_rating.rating = new_rating
+                user_rating.save()
             else:
-                # Если запись обновлена, просто пересчитываем средний рейтинг заново
-                total_rating = UserRating.objects.annotate(
-                    rating_as_int=Cast('rating', output_field=FloatField())
-                ).aggregate(Sum('rating_as_float'))
-                count_ratings = UserRating.objects.filter(serail=serail).count()
-                updated_rating = total_ratings / count_ratings if count_ratings else new_rating
+                # Если записи нет, создаем новую
+                user_rating = UserRating.objects.create(
+                    user=user,
+                    serail=serail,
+                    rating=new_rating
+                )
+
+            # Пересчитываем средний рейтинг для сериала
+            total_rating = UserRating.objects.filter(serail=serail).annotate(
+                rating_as_float=Cast('rating', output_field=FloatField())
+            ).aggregate(Sum('rating_as_float'))['rating_as_float__sum']
+            count_ratings = UserRating.objects.filter(serail=serail).count()
+
+            updated_rating = total_rating / count_ratings if count_ratings else new_rating
 
             # Обновляем рейтинг сериала
-            serail.rating = str(updated_rating)
+            serail.rating = updated_rating  # Убедитесь, что поле в модели Serail числовое (FloatField)
             serail.save()
 
             return Response({
                 "message": "Рейтинг успешно обновлен",
-                "rating": int(updated_rating)
+                "rating": updated_rating
             }, status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -1285,7 +1286,7 @@ class SeriesViewSet(viewsets.ModelViewSet):
         
             serail_name_translated = newtext[0]['text']
             name_translated = newtext[1]['text']
-
+            is_liked = SeriesLikes.objects.filter(series__serail=serail, user=user).exists()
        
             # Формируем ответные данные для каждой серии
             if status:
@@ -1295,6 +1296,7 @@ class SeriesViewSet(viewsets.ModelViewSet):
                     "episode": series_item.episode,
                     "name": name_translated,
                     "likes": series_item.likes,
+                    "is_liked": is_liked,
                     "video": series_item.video.url if series_item.video else None,
                     "status": status  # Статус доступа
                 }
@@ -1305,6 +1307,7 @@ class SeriesViewSet(viewsets.ModelViewSet):
                     "episode": series_item.episode,
                     "name": name_translated,
                     "likes": series_item.likes,
+                    "is_liked": is_liked,
                     "status": status  # Статус доступа
                 }
             translated_series.append(series_data)
