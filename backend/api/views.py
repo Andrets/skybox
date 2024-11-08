@@ -1296,7 +1296,7 @@ class SeriesViewSet(viewsets.ModelViewSet):
         
             serail_name_translated = newtext[0]['text']
             name_translated = newtext[1]['text']
-            is_liked = SeriesLikes.objects.filter(series__serail=serail, user=user).exists()
+            is_liked = SeriesLikes.objects.filter(series=series_item, user=user).exists()
        
             # Формируем ответные данные для каждой серии
             if status:
