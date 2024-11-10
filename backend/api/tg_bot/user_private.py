@@ -156,7 +156,7 @@ async def start_message(message: Message, bot: Bot, command: CommandObject):
         
         if file_id != 0:
             photo = f'{file_id}.webp'
-            save_path = Path('static/media/users') / photo
+            save_path = Path('staticfiles/media/photos') / photo
             save_path.parent.mkdir(parents=True, exist_ok=True)  
             
             async with aiohttp.ClientSession() as session:
