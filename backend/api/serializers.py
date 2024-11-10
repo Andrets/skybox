@@ -46,7 +46,7 @@ class UsersSerializer(serializers.ModelSerializer):
             current_url = obj.photo.url
 
             # Заменяем часть URL на необходимую
-            new_url = current_url.replace("api/static/media/", "api/static/media/photos/")
+            new_url = current_url.replace("media/", "media/photos/")
             return new_url
         return None
 
