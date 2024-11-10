@@ -38,15 +38,15 @@ class UsersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Users
         fields = ['tg_id', 'tg_username', 'name', 'photo', 'lang', 'country', 'isActive', 'paid', 'search_history']
-        
-    def get_photo_url(self, obj):
+
+    def get_photo(self, obj):
         # Проверка, есть ли фото
         if obj.photo:
             # Получаем URL текущего фото
             current_url = obj.photo.url
 
             # Заменяем часть URL на необходимую
-            new_url = current_url.replace('/media/', '/media/photos/')
+            new_url = current_url.replace("api/static/media/", "api/static/media/photos/")
             return new_url
         return None
 
