@@ -170,7 +170,7 @@ USE_TZ = True
 
 STATIC_URL = '/api/staticfiles/'
 STATIC_ROOT = '/app/staticfiles/'
-MEDIA_URL = '/api/static/media/photos'
+MEDIA_URL = '/api/static/media/'
 MEDIA_ROOT = '/app/staticfiles/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

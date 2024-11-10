@@ -34,10 +34,21 @@ class CountrySerializer(serializers.ModelSerializer):
 class UsersSerializer(serializers.ModelSerializer):
     lang = LanguageSerializer(read_only=True) 
     country = CountrySerializer(read_only=True)
+    photo = serializers.SerializerMethodField()
     class Meta:
         model = Users
         fields = ['tg_id', 'tg_username', 'name', 'photo', 'lang', 'country', 'isActive', 'paid', 'search_history']
+        
+    def get_photo_url(self, obj):
+        # Проверка, есть ли фото
+        if obj.photo:
+            # Получаем URL текущего фото
+            current_url = obj.photo.url
 
+            # Заменяем часть URL на необходимую
+            new_url = current_url.replace('/media/', '/media/photos/')
+            return new_url
+        return None
 
 
 class AdminsSerializer(serializers.ModelSerializer):

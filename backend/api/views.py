@@ -384,9 +384,12 @@ class SerailViewSet(viewsets.ModelViewSet):
             texts = [comment.text]
             newtext = self.translate_it(texts, user_lang)
             comment_text = newtext[0]['text']
+            url = comment.user.photo.url if comment.user.photo else None
+            if url:
+                url = url.replace("api/static/media/", "api/static/media/photos/")
             comment_data = {
                 'text': comment_text,
-                'user_avatar': comment.user.photo.url if comment.user.photo else None,
+                'user_avatar': url,
                 'tg_username': comment.user.tg_username
             }
             comments_data.append(comment_data)
