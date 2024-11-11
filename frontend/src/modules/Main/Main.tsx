@@ -12,7 +12,7 @@ import useBackButton from "@/shared/hooks/useBackButton";
 
 const Main: FC = () => {
   const { t } = useTranslation();
-  useBackButton();
+  useBackButton(undefined, false);
   return (
     <>
       <div className={`${styles.container}`}>

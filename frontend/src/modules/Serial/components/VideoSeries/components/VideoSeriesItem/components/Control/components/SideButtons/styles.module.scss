@@ -21,18 +21,12 @@
   }
 }
 
-.likeActive {
-  path {
-    fill: var(--main-theme-color-2);
-  }
-}
-
 .likeSVG {
   path {
     fill: transparent;
   }
 
-  .serialLike {
+  &.likeActive {
     path {
       fill: var(--main-theme-color-2) !important;
       stroke: var(--main-theme-color-2);

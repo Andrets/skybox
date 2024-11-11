@@ -8,7 +8,7 @@ import { LoaderSpinner } from "@/ui/Icons";
 
 const Likes = () => {
   const { t } = useTranslation();
-  useBackButton();
+  useBackButton(undefined, false);
 
   const { data, isLoading } = useGetLikesQuery();
 

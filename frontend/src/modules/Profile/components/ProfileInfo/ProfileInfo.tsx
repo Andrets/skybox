@@ -1,11 +1,13 @@
 import { Avatar } from "@mui/material";
 import styles from "./styles.module.scss";
 import { WebApp } from "@/shared/constants/constants";
+import { useAuthorizationQuery } from "@/api/userApi";
 export const ProfileInfo = () => {
+  const { data } = useAuthorizationQuery();
   return (
     <div>
       <div className={`${styles.container} container `}>
-        <Avatar src={""} className={styles.avatar} />
+        <Avatar src={data?.photo} className={styles.avatar} />
 
         <div className={styles.info}>
           <p className={styles.name}>

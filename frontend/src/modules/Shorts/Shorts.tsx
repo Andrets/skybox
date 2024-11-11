@@ -20,7 +20,7 @@ const Shorts = () => {
   useBlockScroll();
   useShortsStyleRoot();
   useInfinityShorts();
-  useBackButton();
+  useBackButton(undefined, false);
 
   const dispatch = useAppDispatch();
   const swiperRef = useRef<SwiperType | null>(null);
