@@ -975,11 +975,11 @@ class HistoryViewSet(viewsets.ModelViewSet):
         body = {
             "targetLanguageCode": target_lang,
             "texts": text,
-            "folderId": 'b1guislt64fc1r7f3jab',
+            "folderId": 'b1glu7h0aiochtb691bg',
         }
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Api-Key AQVNxoGgtern_AjgdVitH5_aWDlG5sVcRK2Gc8gx"
+            "Authorization": "Api-Key AQVN0LDk_6-ucMmRXOKyGrJTgpiQ1xMf-aCbVUvJ"
         }
 
         try:
@@ -1937,11 +1937,11 @@ class FavoriteViewSet(viewsets.ModelViewSet):
         body = {
             "targetLanguageCode": target_lang,
             "texts": text,
-            "folderId": 'b1guislt64fc1r7f3jab',
+            "folderId": 'b1glu7h0aiochtb691bg',
         }
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Api-Key AQVNxoGgtern_AjgdVitH5_aWDlG5sVcRK2Gc8gx"
+            "Authorization": "Api-Key AQVN0LDk_6-ucMmRXOKyGrJTgpiQ1xMf-aCbVUvJ"
         }
 
         try:
