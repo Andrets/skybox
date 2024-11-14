@@ -46,7 +46,7 @@ from .serializers import (
 import requests
 import random
 from urllib.parse import quote
-
+from requests.auth import HTTPBasicAuth
 from rest_framework import status, viewsets, permissions, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -276,11 +276,11 @@ class SerailViewSet(viewsets.ModelViewSet):
         body = {
             "targetLanguageCode": target_lang,
             "texts": text,
-            "folderId": 'b1guislt64fc1r7f3jab',
+            "folderId": 'b1glu7h0aiochtb691bg',
         }
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Api-Key AQVNxoGgtern_AjgdVitH5_aWDlG5sVcRK2Gc8gx"
+            "Authorization": "Api-Key AQVN0LDk_6-ucMmRXOKyGrJTgpiQ1xMf-aCbVUvJ"
         }
 
         try:
@@ -1090,11 +1090,11 @@ class SeriesViewSet(viewsets.ModelViewSet):
         body = {
             "targetLanguageCode": target_lang,
             "texts": text,
-            "folderId": 'b1guislt64fc1r7f3jab',
+            "folderId": 'b1glu7h0aiochtb691bg',
         }
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Api-Key AQVNxoGgtern_AjgdVitH5_aWDlG5sVcRK2Gc8gx"
+            "Authorization": "Api-Key AQVN0LDk_6-ucMmRXOKyGrJTgpiQ1xMf-aCbVUvJ"
         }
 
         try:
@@ -1402,11 +1402,11 @@ class DocsTextsViewSet(viewsets.ModelViewSet):
         body = {
             "targetLanguageCode": target_lang,
             "texts": text,
-            "folderId": 'b1guislt64fc1r7f3jab',
+            "folderId": 'b1glu7h0aiochtb691bg',
         }
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Api-Key AQVNxoGgtern_AjgdVitH5_aWDlG5sVcRK2Gc8gx"
+            "Authorization": "Api-Key AQVN0LDk_6-ucMmRXOKyGrJTgpiQ1xMf-aCbVUvJ"
         }
 
         try:
@@ -1497,26 +1497,20 @@ class PaymentsViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def create_payment(self, request):
-        # Получение payment_id и типа подписки из параметров запроса
         payment_id = request.query_params.get('payment_id', None)
         subscription_type = request.query_params.get('subscription_type', None)
         tg_id = int(self.request.tg_user_data.get('tg_id', 0))
         user = Users.objects.filter(tg_id=tg_id).first()
-        # Проверка наличия payment_id
         if not payment_id:
             return Response({'error': 'Payment ID is required'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Получение подписки по типу
         subscriptionel = get_object_or_404(Subscriptions, subtype=subscription_type)
 
-        # Формирование idempotence_key
-        # Получаем базовые цены подписок
-        subscriptions = Subscriptions.objects.all()  # Получаем все записи подписок
+        subscriptions = Subscriptions.objects.all()  
 
         results = []
-        feast_discount = self.get_feast_discount()  # Получение скидки на праздники
+        feast_discount = self.get_feast_discount()
 
-        # Получаем персональную и групповую цены, если существуют
         personal_price = self.get_personal_price(tg_id)
 
         group_price = self.get_group_price(tg_id)
@@ -1525,26 +1519,20 @@ class PaymentsViewSet(viewsets.ModelViewSet):
             base_price = float(subscription.price)
             stars_base_price = float(subscription.stars_price)
 
-            # Если есть персональная цена, используем её
             if personal_price:
-
-                
                 if subscription.subtype == personal_price.periodtype:
 
                     base_price = float(personal_price.price)
                     stars_base_price = float(personal_price.stars_price)
 
-            # Если нет персональной цены, проверяем групповую
             elif group_price:
-                if subscription.subtype in group_price.data:  # Проверка принадлежности к группе
+                if subscription.subtype in group_price.data:
                     base_price = float(group_price.price)
                     stars_base_price = float(group_price.stars_price)
 
-            # Применяем скидки
             price_with_discount = self.get_discounted_price(base_price, int(subscription.percent))
             stars_price_with_discount = self.get_discounted_price(stars_base_price, int(subscription.stars_percent))
 
-            # Добавляем праздничные скидки
             price_with_discount = self.get_discounted_price(price_with_discount, feast_discount['percent'])
             stars_price_with_discount = self.get_discounted_price(stars_price_with_discount, feast_discount['stars_percent'])
 
@@ -1554,13 +1542,12 @@ class PaymentsViewSet(viewsets.ModelViewSet):
                 "price_in_stars": round(stars_price_with_discount, 2),
             })
         try:
-            # Получение цены подписки из модели
             price_value = 0
             for el in results:
                 if el['subtype'] == f'{subscriptionel.subtype}':
                     price_value = el['price_in_rubles']
                     break
-            idempotence_key = str(uuid.uuid4())
+            """ idempotence_key = str(uuid.uuid4())
             payment = Payment.create({
                 "payment_token": payment_id,
                 "amount": {
@@ -1574,8 +1561,24 @@ class PaymentsViewSet(viewsets.ModelViewSet):
                 "capture": True,
                 "description": f"Заказ для подписки {subscriptionel.subtype}"
             }, idempotence_key)
-            confirmation_url = payment.confirmation.confirmation_url if payment.confirmation else None
+            confirmation_url = payment.confirmation.confirmation_url if payment.confirmation else None """
 
+
+            public_id = 'pk_ce02360aa1279b7999b054b51be53'
+            api_key = '4517c9a6ac603d91e1ccef0a475f904a'
+            print(float(price_value))
+            data = {
+                "Amount": float(price_value),
+                "Currency": "RUB",
+                "IpAddress": "81.200.149.79",
+                "CardCryptogramPacket": payment_id,
+            }
+            response = requests.post(
+                f"https://api.cloudpayments.ru/payments/cards/charge",
+                json=data,
+                auth=HTTPBasicAuth(public_id, api_key)
+            )
+            print(response.status_code)
             new_payment = Payments.objects.create(
                 user=user,
                 summa=int(price_value),
@@ -1585,31 +1588,29 @@ class PaymentsViewSet(viewsets.ModelViewSet):
                 user.isActive = True
                 user.paid = True
                 user.save()
-            return Response({'status': payment.status, 'payment_id': new_payment.id}, status=status.HTTP_201_CREATED)
-
+            if response.status_code == 200:
+                return Response({'status': "succeed", 'payment_id': new_payment.id}, status=status.HTTP_201_CREATED)
+            else:
+                return Response({'error': 'CloudPaymentsERROR'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
     @action(detail=False, methods=['post'])
     def create_payment_serail(self, request):
-        # Получение payment_id и типа подписки из параметров запроса
         payment_id = request.query_params.get('payment_id', None)
         tg_id = int(self.request.tg_user_data.get('tg_id', 0))
         user = Users.objects.filter(tg_id=tg_id).first()
         
-        # Проверка наличия payment_id и пользователя
         if not payment_id:
             return Response({'error': 'Payment ID is required'}, status=status.HTTP_400_BAD_REQUEST)
         if not user:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Получение ID сериала
         serail_id = request.query_params.get('serail_id')
         if not serail_id:
             return Response({"detail": "serail_id parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Получение цены сериала
         serail_price = SerailPrice.objects.filter(serail_id=serail_id).first()
         if not serail_price:
             return Response({"detail": "Price for the specified serial not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -1617,7 +1618,6 @@ class PaymentsViewSet(viewsets.ModelViewSet):
         base_price = int(serail_price.price)
         stars_base_price = int(serail_price.stars_price)
 
-        # Применение праздничной скидки
         feast_discount = self.get_feast_discount()
         price_with_discount = self.get_discounted_price(base_price, feast_discount['percent'])
 
@@ -1626,20 +1626,21 @@ class PaymentsViewSet(viewsets.ModelViewSet):
 
         try:
             # Создание платежа
-            payment = Payment.create({
-                "payment_token": payment_id,
-                "amount": {
-                    "value": price_with_discount,
-                    "currency": "RUB"
-                },
-                "confirmation": {
-                    "type": "redirect",
-                    "return_url": "https://skybox.video/"
-                },
-                "capture": True,
-                "description": f"Заказ для сериала {serail_id}"
-            }, idempotence_key)
-            confirmation_url = payment.confirmation.confirmation_url if payment.confirmation else None
+            public_id = 'pk_ce02360aa1279b7999b054b51be53'
+            api_key = '4517c9a6ac603d91e1ccef0a475f904a'
+            print(float(price_with_discount))
+            data = {
+                "Amount": float(price_with_discount),
+                "Currency": "RUB",
+                "IpAddress": "81.200.149.79",
+                "CardCryptogramPacket": payment_id,
+            }
+            response = requests.post(
+                f"https://api.cloudpayments.ru/payments/cards/charge",
+                json=data,
+                auth=HTTPBasicAuth(public_id, api_key)
+            )
+            print(response.status_code)
 
             # Создание записи о платеже
             new_payment = Payments.objects.create(
@@ -1656,7 +1657,10 @@ class PaymentsViewSet(viewsets.ModelViewSet):
                 user.isActive = True
                 user.paid = True
                 user.save()
-            return Response({'status': payment.status, 'payment_id': new_payment.id}, status=status.HTTP_201_CREATED)
+            if response.status_code == 200:
+                return Response({'status': "succeed", 'payment_id': new_payment.id}, status=status.HTTP_201_CREATED)
+            else:
+                return Response({'error': 'CloudPaymentsERROR'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -2103,11 +2107,11 @@ class SerailPriceViewSet(viewsets.ModelViewSet):
         body = {
             "targetLanguageCode": target_lang,
             "texts": text,
-            "folderId": 'b1guislt64fc1r7f3jab',
+            "folderId": 'b1glu7h0aiochtb691bg',
         }
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Api-Key AQVNxoGgtern_AjgdVitH5_aWDlG5sVcRK2Gc8gx"
+            "Authorization": "Api-Key AQVN0LDk_6-ucMmRXOKyGrJTgpiQ1xMf-aCbVUvJ"
         }
 
         try:
