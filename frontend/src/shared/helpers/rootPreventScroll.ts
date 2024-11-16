@@ -1,7 +1,6 @@
 import { EffectCallback } from "react";
 
 export const styleRootPreventScroll: EffectCallback = () => {
-  console.log('pizda')
   document.body.style.height = "100vh";
   document.body.style.overflow = "hidden";
 

@@ -49,6 +49,7 @@
     "cardNumberRequired": "يرجى إدخال رقم البطاقة",
     "cardNumberPattern": "تنسيق رقم البطاقة غير صالح",
     "dateRequired": "يرجى إدخال تاريخ انتهاء الصلاحية",
+    "validateCardNumber": "رقم بطاقة غير صالح",
     "dateMinLength": "تنسيق التاريخ غير صالح",
     "cvvRequired": "يرجى إدخال CVV",
     "cvvMinLength": "تنسيق CVV غير صالح"

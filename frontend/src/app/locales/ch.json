@@ -48,6 +48,7 @@
   "error": {
     "cardNumberRequired": "请输入卡号",
     "cardNumberPattern": "卡号格式无效",
+    "validateCardNumber": "无效的卡号",
     "dateRequired": "请输入有效期",
     "dateMinLength": "日期格式无效",
     "cvvRequired": "请输入CVV",

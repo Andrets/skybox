@@ -8,6 +8,7 @@ export declare const window: Window &
 typeof globalThis &
   {
     YooMoneyCheckout: unknown,
+    tiptop: any,
   };
 
 interface CustomSliderEventDetail {
@@ -59,5 +60,6 @@ declare global {
         year: string,
       }) => Promise<PaymentTokenize>;
     };
+    tiptop: any;
   }
 }

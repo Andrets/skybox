@@ -48,6 +48,7 @@
   "error": {
     "cardNumberRequired": "Введите номер карты",
     "cardNumberPattern": "Неверный формат номера карты",
+    "validateCardNumber": "Неверный номер карты",
     "dateRequired": "Введите срок действия",
     "dateMinLength": "Неверный формат даты",
     "cvvRequired": "Введите CVV",

@@ -1,6 +1,5 @@
 import { AddCardContext } from "@/reusable-in-pages/contexts/AddCardContext/context";
-
-import { useYooMoneyCheckout } from "@/shared/hooks/useYooMoneyCheckout";
+import { useCloudPayments } from "@/shared/hooks/useCloudPayments";
 import { useContext } from "react";
 
 export const useGetToken = () => {
@@ -11,7 +10,7 @@ export const useGetToken = () => {
     },
   } = useContext(AddCardContext);
 
-  const checkout = useYooMoneyCheckout();
+  const checkout = useCloudPayments();
 
   const getToken = async () => {
     if (
@@ -20,11 +19,11 @@ export const useGetToken = () => {
       getValues()?.date &&
       isValid
     ) {
-      let response = await checkout.tokenize({
-        number: getValues().number.replace(/\s/g, ""),
-        cvc: getValues().cvv,
-        month: getValues().date.split("/")[0],
-        year: getValues().date.split("/")[1],
+      let response = await checkout.createPaymentCryptogram({
+        cardNumber: getValues().number,
+        cvv: getValues().cvv,
+        expDateMonth: getValues().date.split("/")[0],
+        expDateYear: getValues().date.split("/")[1],
       });
 
       return response;

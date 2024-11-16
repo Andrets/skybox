@@ -6,7 +6,6 @@ import { AddCardContext } from "@/reusable-in-pages/contexts/AddCardContext/cont
 import { useTranslation } from "react-i18next";
 import { useGetToken } from "./helpers/useGetToken";
 import useBackButton from "@/shared/hooks/useBackButton";
-import { YooMoneyCheckoutErrorList } from "@/shared/constants/constants";
 import { ReactComponent as LoaderSpinner } from "@icons/Loader.svg";
 import {
   useCreatePaymentForSerialMutation,
@@ -38,65 +37,49 @@ export const PaySubscribe = () => {
   const getToken = useGetToken();
 
   const paymentFunc = async () => {
-    const resp = await getToken();
-
-    if (resp?.data) {
-      setLoading(true);
-      if (
-        subType === SubscriptionSubtype.TEMPORARILY_MONTH ||
-        subType === SubscriptionSubtype.TEMPORARILY_WEEK ||
-        subType === SubscriptionSubtype.TEMPORARILY_YEAR
-      ) {
-        const paymentInfo = await createPaymentQuery({
-          paymentToken: resp.data.response.paymentToken,
-          subType: subType,
-        });
-
-        if (paymentInfo && paymentInfo?.data) {
-          if (paymentInfo?.data.status === "succeeded") {
-            dispatch(filmInfoApiSlice.util.invalidateTags(["Pay"]));
-            navigate("/successPayment");
-          }
-        }
-      } else {
-        const serial_id = searchParams.get("serial_id");
-        if (serial_id) {
-          const paymentInfo = await createPaymentSerial({
-            paymentToken: resp.data.response.paymentToken,
-            serial_id: serial_id,
+    try {
+      const resp = await getToken();
+      if (typeof resp === "string") {
+        setLoading(true);
+        if (
+          subType === SubscriptionSubtype.TEMPORARILY_MONTH ||
+          subType === SubscriptionSubtype.TEMPORARILY_WEEK ||
+          subType === SubscriptionSubtype.TEMPORARILY_YEAR
+        ) {
+          const paymentInfo = await createPaymentQuery({
+            paymentToken: String(resp),
+            subType: subType,
           });
 
           if (paymentInfo && paymentInfo?.data) {
-            if (paymentInfo?.data.status === "succeeded") {
+            if (paymentInfo?.data.status === "succeed") {
               dispatch(filmInfoApiSlice.util.invalidateTags(["Pay"]));
               navigate("/successPayment");
             }
           }
+        } else {
+          const serial_id = searchParams.get("serial_id");
+          if (serial_id) {
+            const paymentInfo = await createPaymentSerial({
+              paymentToken: resp,
+              serial_id: serial_id,
+            });
+
+            if (paymentInfo && paymentInfo?.data) {
+              if (paymentInfo?.data.status === "succeed") {
+                dispatch(filmInfoApiSlice.util.invalidateTags(["Pay"]));
+                navigate("/successPayment");
+              }
+            }
+          }
         }
       }
-    }
-
-    if (resp?.error) {
-      let params = resp.error.params;
-
-      for (let i = 0; i < params.length; i++) {
-        let el = params[i];
-
-        if (el.code === YooMoneyCheckoutErrorList.invalid_number) {
-          setError("number", { type: "value", message: el.message });
-        }
-
-        if (el.code === YooMoneyCheckoutErrorList.invalid_cvc) {
-          setError("cvv", { type: "value", message: el.message });
-        }
-
-        if (el.code === YooMoneyCheckoutErrorList.invalid_expiry_month) {
-          setError("date", { type: "value", message: el.message });
-        }
-
-        if (el.code === YooMoneyCheckoutErrorList.invalid_expiry_year) {
-          setError("date", { type: "value", message: el.message });
-        }
+    } catch (e: any) {
+      if (e?.cardNumber) {
+        setError("number", {
+          type: "value",
+          message: t("error.validateCardNumber"),
+        });
       }
     }
   };

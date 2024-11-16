@@ -47,6 +47,7 @@
   "error": {
     "cardNumberRequired": "카드 번호를 입력하세요.",
     "cardNumberPattern": "잘못된 카드 번호 형식입니다.",
+    "validateCardNumber": "잘못된 카드 번호",
     "dateRequired": "유효 기간을 입력하세요.",
     "dateMinLength": "잘못된 날짜 형식입니다.",
     "cvvRequired": "CVV를 입력하세요.",

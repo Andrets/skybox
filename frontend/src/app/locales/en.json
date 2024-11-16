@@ -48,6 +48,7 @@
   "error": {
     "cardNumberRequired": "Please enter card number",
     "cardNumberPattern": "Invalid card number format",
+    "validateCardNumber": "Invalid card number",
     "dateRequired": "Please enter expiration date",
     "dateMinLength": "Invalid date format",
     "cvvRequired": "Please enter CVV",

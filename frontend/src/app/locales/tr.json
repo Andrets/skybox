@@ -50,6 +50,7 @@
     "cardNumberRequired": "Kart numarasını girin",
     "cardNumberPattern": "Kart numarası hatalı formatta",
     "dateRequired": "Son kullanma tarihini girin",
+    "validateCardNumber": "Geçersiz kart numarası",
     "dateMinLength": "Tarih hatalı formatta",
     "cvvRequired": "CVV'yi girin",
     "cvvMinLength": "CVV hatalı formatta"
