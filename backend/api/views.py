@@ -1292,7 +1292,7 @@ class SeriesViewSet(viewsets.ModelViewSet):
         for series_item in series_list:
             # Проверяем доступ
             has_permission = PermissionsModel.objects.filter(user=user, series=series_item).exists()
-            status = has_subscription or has_permission or series_item.episode <= 10
+            status = has_subscription or has_permission or series_item.episode <= 5
 
             texts = [series_item.serail.name, series_item.name] 
             newtext = self.translate_it(texts, user_lang)
