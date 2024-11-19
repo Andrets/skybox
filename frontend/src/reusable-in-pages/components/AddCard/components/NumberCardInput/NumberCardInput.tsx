@@ -60,12 +60,13 @@ export const NumberCardInput = forwardRef<
 
   return (
     <AddCardInput
+      {...restProps}
       placeholder={placeholder}
       maxLength={19}
       className={`${styles.input} ${className}`}
       ref={ref}
       type="tel"
-      {...restProps}
+      value={value}
     >
       <SwitchIcon />
       {restProps.children}

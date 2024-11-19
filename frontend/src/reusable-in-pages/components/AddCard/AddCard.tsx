@@ -9,6 +9,7 @@ import {
 import { AddCardContext } from "@/reusable-in-pages/contexts/AddCardContext/context";
 import { Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 
 export const AddCardForm = ({
   className,
@@ -34,23 +35,24 @@ export const AddCardForm = ({
         <Controller
           name="number"
           control={control}
-          render={({ field }) => (
-            <NumberCardInput
-              placeholder={t("cardNumber")}
-              className={styles.input}
-              {...field}
-              ref={numberCardRef}
-            >
-              {errors.number && (
-                <span className={styles.error}>
-                  {`${errors.number.message}`}
-                </span>
-              )}
-            </NumberCardInput>
-          )}
+          render={({ field }) => {
+            return (
+              <NumberCardInput
+                {...field}
+                placeholder={t("cardNumber")}
+                className={styles.input}
+                ref={numberCardRef}
+              >
+                {errors.number && (
+                  <span className={styles.error}>
+                    {`${errors.number.message}`}
+                  </span>
+                )}
+              </NumberCardInput>
+            );
+          }}
           rules={{
             required: t("error.cardNumberRequired"),
-
             pattern: {
               value: /^(\d{4}\s?){4}$/,
               message: t("error.cardNumberPattern"),
@@ -106,6 +108,35 @@ export const AddCardForm = ({
             }}
           />
         </div>
+
+        <Controller
+          name="privacy"
+          control={control}
+          rules={{ required: true }}
+          render={({ field }) => {
+            return (
+              <label className={styles.privacy}>
+                <input
+                  {...field}
+                  checked={field.value}
+                  type="checkbox"
+                  value={undefined}
+                />
+                <span className={styles.checkboxMask}></span>
+
+                <span
+                  className={`${styles.text} ${errors.privacy && styles.error}`}
+                >
+                  {t("privacyPolicyAggrement.mainText")}
+                  <Link to="/privacyPolicy">
+                    {" "}
+                    {t("privacyPolicyAggrement.linkText")}
+                  </Link>
+                </span>
+              </label>
+            );
+          }}
+        />
       </div>
 
       {children}

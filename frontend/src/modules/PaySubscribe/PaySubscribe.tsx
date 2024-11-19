@@ -28,6 +28,7 @@ export const PaySubscribe = () => {
   const {
     formHook: {
       formState: { isValid },
+      reset,
       setError,
     },
   } = useContext(AddCardContext);
@@ -55,6 +56,7 @@ export const PaySubscribe = () => {
             if (paymentInfo?.data.status === "succeed") {
               dispatch(filmInfoApiSlice.util.invalidateTags(["Pay"]));
               navigate("/successPayment");
+              reset();
             }
           }
         } else {
@@ -69,6 +71,7 @@ export const PaySubscribe = () => {
               if (paymentInfo?.data.status === "succeed") {
                 dispatch(filmInfoApiSlice.util.invalidateTags(["Pay"]));
                 navigate("/successPayment");
+                reset();
               }
             }
           }

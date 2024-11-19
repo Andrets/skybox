@@ -12,15 +12,16 @@ import { TelegramProvider } from "./shared/hooks/useTelegram.tsx";
 import { Provider } from "react-redux";
 import store from "./app/store/store.ts";
 import "./app/locales/i18n.ts";
+import { AddCardProvider } from "./reusable-in-pages/contexts/AddCardContext/provider.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Provider store={store}>
       <TelegramProvider>
         <ThemeProvider theme={theme}>
-          <>
+          <AddCardProvider>
             <RouterProvider router={router} />
-          </>
+          </AddCardProvider>
         </ThemeProvider>
       </TelegramProvider>
     </Provider>

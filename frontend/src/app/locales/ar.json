@@ -77,5 +77,9 @@
   "paymentSuccess": "تم الدفع بنجاح",
   "backToHome": "العودة إلى الصفحة الرئيسية",
   "new": "جديد",
-  "share": "مشاركة"
+  "share": "مشاركة",
+  "privacyPolicyAggrement": {
+    "mainText": "يرجى تأكيد موافقتك على ",
+    "linkText": "سياسة الخصوصية"
+  }
 }

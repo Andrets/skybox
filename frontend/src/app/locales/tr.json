@@ -78,5 +78,9 @@
   "paymentSuccess": "Ödeme başarılı",
   "backToHome": "Ana sayfaya dön",
   "new": "Yeni",
-  "share": "Paylaş"
+  "share": "Paylaş",
+  "privacyPolicyAggrement": {
+    "mainText": "ile olan sözleşmenizi onaylayın.",
+    "linkText": "Gizlilik politikası"
+  }
 }

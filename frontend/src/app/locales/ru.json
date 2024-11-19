@@ -77,5 +77,9 @@
   "paymentSuccess": "Оплата успешно прошла",
   "backToHome": "Выйти на главную",
   "new": "Новый",
-  "share": "Поделиться"
+  "share": "Поделиться",
+  "privacyPolicyAggrement": {
+    "mainText": "Подтвердите соглашение с ",
+    "linkText": "политикой конфиденциальности"
+  }
 }
