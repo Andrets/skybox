@@ -67,6 +67,14 @@ export const BlockSlide = () => {
   };
   return (
     <>
+      {data && (
+        <SubsDrawer
+          serial_data={serialData}
+          closeClick={handleCloseClick}
+          open={modal}
+          data={data}
+        />
+      )}
       <UnlockNowButton
         onClick={handleUnlockButton}
         className={styles.unlockNowBtn}
@@ -78,14 +86,7 @@ export const BlockSlide = () => {
         <SideButtons />
       </div>
 
-      {data && (
-        <SubsDrawer
-          serial_data={serialData}
-          closeClick={handleCloseClick}
-          open={modal}
-          data={data}
-        />
-      )}
+      
     </>
   );
 };
