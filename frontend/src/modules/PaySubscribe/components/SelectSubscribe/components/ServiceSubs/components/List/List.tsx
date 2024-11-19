@@ -25,6 +25,18 @@ export const ServiceSubList = ({ data }: { data: SubscriptionPlanObject }) => {
   );
   return (
     <>
+      {serialSubData && (
+        <TypeSubscribeBanner
+          onClick={() => {
+            dispatch(setTypeSubscribe(serialSubData.serail_id));
+          }}
+          className={styles.subItem}
+          header={t("buySerial")}
+          description={t("ininfinitySerialAccess")}
+          price={<span>{serialSubData.price_in_rubles}₽ </span>}
+          isActive={typeSub === serialSubData.serail_id}
+        />
+      )}
       {data[SubscriptionSubtype.TEMPORARILY_WEEK] && (
         <TypeSubscribeBanner
           onClick={handleType(SubscriptionSubtype.TEMPORARILY_WEEK)}
@@ -72,18 +84,7 @@ export const ServiceSubList = ({ data }: { data: SubscriptionPlanObject }) => {
         />
       )}
 
-      {serialSubData && (
-        <TypeSubscribeBanner
-          onClick={() => {
-            dispatch(setTypeSubscribe(serialSubData.serail_id));
-          }}
-          className={styles.subItem}
-          header={t("buySerial")}
-          description={t("ininfinitySerialAccess")}
-          price={<span>{serialSubData.price_in_rubles}₽ </span>}
-          isActive={typeSub === serialSubData.serail_id}
-        />
-      )}
+      
     </>
   );
 };
