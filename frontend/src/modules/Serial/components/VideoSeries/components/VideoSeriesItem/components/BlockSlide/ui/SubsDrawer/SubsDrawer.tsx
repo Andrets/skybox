@@ -38,6 +38,23 @@ export const SubsDrawer = ({
         </Button>
       </div>
 
+      {serial_data && (
+        <TypeSubscribeBanner
+          onClick={clickBanner}
+          className={styles.subItem}
+          header={t("buySerial")}
+          description={`${t("infinitySerialAccess")} ${
+            serial_data.serail_name
+          }`}
+          price={
+            <span>
+              {serial_data.price_in_rubles}₽ <span>/ {t("month")}</span>
+            </span>
+          }
+          isActive={false}
+        />
+      )}
+
       {data[SubscriptionSubtype.TEMPORARILY_WEEK] && (
         <TypeSubscribeBanner
           onClick={clickBanner}
@@ -79,21 +96,6 @@ export const SubsDrawer = ({
             <span>
               {data[SubscriptionSubtype.TEMPORARILY_YEAR].price_in_rubles} ₽{" "}
               <span>/ {t("year")}</span>
-            </span>
-          }
-          isActive={false}
-        />
-      )}
-
-      {serial_data && (
-        <TypeSubscribeBanner
-          onClick={clickBanner}
-          className={styles.subItem}
-          header={t('buySerial')}
-          description={t("ininfinitySerialAccess")}
-          price={
-            <span>
-              {serial_data.price_in_rubles}₽ <span>/ {t("month")}</span>
             </span>
           }
           isActive={false}

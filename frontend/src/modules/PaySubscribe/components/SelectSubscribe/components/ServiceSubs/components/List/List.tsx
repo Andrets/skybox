@@ -23,7 +23,6 @@ export const ServiceSubList = ({ data }: { data: SubscriptionPlanObject }) => {
     searchParams.get("serial_id") ? String(searchParams.get("serial_id")) : "",
     { skip: searchParams.get("serial_id") ? false : true }
   );
-
   return (
     <>
       {serialSubData && (
@@ -33,12 +32,13 @@ export const ServiceSubList = ({ data }: { data: SubscriptionPlanObject }) => {
           }}
           className={styles.subItem}
           header={t("buySerial")}
-          description={t("ininfinitySerialAccess")}
+          description={`${t("infinitySerialAccess")} ${
+            serialSubData.serail_name
+          }`}
           price={<span>{serialSubData.price_in_rubles}₽ </span>}
           isActive={typeSub === serialSubData.serail_id}
         />
       )}
-
       {data[SubscriptionSubtype.TEMPORARILY_WEEK] && (
         <TypeSubscribeBanner
           onClick={handleType(SubscriptionSubtype.TEMPORARILY_WEEK)}
@@ -54,7 +54,6 @@ export const ServiceSubList = ({ data }: { data: SubscriptionPlanObject }) => {
           isActive={typeSub === SubscriptionSubtype.TEMPORARILY_WEEK}
         />
       )}
-
       {data[SubscriptionSubtype.TEMPORARILY_MONTH] && (
         <TypeSubscribeBanner
           className={styles.subItem}
