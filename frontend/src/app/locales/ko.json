@@ -80,5 +80,7 @@
   "privacyPolicyAggrement": {
     "mainText": "에 동의하시겠습니까?",
     "linkText": "개인정보처리방침"
-  }
+  },
+  "buySerial": "시리즈 구매",
+  "infinitySerialAccess": "시리즈 무제한 시청"
 }

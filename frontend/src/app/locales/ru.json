@@ -45,6 +45,8 @@
   "annualSubscription": "Годовая подписка",
   "monthlySubscription": "Ежемесячная подписка",
   "weeklySubscription": "Недельная подписка",
+  "buySerial": "Купить сериал",
+  "infinitySerialAccess": "Бесконечный доступ к сериалу",
   "error": {
     "cardNumberRequired": "Введите номер карты",
     "cardNumberPattern": "Неверный формат номера карты",

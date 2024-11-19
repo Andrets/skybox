@@ -81,5 +81,7 @@
   "privacyPolicyAggrement": {
     "mainText": "يرجى تأكيد موافقتك على ",
     "linkText": "سياسة الخصوصية"
-  }
+  },
+  "buySerial": "شراء المسلسل",
+  "infinitySerialAccess": "وصول غير محدود إلى المسلسل"
 }

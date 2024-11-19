@@ -81,5 +81,7 @@
   "privacyPolicyAggrement": {
     "mainText": "Confirm your agreement with the ",
     "linkText": "privacy policy"
-  }
+  },
+  "buySerial": "Buy Series",
+  "infinitySerialAccess": "Unlimited Series Access"
 }

@@ -81,5 +81,7 @@
   "privacyPolicyAggrement": {
     "mainText": "请确认您已同意 ",
     "linkText": "隐私政策"
-  }
+  },
+  "buySerial": "购买剧集",
+  "infinitySerialAccess": "无限观看剧集"
 }

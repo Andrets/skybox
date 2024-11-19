@@ -82,5 +82,7 @@
   "privacyPolicyAggrement": {
     "mainText": "ile olan sözleşmenizi onaylayın.",
     "linkText": "Gizlilik politikası"
-  }
+  },
+  "buySerial": "Dizi Satın Al",
+  "infinitySerialAccess": "Diziye Sınırsız Erişim"
 }

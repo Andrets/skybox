@@ -78,8 +78,8 @@ export const ServiceSubList = ({ data }: { data: SubscriptionPlanObject }) => {
             dispatch(setTypeSubscribe(serialSubData.serail_id));
           }}
           className={styles.subItem}
-          header={"Купить сериал"}
-          description={"Безлимитный доступ к сериалу"}
+          header={t("buySerial")}
+          description={t("ininfinitySerialAccess")}
           price={<span>{serialSubData.price_in_rubles}₽ </span>}
           isActive={typeSub === serialSubData.serail_id}
         />

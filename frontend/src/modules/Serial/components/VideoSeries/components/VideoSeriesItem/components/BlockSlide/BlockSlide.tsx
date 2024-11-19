@@ -5,15 +5,21 @@ import SideButtons from "../Control/components/SideButtons/SideButtons";
 import { useAppDispatch } from "@/shared/hooks/reduxTypes";
 import { MouseEventHandler, useEffect, useRef, useState } from "react";
 import { setIsBlockedSlide } from "@/modules/Serial/slices/FilmVideoSlice";
-import { useGetSubPricesQuery } from "@/api/userApi";
+import {
+  useGetSubPricesForSerialQuery,
+  useGetSubPricesQuery,
+} from "@/api/userApi";
+import { useParams } from "react-router-dom";
 
 export const BlockSlide = () => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const [modal, setModal] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const { id } = useParams();
 
   const { data } = useGetSubPricesQuery();
+  const { data: serialData } = useGetSubPricesForSerialQuery(String(id));
 
   useEffect(() => {
     dispatch(setIsBlockedSlide(true));
@@ -73,7 +79,12 @@ export const BlockSlide = () => {
       </div>
 
       {data && (
-        <SubsDrawer closeClick={handleCloseClick} open={modal} data={data} />
+        <SubsDrawer
+          serial_data={serialData}
+          closeClick={handleCloseClick}
+          open={modal}
+          data={data}
+        />
       )}
     </>
   );

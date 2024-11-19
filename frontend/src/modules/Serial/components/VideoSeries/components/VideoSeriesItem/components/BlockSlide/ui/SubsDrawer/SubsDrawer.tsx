@@ -9,13 +9,20 @@ import { useTranslation } from "react-i18next";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { MouseEventHandler } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { PriceResponseForSerial } from "@/shared/models/FilmInfoApi";
 
 export interface SubsDrawerProps extends DrawerProps {
   data: SubscriptionPlanObject;
+  serial_data: PriceResponseForSerial | undefined;
   closeClick: MouseEventHandler<HTMLButtonElement>;
 }
 
-export const SubsDrawer = ({ data, open, closeClick }: SubsDrawerProps) => {
+export const SubsDrawer = ({
+  data,
+  open,
+  serial_data,
+  closeClick,
+}: SubsDrawerProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams();
@@ -72,6 +79,21 @@ export const SubsDrawer = ({ data, open, closeClick }: SubsDrawerProps) => {
             <span>
               {data[SubscriptionSubtype.TEMPORARILY_YEAR].price_in_rubles} ₽{" "}
               <span>/ {t("year")}</span>
+            </span>
+          }
+          isActive={false}
+        />
+      )}
+
+      {serial_data && (
+        <TypeSubscribeBanner
+          onClick={clickBanner}
+          className={styles.subItem}
+          header={t('buySerial')}
+          description={t("ininfinitySerialAccess")}
+          price={
+            <span>
+              {serial_data.price_in_rubles}₽ <span>/ {t("month")}</span>
             </span>
           }
           isActive={false}
