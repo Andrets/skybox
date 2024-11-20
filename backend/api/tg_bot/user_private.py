@@ -67,20 +67,25 @@ def gift_most_liked_serial(user):
 #deep_link=True
 @user_private.message(CommandStart())
 async def start_message(message: Message, bot: Bot, command: CommandObject):
-
+    photo_id = "AgACAgIAAxkBAAIDo2c93w9QF8pWbpbddLjcA6uKmn3CAAJ06TEbkz7xSZDyf5fzyfu6AQADAgADeQADNgQ"
     language_code = str(message.from_user.language_code)
     if language_code == "ru":
-        await message.answer('🎬 Добро пожаловать в SKYBOX!\n'
-                            '\n'
-                            'Ваш идеальный помощник для просмотра сериалов.\n'
-                            '\n'
-                            '📺 Здесь вы можете:\n'
-                            '— Искать и находить любимые сериалы\n'
-                            '— Узнавать последние новинки\n'
-                            '— Сохранять и смотреть короткие видео\n'
-                            '\n'
-                            'Нажмите «Начать», чтобы открыть приложение и насладиться просмотром сериалов!', 
-                            reply_markup=kb.start_inline(language_code))
+        text = (
+            "Привет! Добро пожаловать в SkyboxTV 🎬"
+            "Сегодня ты — главный герой своего киноприключения!"
+            "Какую историю откроешь сейчас? Решать только тебе! 🌟"
+            "Запусти SkyboxTV, и мир микро-сериалов раскроется специально для тебя. Погружайся в захватывающие сюжеты, которые увлекут с первых секунд."
+            "Создавай свою коллекцию избранных историй, исследуй новые жанры и находи кинематографические сокровища."
+            "А мы будем радовать тебя ежедневными премьерами и эксклюзивным контентом."
+            "Не забудь про друзей — приглашай их в SkyboxTV и делитесь яркими эмоциями вместе! 🍿"
+            "SkyboxTV — твой личный кинозал в кармане. Начни своё приключение прямо сейчас! 🚀"
+        )
+        await bot.send_photo(
+            chat_id=message.chat.id,
+            photo=photo_id,
+            caption=text,
+            reply_markup=kb.start_inline(language_code)
+        )
     elif language_code == "en":
         await message.answer('🎬 Welcome to SKYBOX!\n'
                      '\n'
@@ -245,12 +250,4 @@ async def set_birthday(message: Message):
         translated_invalid_format = await translate_it([invalid_format_message], message.from_user.language_code)
         await message.answer(translated_invalid_format[0]['text'])
 
-
-@user_private.message(F.photo)
-async def get_photo_id(message: Message):
-    photo = message.photo[-1]
-    file_id = photo.file_id
-    await message.reply(f"file_id вашей фотографии: {file_id}")
-
-    
 
