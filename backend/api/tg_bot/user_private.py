@@ -87,65 +87,90 @@ async def start_message(message: Message, bot: Bot, command: CommandObject):
             reply_markup=kb.start_inline(language_code)
         )
     elif language_code == "en":
-        await message.answer('🎬 Welcome to SKYBOX!\n'
-                     '\n'
-                     'Your perfect assistant for watching TV shows.\n'
-                     '\n'
-                     '📺 Here you can:\n'
-                     '— Search and find your favorite TV shows\n'
-                     '— Discover the latest releases\n'
-                     '— Save and watch short videos\n'
-                     '\n'
-                     'Click "Start" to open the app and enjoy watching TV shows!', 
-                     reply_markup=kb.start_inline(language_code))
+        text = (
+            "Hello! Welcome to SkyboxTV 🎬\n"
+            "Today, you are the main character of your movie adventure!\n"
+            "What story will you discover now? The choice is yours! 🌟\n"
+            "Launch SkyboxTV, and the world of micro-series will unfold just for you. Dive into captivating plots that will hook you from the very first second.\n"
+            "Create your own collection of favorite stories, explore new genres, and uncover cinematic treasures.\n"
+            "We'll delight you with daily premieres and exclusive content.\n"
+            "Don't forget about your friends—invite them to SkyboxTV and share bright emotions together! 🍿\n"
+            "SkyboxTV is your personal cinema in your pocket. Start your adventure right now! 🚀"
+        )
+        await bot.send_photo(
+            chat_id=message.chat.id,
+            photo=photo_id,
+            caption=text,
+            reply_markup=kb.start_inline(language_code)
+        )
     elif language_code == "zh":
-        await message.answer('🎬 欢迎来到SKYBOX！\n'
-                     '\n'
-                     '您的最佳电视剧观看助手。\n'
-                     '\n'
-                     '📺 在这里你可以：\n'
-                     '— 搜索并找到你喜欢的电视剧\n'
-                     '— 发现最新的剧集\n'
-                     '— 保存并观看短视频\n'
-                     '\n'
-                     '点击“开始”打开应用程序，享受观看电视剧的乐趣！', 
-                     reply_markup=kb.start_inline(language_code))
+        text = (
+            "你好！欢迎来到SkyboxTV 🎬\n"
+            "今天，你是你自己电影冒险的主角！\n"
+            "现在你会选择哪一个故事呢？决定权在你手中！🌟\n"
+            "打开SkyboxTV，微型剧集的世界将为你展开。从第一秒起，就沉浸在扣人心弦的情节中。\n"
+            "创建你自己的最爱故事收藏，探索新类型，发现电影宝藏。\n"
+            "我们每天都会为你带来首映和独家内容。\n"
+            "别忘了你的朋友——邀请他们加入SkyboxTV，一起分享精彩的情感！🍿\n"
+            "SkyboxTV是你口袋里的私人电影院。现在就开始你的冒险吧！🚀"
+        )
+        await bot.send_photo(
+            chat_id=message.chat.id,
+            photo=photo_id,
+            caption=text,
+            reply_markup=kb.start_inline(language_code)
+        )
     elif language_code == "ko":
-        await message.answer('🎬 SKYBOX에 오신 것을 환영합니다!\n'
-                     '\n'
-                     '당신의 완벽한 드라마 시청 도우미입니다.\n'
-                     '\n'
-                     '📺 여기서 할 수 있는 것:\n'
-                     '— 좋아하는 드라마를 검색하고 찾기\n'
-                     '— 최신 드라마를 알아보기\n'
-                     '— 짧은 동영상을 저장하고 보기\n'
-                     '\n'
-                     '앱을 열고 드라마를 즐기려면 "시작"을 누르세요!', 
-                     reply_markup=kb.start_inline(language_code))
+        text = (
+            "안녕하세요! SkyboxTV에 오신 것을 환영합니다 🎬\n"
+            "오늘 당신은 자신의 영화 모험의 주인공입니다!\n"
+            "지금 어떤 이야기를 선택하시겠습니까? 선택은 당신의 몫입니다! 🌟\n"
+            "SkyboxTV를 실행하면 미니 시리즈의 세계가 당신을 위해 열릴 것입니다. 첫 순간부터 몰입하게 되는 흥미진진한 스토리를 즐기세요.\n"
+            "자신만의 좋아하는 이야기 컬렉션을 만들고, 새로운 장르를 탐험하며 영화 속 보물을 발견하세요.\n"
+            "우리는 매일 새로운 프리미어와 독점 콘텐츠로 당신을 기쁘게 할 것입니다.\n"
+            "친구들을 잊지 마세요—그들을 SkyboxTV로 초대하여 함께 멋진 감정을 나누세요! 🍿\n"
+            "SkyboxTV는 당신의 주머니 속 개인 영화관입니다. 지금 바로 모험을 시작하세요! 🚀"
+        )
+        await bot.send_photo(
+            chat_id=message.chat.id,
+            photo=photo_id,
+            caption=text,
+            reply_markup=kb.start_inline(language_code)
+        )
     elif language_code == "tr":
-        await message.answer('🎬 SKYBOX\'a hoş geldiniz!\n'
-                     '\n'
-                     'Dizileri izlemek için mükemmel asistanınız.\n'
-                     '\n'
-                     '📺 Burada şunları yapabilirsiniz:\n'
-                     '— Favori dizilerinizi arayın ve bulun\n'
-                     '— En son çıkanları keşfedin\n'
-                     '— Kısa videoları kaydedin ve izleyin\n'
-                     '\n'
-                     'Uygulamayı açmak ve dizilerin keyfini çıkarmak için "Başlat"a tıklayın!', 
-                     reply_markup=kb.start_inline(language_code))
+        text = (
+            "Merhaba! SkyboxTV'ye hoş geldiniz 🎬\n"
+            "Bugün, kendi film maceranızın baş kahramanısınız!\n"
+            "Şimdi hangi hikayeyi keşfedeceksiniz? Karar sizin! 🌟\n"
+            "SkyboxTV'yi başlatın ve mikro dizilerin dünyası sizin için açılacak. İlk saniyeden itibaren sizi içine çekecek büyüleyici hikayelere dalın.\n"
+            "Kendi favori hikaye koleksiyonunuzu oluşturun, yeni türleri keşfedin ve sinematik hazineleri bulun.\n"
+            "Her gün sizi yeni prömiyerler ve özel içeriklerle memnun edeceğiz.\n"
+            "Arkadaşlarınızı unutmayın—onları SkyboxTV'ye davet edin ve birlikte harika duyguları paylaşın! 🍿\n"
+            "SkyboxTV, cebinizdeki kişisel sinema salonunuzdur. Maceranıza hemen başlayın! 🚀"
+        )
+        await bot.send_photo(
+            chat_id=message.chat.id,
+            photo=photo_id,
+            caption=text,
+            reply_markup=kb.start_inline(language_code)
+        )
     elif language_code == "ar":
-        await message.answer('🎬 مرحباً بك في SKYBOX!\n'
-                     '\n'
-                     'مساعدك المثالي لمشاهدة المسلسلات.\n'
-                     '\n'
-                     '📺 هنا يمكنك:\n'
-                     '— البحث والعثور على مسلسلاتك المفضلة\n'
-                     '— اكتشاف أحدث الإصدارات\n'
-                     '— حفظ ومشاهدة الفيديوهات القصيرة\n'
-                     '\n'
-                     'اضغط على "ابدأ" لفتح التطبيق والاستمتاع بمشاهدة المسلسلات!', 
-                     reply_markup=kb.start_inline(language_code))
+        text = (
+            "مرحباً! أهلاً بك في SkyboxTV 🎬\n"
+            "اليوم، أنت بطل مغامرتك السينمائية الخاصة!\n"
+            "ما هي القصة التي ستكتشفها الآن؟ الخيار بيدك! 🌟\n"
+            "قم بتشغيل SkyboxTV، وسينفتح عالم المسلسلات القصيرة خصيصاً لك. انغمس في القصص المثيرة التي ستأسر انتباهك من اللحظة الأولى.\n"
+            "أنشئ مجموعتك الخاصة من القصص المفضلة، واستكشف أنواعاً جديدة، واكتشف الكنوز السينمائية.\n"
+            "سنبهرك يومياً بالعروض الأولى والمحتوى الحصري.\n"
+            "لا تنسَ أصدقاءك—ادعهم إلى SkyboxTV وشاركوا المشاعر الرائعة معاً! 🍿\n"
+            "SkyboxTV هو سينماك الشخصية في جيبك. ابدأ مغامرتك الآن! 🚀"
+        )
+        await bot.send_photo(
+            chat_id=message.chat.id,
+            photo=photo_id,
+            caption=text,
+            reply_markup=kb.start_inline(language_code)
+        )
 
     UserProfilePhotos = await bot.get_user_profile_photos(user_id=message.from_user.id)
     file_id = 0
