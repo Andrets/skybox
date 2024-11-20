@@ -246,29 +246,11 @@ async def set_birthday(message: Message):
         await message.answer(translated_invalid_format[0]['text'])
 
 
-@user_private.message(Command("refund"))
-async def cmd_refund(message: Message):
-    # ID транзакции для рефанда
-    # по ней можно понять, какой товар/услугу возвращает человек
-    # и по правилам ТГ, вы можете ОТКАЗАТЬ в рефанде
-    # но только в том случае, если условия отказа прописаны в Terms of Service вашего бота
-    # ...
-    # для примера, мы будем разрешать любой возврат звезд в любое время
-    text = message.text
-    m = text.replace('/refund ', '')
-    t_id = m
-
-    # чекаем, указан ли ID транзакции
-    if t_id is None:
-        await message.answer('Укажите айди')
-        return
-
-
-    await bot.refund_star_payment(
-        user_id=message.from_user.id,
-        telegram_payment_charge_id=t_id
-    )
-    await message.answer('Успешно у тебя')
+@user_private.message(F.photo)
+async def get_photo_id(message: Message):
+    photo = message.photo[-1]
+    file_id = photo.file_id
+    await message.reply(f"file_id вашей фотографии: {file_id}")
 
     
 
