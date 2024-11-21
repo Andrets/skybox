@@ -214,7 +214,12 @@ async def start_message(message: Message, bot: Bot, command: CommandObject):
         
         except ObjectDoesNotExist:
             pass
+    
+    
 
+    text4 = "Нажав кнопку start, Вы приняли согласие на обработку персональных данных"
+    text4 = await translate_it([text4], str(language_code))
+    await message.answer(text4[0]['text'])
     if user_reg:
         success = await gift_most_liked_serial(user=user_reg)
         if success:
