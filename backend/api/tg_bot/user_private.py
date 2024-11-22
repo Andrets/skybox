@@ -384,23 +384,20 @@ async def consent_callback(call: CallbackQuery):
         photo=photo, 
         lang_code=language_code
     )
-    if isinstance(F.data, MagicFilter):
-        resolved_data = F.data.resolve()  # Преобразуйте MagicFilter в допустимое значение
-    else:
-        resolved_data = F.data
-    try:
-        start_bonus = await update_code(call.message.chat.id, resolved_data)
-        if start_bonus == 500 or start_bonus == 400:  
+    if call.data != "consent_agree":
+        try:
+            start_bonus = await update_code(call.message.chat.id, call.data)
+            if start_bonus == 500 or start_bonus == 400:  
+                pass
+            else:
+            
+                await call.message.chat.id(chat_id=call.message.chat.id, text=f"Поздравляем! Бонус активирован! Сообщение от бота: {start_bonus}")
+        except ObjectDoesNotExist:
             pass
-        else:
-        
-            await call.message.chat.id(chat_id=call.message.chat.id, text=f"Поздравляем! Бонус активирован! Сообщение от бота: {start_bonus}")
-    except ObjectDoesNotExist:
-        pass
     
     
 
-    text4 =f"{F.data}"
+    text4 =f"{call.data}"
     text4 = await translate_it([text4], str(language_code))
     await message.answer(text4[0]['text'])
     if user_reg:
