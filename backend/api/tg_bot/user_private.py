@@ -95,28 +95,28 @@ async def start_message(message: Message, bot: Bot, command: CommandObject):
         reply_markup=consent_keyboard
     )
     
-    @user_private.callback_query_handler(text="consent_agree")
-    async def consent_callback(call: CallbackQuery):
-        await call.message.delete()
-        
-        # Отправляем главное сообщение
-        text = (
-            "Привет! Добро пожаловать в SkyboxTV 🎬\n"
-            "Сегодня ты — главный герой своего киноприключения!\n"
-            "Какую историю откроешь сейчас? Решать только тебе! 🌟"
-        )
-        await bot.send_photo(
-            chat_id=call.message.chat.id,
-            photo=photo_id,
-            caption=text,
-            reply_markup=kb.start_inline(language_code)
-        )
-        
-        
-        await bot.send_message(
-            chat_id=call.message.chat.id,
-            text="Хотите указать дату рождения?\nНапишите /birthday {Ваш день рождения в формате 13.06}"
-        )
+@admin_private.callback_query(F.data == 'consent_agree')
+async def consent_callback(call: CallbackQuery):
+    await call.message.delete()
+    
+    # Отправляем главное сообщение
+    text = (
+        "Привет! Добро пожаловать в SkyboxTV 🎬\n"
+        "Сегодня ты — главный герой своего киноприключения!\n"
+        "Какую историю откроешь сейчас? Решать только тебе! 🌟"
+    )
+    await bot.send_photo(
+        chat_id=call.message.chat.id,
+        photo=photo_id,
+        caption=text,
+        reply_markup=kb.start_inline(language_code)
+    )
+    
+    
+    await bot.send_message(
+        chat_id=call.message.chat.id,
+        text="Хотите указать дату рождения?\nНапишите /birthday {Ваш день рождения в формате 13.06}"
+    )
 #deep_link=True
 """ @user_private.message(CommandStart())
 async def start_message(message: Message, bot: Bot, command: CommandObject):
