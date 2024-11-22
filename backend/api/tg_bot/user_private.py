@@ -10,7 +10,7 @@ from aiogram import Bot
 from aiogram.methods.get_user_profile_photos import GetUserProfilePhotos
 from aiogram.client.bot import DefaultBotProperties
 from aiogram.enums import ParseMode
-
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from asgiref.sync import sync_to_async
 import django.contrib
 from googletrans import Translator
@@ -64,8 +64,61 @@ def gift_most_liked_serial(user):
         return True
     return False
 
-#deep_link=True
+
+
 @user_private.message(CommandStart())
+async def start_message(message: Message, bot: Bot, command: CommandObject):
+    photo_id = "AgACAgIAAxkBAAIDo2c93w9QF8pWbpbddLjcA6uKmn3CAAJ06TEbkz7xSZDyf5fzyfu6AQADAgADeQADNgQ"
+    language_code = str(message.from_user.language_code)
+    
+    consent_text = {
+        "ru": "Согласиться",
+        "en": "Agree",
+        "zh": "同意",
+        "ko": "동의하다",
+        "tr": "Kabul et",
+        "ar": "موافق"
+    }.get(language_code, "Agree")
+    
+    consent_keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text=consent_text, callback_data="consent_agree")]
+        ]
+    )
+    
+    text4 = "Нажав кнопку, вы соглашаетесь на обработку персональных данных"
+    text4 = await translate_it([text4], str(language_code))
+    
+    await bot.send_message(
+        chat_id=message.chat.id,
+        text=text4[0]['text'],
+        reply_markup=consent_keyboard
+    )
+    
+    @user_private.callback_query_handler(text="consent_agree")
+    async def consent_callback(call: CallbackQuery):
+        await call.message.delete()
+        
+        # Отправляем главное сообщение
+        text = (
+            "Привет! Добро пожаловать в SkyboxTV 🎬\n"
+            "Сегодня ты — главный герой своего киноприключения!\n"
+            "Какую историю откроешь сейчас? Решать только тебе! 🌟"
+        )
+        await bot.send_photo(
+            chat_id=call.message.chat.id,
+            photo=photo_id,
+            caption=text,
+            reply_markup=kb.start_inline(language_code)
+        )
+        
+        
+        await bot.send_message(
+            chat_id=call.message.chat.id,
+            text="Хотите указать дату рождения?\nНапишите /birthday {Ваш день рождения в формате 13.06}"
+        )
+#deep_link=True
+""" @user_private.message(CommandStart())
 async def start_message(message: Message, bot: Bot, command: CommandObject):
     photo_id = "AgACAgIAAxkBAAIDo2c93w9QF8pWbpbddLjcA6uKmn3CAAJ06TEbkz7xSZDyf5fzyfu6AQADAgADeQADNgQ"
     language_code = str(message.from_user.language_code)
@@ -232,7 +285,7 @@ async def start_message(message: Message, bot: Bot, command: CommandObject):
         await message.answer(text[0]['text'])
 
 
-
+ """
 @user_private.message(F.successful_payment)
 async def successful_payment_handler(message: Message):
     successful_payment: SuccessfulPayment = message.successful_payment
