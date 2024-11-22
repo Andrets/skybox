@@ -15,7 +15,7 @@ from asgiref.sync import sync_to_async
 import django.contrib
 from googletrans import Translator
 from django.db.models import Sum
-from aiogram.types import FSInputFile
+from aiogram.types import URLInputFile
 from api.models import Users, Series, Serail, PermissionsModel, StartBonus
 from api.tg_bot.database import  *
 from api.tg_bot.classes_functions import Admin
