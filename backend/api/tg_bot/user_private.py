@@ -241,7 +241,7 @@ async def start_message(message: Message, bot: Bot, command: CommandObject):
             )
         file_url = "https://skybox.video/api/static/media/photos/privacypolicy.pdf"
 
-        url_file = URLInputFile(file_url)
+        url_file = URLInputFile(file_url, filename="Политика конфиденциальности")
         text4 = "Нажав кнопку, вы соглашаетесь на обработку персональных данных"
         text4 = await translate_it([text4], str(language_code))
         translated_text = text4[0]['text'] 
