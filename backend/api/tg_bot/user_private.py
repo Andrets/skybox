@@ -15,7 +15,7 @@ from asgiref.sync import sync_to_async
 import django.contrib
 from googletrans import Translator
 from django.db.models import Sum
-
+from aiogram.types import FSInputFile
 from api.models import Users, Series, Serail, PermissionsModel, StartBonus
 from api.tg_bot.database import  *
 from api.tg_bot.classes_functions import Admin
@@ -239,13 +239,15 @@ async def start_message(message: Message, bot: Bot, command: CommandObject):
                     [InlineKeyboardButton(text=consent_text, callback_data="consent_agree")]
                 ]
             )
-        
+        pdf_path = "./privacypolicyf.pdf"
+        pdf_file = FSInputFile(pdf_path)
         text4 = "Нажав кнопку, вы соглашаетесь на обработку персональных данных"
         text4 = await translate_it([text4], str(language_code))
         
-        await bot.send_message(
+        await bot.send_document(
             chat_id=message.chat.id,
-            text=text4[0]['text'],
+            document=pdf_file,
+            caption=text4,
             reply_markup=consent_keyboard
         )
     
