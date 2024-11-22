@@ -239,7 +239,7 @@ async def start_message(message: Message, bot: Bot, command: CommandObject):
                     [InlineKeyboardButton(text=consent_text, callback_data="consent_agree")]
                 ]
             )
-        pdf_path = "./privacypolicyf.pdf"
+        pdf_path = "backend/api/tg_bot/privacypolicyf.pdf"
         pdf_file = FSInputFile(pdf_path)
         text4 = "Нажав кнопку, вы соглашаетесь на обработку персональных данных"
         text4 = await translate_it([text4], str(language_code))
