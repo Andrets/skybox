@@ -70,6 +70,8 @@ def gift_most_liked_serial(user):
 async def start_message(message: Message, bot: Bot, command: CommandObject):
     m = await get_user_in_db(message.from_user.id)
     language_code = str(message.from_user.language_code)
+    photo_id = "AgACAgIAAxkBAAIDo2c93w9QF8pWbpbddLjcA6uKmn3CAAJ06TEbkz7xSZDyf5fzyfu6AQADAgADeQADNgQ"
+
     if m:
         if language_code == "ru":
             text = (
@@ -397,9 +399,6 @@ async def consent_callback(call: CallbackQuery):
     
     
 
-    text4 =f"{call.data}"
-    text4 = await translate_it([text4], str(language_code))
-    await bot.send_message(chat_id=call.message.chat.id, text=text4[0]['text'])
     if user_reg:
         success = await gift_most_liked_serial(user=user_reg)
         if success:
