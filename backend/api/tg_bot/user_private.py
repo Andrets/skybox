@@ -239,15 +239,16 @@ async def start_message(message: Message, bot: Bot, command: CommandObject):
                     [InlineKeyboardButton(text=consent_text, callback_data="consent_agree")]
                 ]
             )
-        pdf_path = "backend/api/tg_bot/privacypolicyf.pdf"
-        pdf_file = FSInputFile(pdf_path)
+        file_url = "https://skybox.video/api/static/media/photos/privacypolicy.pdf"
+
+        url_file = URLInputFile(file_url)
         text4 = "Нажав кнопку, вы соглашаетесь на обработку персональных данных"
         text4 = await translate_it([text4], str(language_code))
         translated_text = text4[0]['text'] 
         await bot.send_document(
             chat_id=message.chat.id,
-            document=pdf_file,
-            caption=translated_text,  # Здесь уже строка
+            document=url_file,
+            caption=translated_text,
             reply_markup=consent_keyboard
         )
     
