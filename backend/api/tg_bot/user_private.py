@@ -384,10 +384,12 @@ async def consent_callback(call: CallbackQuery):
         photo=photo, 
         lang_code=language_code
     )
-    
+    if isinstance(F.data, MagicFilter):
+        resolved_data = F.data.resolve()  # Преобразуйте MagicFilter в допустимое значение
+    else:
+        resolved_data = F.data
     try:
-        d = F.data.resolve()
-        start_bonus = await update_code(call.message.chat.id, d)
+        start_bonus = await update_code(call.message.chat.id, resolved_data)
         if start_bonus == 500 or start_bonus == 400:  
             pass
         else:
