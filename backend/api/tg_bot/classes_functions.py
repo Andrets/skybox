@@ -11,3 +11,4 @@ class Admin(StatesGroup):
     name = State()
     genre = State()
     video = State()
+    ref = State()
