@@ -116,7 +116,11 @@ def get_users_by_subscription(segment):
 # ---------------------
 # POST
 # ---------------------
-
+@sync_to_async
+def get_user_in_db(tg_id):
+    if Users.objects.filter(tg_id=tg_id).exists():
+        return True
+    return False
 @sync_to_async
 def add_user_data(tg_id, tg_username, name, photo, lang_code):
     LANGUAGE_COUNTRY_MAP = {
