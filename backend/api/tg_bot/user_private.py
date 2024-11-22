@@ -244,10 +244,10 @@ async def start_message(message: Message, bot: Bot, command: CommandObject):
         text4 = "Нажав кнопку, вы соглашаетесь на обработку персональных данных"
         text4 = await translate_it([text4], str(language_code))
         translated_text = text4[0]['text'] 
-        await bot.send_message(
+        await bot.send_document(
             chat_id=message.chat.id,
-            text=text4[0]['text'],
-            caption=translated_text,
+            document=pdf_file,
+            caption=translated_text,  # Здесь уже строка
             reply_markup=consent_keyboard
         )
     
