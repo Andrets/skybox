@@ -68,7 +68,6 @@ def gift_most_liked_serial(user):
 
 @user_private.message(CommandStart())
 async def start_message(message: Message, bot: Bot, command: CommandObject):
-    photo_id = "AgACAgIAAxkBAAIDo2c93w9QF8pWbpbddLjcA6uKmn3CAAJ06TEbkz7xSZDyf5fzyfu6AQADAgADeQADNgQ"
     language_code = str(message.from_user.language_code)
     
     consent_text = {
@@ -97,6 +96,8 @@ async def start_message(message: Message, bot: Bot, command: CommandObject):
     
 @user_private.callback_query(F.data == 'consent_agree')
 async def consent_callback(call: CallbackQuery):
+    photo_id = "AgACAgIAAxkBAAIDo2c93w9QF8pWbpbddLjcA6uKmn3CAAJ06TEbkz7xSZDyf5fzyfu6AQADAgADeQADNgQ"
+
     await call.message.delete()
     
     # Отправляем главное сообщение
@@ -112,7 +113,13 @@ async def consent_callback(call: CallbackQuery):
         reply_markup=kb.start_inline(language_code)
     )
     
-    
+    user_reg = await add_user_data(
+        tg_id=call.from_user.id, 
+        tg_username=call.from_user.username, 
+        name=call.from_user.first_name, 
+        photo=photo, 
+        lang_code=language_code
+    )
     await bot.send_message(
         chat_id=call.message.chat.id,
         text="Хотите указать дату рождения?\nНапишите /birthday {Ваш день рождения в формате 13.06}"
