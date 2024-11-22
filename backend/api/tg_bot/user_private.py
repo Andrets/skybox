@@ -97,6 +97,7 @@ async def start_message(message: Message, bot: Bot, command: CommandObject):
 @user_private.callback_query(F.data == 'consent_agree')
 async def consent_callback(call: CallbackQuery):
     photo_id = "AgACAgIAAxkBAAIDo2c93w9QF8pWbpbddLjcA6uKmn3CAAJ06TEbkz7xSZDyf5fzyfu6AQADAgADeQADNgQ"
+    language_code = str(call.from_user.language_code)
 
     await call.message.delete()
     
