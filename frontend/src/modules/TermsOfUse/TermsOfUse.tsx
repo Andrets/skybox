@@ -9,7 +9,6 @@ import {
   TermsOfUseTr,
   TermsOfUseZh,
 } from "./trans";
-import { PrivacyPolicyTr } from "../PrivacyPolicy/trans";
 
 const c = {
   ru: <TermsOfUseRU />,
