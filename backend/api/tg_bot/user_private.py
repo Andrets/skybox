@@ -95,7 +95,7 @@ async def start_message(message: Message, bot: Bot, command: CommandObject):
         reply_markup=consent_keyboard
     )
     
-@admin_private.callback_query(F.data == 'consent_agree')
+@user_private.callback_query(F.data == 'consent_agree')
 async def consent_callback(call: CallbackQuery):
     await call.message.delete()
     
