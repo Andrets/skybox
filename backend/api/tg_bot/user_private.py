@@ -399,7 +399,7 @@ async def consent_callback(call: CallbackQuery):
 
     text4 =f"{call.data}"
     text4 = await translate_it([text4], str(language_code))
-    await message.answer(text4[0]['text'])
+    await bot.send_message(chat_id=call.message.chat.id, text=text4[0]['text'])
     if user_reg:
         success = await gift_most_liked_serial(user=user_reg)
         if success:
