@@ -243,11 +243,11 @@ async def start_message(message: Message, bot: Bot, command: CommandObject):
         pdf_file = FSInputFile(pdf_path)
         text4 = "Нажав кнопку, вы соглашаетесь на обработку персональных данных"
         text4 = await translate_it([text4], str(language_code))
-        
-        await bot.send_document(
+        translated_text = text4[0]['text'] 
+        await bot.send_message(
             chat_id=message.chat.id,
-            document=pdf_file,
-            caption=text4,
+            text=text4[0]['text'],
+            caption=translated_text,
             reply_markup=consent_keyboard
         )
     
