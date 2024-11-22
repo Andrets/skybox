@@ -24,7 +24,6 @@ export interface PriceResponseForSerial {
   serail_id: string;
   price_in_rubles: number;
   price_in_stars: number;
-  serail_name: string;
 }
 
 export interface CreateCommentQueryParams {

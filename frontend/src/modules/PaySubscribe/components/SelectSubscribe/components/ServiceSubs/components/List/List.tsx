@@ -32,9 +32,7 @@ export const ServiceSubList = ({ data }: { data: SubscriptionPlanObject }) => {
           }}
           className={styles.subItem}
           header={t("buySerial")}
-          description={`${t("infinitySerialAccess")} ${
-            serialSubData.serail_name
-          }`}
+          description={t("infinitySerialAccess")}
           price={<span>{serialSubData.price_in_rubles}₽ </span>}
           isActive={typeSub === serialSubData.serail_id}
         />

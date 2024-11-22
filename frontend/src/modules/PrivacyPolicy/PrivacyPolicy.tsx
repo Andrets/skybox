@@ -1,26 +1,34 @@
-import { useGetPolicyQuery } from "@/api/DocumentsApi";
+import { useAuthorizationQuery } from "@/api/userApi";
 import styles from "./styles.module.scss";
-import { LoaderSpinner } from "@/ui/Icons";
+
 import useBackButton from "@/shared/hooks/useBackButton";
+import {
+  PrivacyPolicyAr,
+  PrivacyPolicyEn,
+  PrivacyPolicyKo,
+  PrivacyPolicyRu,
+  PrivacyPolicyTr,
+  PrivacyPolicyZh,
+} from "./trans";
 
+const c = {
+  ru: <PrivacyPolicyRu />,
+  ar: <PrivacyPolicyAr />,
+  en: <PrivacyPolicyEn />,
+  ko: <PrivacyPolicyKo />,
+  tr: <PrivacyPolicyTr />,
+  zh: <PrivacyPolicyZh />,
+};
 const PrivacyPolicy = () => {
-  const { data, isLoading } = useGetPolicyQuery();
-
+  const { data } = useAuthorizationQuery();
   useBackButton();
 
-  if (isLoading) {
-    return (
-      <div className={`container ${styles.container} ${styles.empty}`}>
-        <LoaderSpinner />
-      </div>
-    );
-  }
-
-  if (data) {
-    return <div className={`container ${styles.container}`}>{data.text}</div>;
-  }
-
-  return <></>;
+  return (
+    <div className={`container ${styles.container}`}>
+      {" "}
+      {data && data.lang ? c[data.lang] : c.ru}
+    </div>
+  );
 };
 
 export default PrivacyPolicy;

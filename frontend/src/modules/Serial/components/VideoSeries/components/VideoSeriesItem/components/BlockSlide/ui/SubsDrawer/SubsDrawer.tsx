@@ -43,9 +43,7 @@ export const SubsDrawer = ({
           onClick={clickBanner}
           className={styles.subItem}
           header={t("buySerial")}
-          description={`${t("infinitySerialAccess")} ${
-            serial_data.serail_name
-          }`}
+          description={t("infinitySerialAccess")}
           price={
             <span>
               {serial_data.price_in_rubles}₽ <span>/ {t("month")}</span>
