@@ -240,12 +240,12 @@ async def consent_callback(call: CallbackQuery):
     )
     
     try:
-        start_bonus = await update_code(message.from_user.id, F.data)
+        start_bonus = await update_code(call.message.chat.id, F.data)
         if start_bonus == 500 or start_bonus == 400:  
             pass
         else:
         
-            await message.reply(f"Поздравляем! Бонус активирован! Сообщение от бота: {start_bonus}")
+            await call.message.chat.id(chat_id=call.message.chat.id, text=f"Поздравляем! Бонус активирован! Сообщение от бота: {start_bonus}")
     except ObjectDoesNotExist:
         pass
     
