@@ -75,7 +75,12 @@ from requests.exceptions import JSONDecodeError
 import redis
 
 # Инициализация клиента Redis
-redis_client = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
+redis_client = redis.StrictRedis(
+    host="redis",  
+    port=6379,
+    password="swydk", 
+    decode_responses=True
+)
 
 def levenshtein_distance(s1, s2):
     """Calculate the Levenshtein distance between two strings."""
@@ -1221,7 +1226,7 @@ class SeriesViewSet(viewsets.ModelViewSet):
 
         filtered_series = []
         for series in result_series:
-            has_access = active_payment or PermissionsModel.objects.filter(user=user, series=series).exists() or series.episode <= 10
+            has_access = active_payment or PermissionsModel.objects.filter(user=user, series=series).exists() or series.episode <= 8
 
             if has_access:
                 filtered_series.append(series)
