@@ -72,6 +72,10 @@ from asgiref.sync import sync_to_async, async_to_sync
 from aiogram.types import LabeledPrice, PreCheckoutQuery, SuccessfulPayment, ContentType
 import telebot
 from requests.exceptions import JSONDecodeError
+import redis
+
+# Инициализация клиента Redis
+redis_client = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
 
 def levenshtein_distance(s1, s2):
     """Calculate the Levenshtein distance between two strings."""
@@ -1086,34 +1090,74 @@ class SeriesViewSet(viewsets.ModelViewSet):
             return str(user.lang.lang_name)
         return 'en'
 
+    def check_active_payment(self, user):
+        redis_key = f"permisson:{user.id}"
+            
+        cached_permisson = redis_client.get(redis_key)
+        if cached_permisson:
+            return cached_permisson
+        one_month_ago = timezone.now() - timedelta(days=30)
+        one_year_ago = timezone.now() - timedelta(days=365)
+        active_payment = Payments.objects.filter(
+            user=user
+        ).filter(
+            Q(status=Payments.StatusEnum.ALWAYS) |  
+            (Q(status=Payments.StatusEnum.TEMPORARILY_YEAR) & Q(created_date__gte=one_year_ago)) |  
+            (Q(status=Payments.StatusEnum.TEMPORARILY_MONTH) & Q(created_date__gte=one_month_ago))  
+        ).exists()
+        if active_payment:
+            redis_client.set(redis_key, 1, ex=120)
+        else:
+            redis_client.set(redis_key, 0, ex=120)
+
+        return active_payment
+        
+
     def translate_it(self, text, target_lang):
-        body = {
-            "targetLanguageCode": target_lang,
-            "texts": text,
-            "folderId": 'b1glu7h0aiochtb691bg',
-        }
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": "Api-Key AQVN0LDk_6-ucMmRXOKyGrJTgpiQ1xMf-aCbVUvJ"
-        }
-
-        try:
-            response = requests.post(
-                'https://translate.api.cloud.yandex.net/translate/v2/translate',
-                json=body,
-                headers=headers
-            )
-            response.raise_for_status()
-            data = response.json()
-            return data.get('translations', [{'text': t} for t in text])  
-
-        except JSONDecodeError:
-            print("Не удалось декодировать JSON от API перевода.")
-            return [{'text': t} for t in text]  
-
-        except requests.RequestException as e:
-            print(f"Ошибка запроса: {e}")
-            return [{'text': t} for t in text]  
+        translations = []
+        print(target_lang)
+        for t in text:
+            redis_key = f"translation:{t}:{target_lang}"
+            
+            cached_translation = redis_client.get(redis_key)
+            if cached_translation:
+                translations.append({'text': cached_translation})
+                continue
+            
+            body = {
+                "targetLanguageCode": target_lang,
+                "texts": [t],
+                "folderId": 'b1glu7h0aiochtb691bg',
+            }
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": "Api-Key AQVN0LDk_6-ucMmRXOKyGrJTgpiQ1xMf-aCbVUvJ"
+            }
+            
+            try:
+                response = requests.post(
+                    'https://translate.api.cloud.yandex.net/translate/v2/translate',
+                    json=body,
+                    headers=headers
+                )
+                response.raise_for_status()
+                data = response.json()
+                
+                translated_text = data.get('translations', [{'text': t}])[0]['text']
+                
+                redis_client.set(redis_key, translated_text, ex=3600*2)
+                
+                translations.append({'text': translated_text})
+            
+            except JSONDecodeError:
+                print("Не удалось декодировать JSON от API перевода.")
+                translations.append({'text': t})
+            
+            except requests.RequestException as e:
+                print(f"Ошибка запроса: {e}")
+                translations.append({'text': t})
+        
+        return translations
 
     def get_queryset(self):
         tg_id = getattr(self.request, 'tg_id', None)
@@ -1152,21 +1196,10 @@ class SeriesViewSet(viewsets.ModelViewSet):
         else:
             return Response({"detail": "User not found."}, status=404)
 
-        # Получаем просмотренные серии пользователя
         viewed_series_ids = ViewedSeries.objects.filter(user=user).values_list('series_id', flat=True)
 
-        # Проверка подписки пользователя
-        one_month_ago = timezone.now() - timedelta(days=30)
-        one_year_ago = timezone.now() - timedelta(days=365)
-        active_payment = Payments.objects.filter(
-            user=user
-        ).filter(
-            Q(status=Payments.StatusEnum.ALWAYS) |  
-            (Q(status=Payments.StatusEnum.TEMPORARILY_YEAR) & Q(created_date__gte=one_year_ago)) |  
-            (Q(status=Payments.StatusEnum.TEMPORARILY_MONTH) & Q(created_date__gte=one_month_ago))  
-        ).exists()
+        active_payment = self.check_active_payment(user)
 
-        # Если активная подписка есть, выбираем все серии, иначе только эпизоды <= 10
         if active_payment:
             queryset = Series.objects.exclude(id__in=viewed_series_ids)
         else:
@@ -1175,7 +1208,6 @@ class SeriesViewSet(viewsets.ModelViewSet):
         if not queryset.exists():
             return Response({"detail": "No series available."}, status=404)
 
-        # Подбираем 20% с топа и 80% случайных
         count = queryset.count()
         top_20_percent_count = max(1, int(count * 0.2))
         random_80_percent_count = max(0, 10 - top_20_percent_count)
@@ -1184,11 +1216,9 @@ class SeriesViewSet(viewsets.ModelViewSet):
         remaining_series = queryset.exclude(id__in=top_20_percent.values_list('id', flat=True))
         random_80_percent = remaining_series.order_by('?')[:random_80_percent_count]
 
-        # Комбинируем и перемешиваем серии
         result_series = list(top_20_percent) + list(random_80_percent)
         random.shuffle(result_series)
 
-        # Проверка доступа к сериям
         filtered_series = []
         for series in result_series:
             has_access = active_payment or PermissionsModel.objects.filter(user=user, series=series).exists() or series.episode <= 10
@@ -1196,11 +1226,9 @@ class SeriesViewSet(viewsets.ModelViewSet):
             if has_access:
                 filtered_series.append(series)
 
-        # Сериализация данных с добавлением serail_id и is_liked, а также переводом нужных полей
         user_lang = self.get_user_language()
         serialized_data = []
         for series in filtered_series:
-            # Переводим только `serail.name` и `series.name`
             texts = [series.serail.name, series.name]
             newtext = self.translate_it(texts, user_lang)
 
@@ -1210,11 +1238,10 @@ class SeriesViewSet(viewsets.ModelViewSet):
             favorite_count = Favorite.objects.filter(serail=serail).count()
             user_has_favorited = Favorite.objects.filter(user=user, serail=serail).exists()
             
-            # Формируем сериализованные данные
             series_data = {
                 **self.get_serializer(series).data,
-                "serail_id": series.serail.id,  # Добавляем ID сериала
-                "is_liked": SeriesLikes.objects.filter(user=user, series=series).exists(),  # Проверка, добавлен ли сериал в избранное
+                "serail_id": series.serail.id,
+                "is_liked": SeriesLikes.objects.filter(user=user, series=series).exists(),
                 "serail_name": new_serail_name,
                 "name": new_series_name,
                 "favorite_count":favorite_count,
