@@ -1120,7 +1120,6 @@ class SeriesViewSet(viewsets.ModelViewSet):
 
     def translate_it(self, text, target_lang):
         translations = []
-        print(target_lang)
         for t in text:
             redis_key = f"translation:{t}:{target_lang}"
             
@@ -1596,8 +1595,8 @@ class PaymentsViewSet(viewsets.ModelViewSet):
             confirmation_url = payment.confirmation.confirmation_url if payment.confirmation else None """
 
 
-            public_id = 'pk_ce02360aa1279b7999b054b51be53'
-            api_key = '4517c9a6ac603d91e1ccef0a475f904a'
+            public_id = 'pk_b7bdec8e9c868a7dcd34d04fb3c3d'
+            api_key = '52d894c1c825b53685850f3a854b7bae'
             print(float(price_value))
             data = {
                 "Amount": float(price_value),
@@ -1658,8 +1657,8 @@ class PaymentsViewSet(viewsets.ModelViewSet):
 
         try:
             # Создание платежа
-            public_id = 'pk_ce02360aa1279b7999b054b51be53'
-            api_key = '4517c9a6ac603d91e1ccef0a475f904a'
+            public_id = 'pk_b7bdec8e9c868a7dcd34d04fb3c3d'
+            api_key = '52d894c1c825b53685850f3a854b7bae'
             print(float(price_with_discount))
             data = {
                 "Amount": float(price_with_discount),
