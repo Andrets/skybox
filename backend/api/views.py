@@ -1620,7 +1620,10 @@ class PaymentsViewSet(viewsets.ModelViewSet):
                 user.paid = True
                 user.save()
             if response.status_code == 200:
-                return Response({'status': "succeed", 'payment_id': new_payment.id, 'data': f"{response.json()}" }, status=status.HTTP_201_CREATED)
+                if response.json()["Success"] == True:
+                    return Response({'status': "succeed", 'payment_id': new_payment.id, 'data': f"{response.json()}" }, status=status.HTTP_201_CREATED)
+                else:
+                    return Response({'status': "declined", 'payment_id': new_payment.id, 'data': f"{response.json()}" }, status=status.HTTP_201_CREATED)
             else:
                 return Response({'error': 'CloudPaymentsERROR'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as e:
@@ -1689,7 +1692,10 @@ class PaymentsViewSet(viewsets.ModelViewSet):
                 user.paid = True
                 user.save()
             if response.status_code == 200:
-                return Response({'status': "succeed", 'payment_id': new_payment.id}, status=status.HTTP_201_CREATED)
+                if response.json()["Success"] == True:
+                    return Response({'status': "succeed", 'payment_id': new_payment.id, 'data': f"{response.json()}" }, status=status.HTTP_201_CREATED)
+                else:
+                    return Response({'status': "declined", 'payment_id': new_payment.id, 'data': f"{response.json()}" }, status=status.HTTP_201_CREATED)
             else:
                 return Response({'error': 'CloudPaymentsERROR'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
