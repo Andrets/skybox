@@ -1,7 +1,7 @@
 import threading
 from django.utils import timezone
 from datetime import timedelta
-from .models import StatusNew, Payments, Users, Series, PermissionsModel, ForBirthday
+from .models import StatusNew, Payments, Users, Series, PermissionsModel, ForBirthday, Messages
 import time
 
 def check_status_new():
