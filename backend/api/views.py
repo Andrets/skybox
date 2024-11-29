@@ -1599,7 +1599,7 @@ class PaymentsViewSet(viewsets.ModelViewSet):
             api_key = '52d894c1c825b53685850f3a854b7bae'
             print(float(price_value))
             data = {
-                "Amount": str(price_value) + ".00",
+                "Amount": str(price_value) + "0",
                 "Currency": "RUB",
                 "IpAddress": "81.200.149.79",
                 "CardCryptogramPacket": payment_id,
