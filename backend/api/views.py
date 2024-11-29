@@ -1603,6 +1603,8 @@ class PaymentsViewSet(viewsets.ModelViewSet):
                 "Currency": "RUB",
                 "IpAddress": "81.200.149.79",
                 "CardCryptogramPacket": payment_id,
+                "Name":"CARDHOLDER NAME", 
+                "Description":"Оплата товаров в example.com",
             }
             response = requests.post(
                 f"https://api.cloudpayments.ru/payments/cards/charge",
