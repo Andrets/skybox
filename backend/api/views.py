@@ -1610,6 +1610,7 @@ class PaymentsViewSet(viewsets.ModelViewSet):
                 auth=HTTPBasicAuth(public_id, api_key)
             )
             print(response.status_code)
+            print(response.json())
             new_payment = Payments.objects.create(
                 user=user,
                 summa=int(price_value),
