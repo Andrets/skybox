@@ -54,9 +54,10 @@ export const PaySubscribe = () => {
 
           if (paymentInfo && paymentInfo?.data) {
             if (paymentInfo?.data.status === "succeed") {
-              dispatch(filmInfoApiSlice.util.invalidateTags(["Pay"]));
+              alert(paymentInfo?.data)
+              /* dispatch(filmInfoApiSlice.util.invalidateTags(["Pay"]));
               navigate("/successPayment");
-              reset();
+              reset(); */
             }
           }
         } else {
