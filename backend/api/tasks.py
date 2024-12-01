@@ -40,10 +40,10 @@ def check_subscription_expiration():
                 summa=payment.summa,
                 status=Payments.StatusEnum.ONCE  # статус для истекших подписок
             )
-            Messages.objects.create(
+            """ Messages.objects.create(
                 tg_id=payment.user.tg_id,
                 data=f'Ваша подписка истекла. Пожалуйста, обновите свою подписку для продолжения доступа.'
-            )
+            ) """
             # Деактивируем пользователя
             payment.user.isActive = False
             payment.user.save()

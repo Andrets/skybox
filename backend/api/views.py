@@ -1598,7 +1598,6 @@ class PaymentsViewSet(viewsets.ModelViewSet):
             public_id = 'pk_b7bdec8e9c868a7dcd34d04fb3c3d'
             api_key = '52d894c1c825b53685850f3a854b7bae'
             print(float(price_value))
-            from base64 import b64encode
 
             data = {
                 "Amount": str(price_value) + "0",
@@ -1609,12 +1608,11 @@ class PaymentsViewSet(viewsets.ModelViewSet):
                 "Description":"Оплата товаров в example.com",
             }
             
-            auth_header = b64encode(f'{public_id}:{api_key}'.encode()).decode()
-            headers = {
-                "Authorization": f"Basic {auth_header}",
-                "Content-Type": "application/json"
-            }
-            response = requests.post(url, json=data, headers=headers)
+            response = requests.post(
+                f"https://api.cloudpayments.ru/payments/cards/charge",
+                json=data,
+                auth=HTTPBasicAuth(public_id, api_key)
+            )
             print(response.status_code)
             print(response.json())
             new_payment = Payments.objects.create(
