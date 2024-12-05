@@ -62,3 +62,4 @@ wrapt==1.16.0
 yarl==1.13.1
 yookassa==3.3.0
 redis==5.2.0
+cloudpayments==1.6.3
