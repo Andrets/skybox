@@ -23,6 +23,7 @@ from .models import (
     Tokens,
     SeriesLikes,
 )
+from cloudpayments import CloudPayments
 from .serializers import (
     UsersSerializer,
     LanguageSerializer,
@@ -1525,15 +1526,28 @@ class PaymentsViewSet(viewsets.ModelViewSet):
             
         return None
 
+    def get_pay_link(self, amount,res):
+        
+
+        public_id = 'pk_09a630484c3fe65ceb64733085d2d'
+        api_key = 'da9d495d1f33b2f1367a20f14095e5e1'
+        client = CloudPayments(public_id, api_key)
+        currency = 'RUB'
+        description = res
+
+        order = client.create_order(amount, currency, description, email=None,
+                                    send_email=None, require_confirmation=None,
+                                    invoice_id=None, account_id=None, phone=None,
+                                    send_sms=None, send_whatsapp=None, culture_info=None)
+
+        return order.number, order.url
 
     @action(detail=False, methods=['post'])
     def create_payment(self, request):
-        payment_id = request.query_params.get('payment_id', None)
         subscription_type = request.query_params.get('subscription_type', None)
         tg_id = int(self.request.tg_user_data.get('tg_id', 0))
         user = Users.objects.filter(tg_id=tg_id).first()
-        if not payment_id:
-            return Response({'error': 'Payment ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+       
 
         subscriptionel = get_object_or_404(Subscriptions, subtype=subscription_type)
 
@@ -1578,26 +1592,18 @@ class PaymentsViewSet(viewsets.ModelViewSet):
                 if el['subtype'] == f'{subscriptionel.subtype}':
                     price_value = el['price_in_rubles']
                     break
-            """ idempotence_key = str(uuid.uuid4())
-            payment = Payment.create({
-                "payment_token": payment_id,
-                "amount": {
-                    "value": price_value,
-                    "currency": "RUB"
-                },
-                "confirmation": {
-                    "type": "redirect",
-                    "return_url": "https://skybox.video/"
-                },
-                "capture": True,
-                "description": f"Заказ для подписки {subscriptionel.subtype}"
-            }, idempotence_key)
-            confirmation_url = payment.confirmation.confirmation_url if payment.confirmation else None """
+            
 
+            public_id = 'pk_09a630484c3fe65ceb64733085d2d'
+            api_key = 'da9d495d1f33b2f1367a20f14095e5e1'
+            if el['subtype'] == "TEMPORARILY_YEAR":
+                link = self.get_pay_link(float(price_value), "Доступ на год")
+            elif el['subtype'] == "TEMPORARILY_MONTH":
+                link = self.get_pay_link(float(price_value), "Доступ на месяц")
+            elif el['subtype'] == "TEMPORARILY_WEEK":
+                link = self.get_pay_link(float(price_value), "Доступ на неделю")
 
-            public_id = 'pk_b7bdec8e9c868a7dcd34d04fb3c3d'
-            api_key = '52d894c1c825b53685850f3a854b7bae'
-            print(float(price_value))
+            """  print(float(price_value))
 
             data = {
                 "Amount": str(price_value) + "0",
@@ -1623,26 +1629,51 @@ class PaymentsViewSet(viewsets.ModelViewSet):
             if not user.isActive:
                 user.isActive = True
                 user.paid = True
-                user.save()
-            if response.status_code == 200:
+                user.save() """
+            return Response({'status': "succeed", 'link': link}, status=status.HTTP_201_CREATED)
+            """ if response.status_code == 200:
                 if response.json()["Success"] == True:
                     return Response({'status': "succeed", 'payment_id': new_payment.id, 'data': f"{response.json()}" }, status=status.HTTP_201_CREATED)
                 else:
                     return Response({'status': "declined", 'payment_id': new_payment.id, 'data': f"{response.json()}" }, status=status.HTTP_400_BAD_REQUEST)
             else:
-                return Response({'error': 'CloudPaymentsERROR'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response({'error': 'CloudPaymentsERROR'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) """
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['get'])
+    def check_payment(self, request):
+        order_id = request.query_params.get('order_id', None)
+        subscription_type = request.query_params.get('subscription_type', None)
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        user = Users.objects.filter(tg_id=tg_id).first()
+        public_id = 'pk_09a630484c3fe65ceb64733085d2d'
+        api_key = 'da9d495d1f33b2f1367a20f14095e5e1'
+        data = {
+            "InvoiceId": int(order_id)
+        }
+        response = requests.post(
+            f"https://api.cloudpayments.ru/v2/payments/find",
+            json=data,
+            auth=HTTPBasicAuth(public_id, api_key)
+        )
+        new_payment = Payments.objects.create(
+            user=user,
+            summa=int(price_value),
+            status=subscription_type  
+        )
+        if not user.isActive:
+            user.isActive = True
+            user.paid = True
+            user.save()
+        return Response(response.json(), status=status.HTTP_201_CREATED)
 
 
     @action(detail=False, methods=['post'])
     def create_payment_serail(self, request):
-        payment_id = request.query_params.get('payment_id', None)
         tg_id = int(self.request.tg_user_data.get('tg_id', 0))
         user = Users.objects.filter(tg_id=tg_id).first()
-        
-        if not payment_id:
-            return Response({'error': 'Payment ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
         if not user:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -1660,56 +1691,54 @@ class PaymentsViewSet(viewsets.ModelViewSet):
         feast_discount = self.get_feast_discount()
         price_with_discount = self.get_discounted_price(base_price, feast_discount['percent'])
 
-        # Формирование idempotence_key
-        idempotence_key = str(uuid.uuid4())
-
         try:
-            # Создание платежа
-            public_id = 'pk_b7bdec8e9c868a7dcd34d04fb3c3d'
-            api_key = '52d894c1c825b53685850f3a854b7bae'
-            print(float(price_with_discount))
-            data = {
-                "Amount": float(price_with_discount),
-                "Currency": "RUB",
-                "IpAddress": "81.200.149.79",
-                "CardCryptogramPacket": payment_id,
-            }
-            response = requests.post(
-                f"https://api.cloudpayments.ru/payments/cards/charge",
-                json=data,
-                auth=HTTPBasicAuth(public_id, api_key)
-            )
-            print(response.status_code)
-
-            # Создание записи о платеже
-            new_payment = Payments.objects.create(
-                user=user,
-                summa=int(price_with_discount),
-                status=Payments.StatusEnum.ONCE
-            )
-
-            # Получаем все серии для указанного сериала и создаем доступ для каждой
-            series_list = Series.objects.filter(serail_id=serail_id)
-            for series in series_list:
-                PermissionsModel.objects.create(series=series, user=user)
-            if not user.isActive:
-                user.isActive = True
-                user.paid = True
-                user.save()
-            if response.status_code == 200:
-                if response.json()["Success"] == True:
-                    return Response({'status': "succeed", 'payment_id': new_payment.id, 'data': f"{response.json()}" }, status=status.HTTP_201_CREATED)
-                else:
-                    return Response({'status': "declined", 'payment_id': new_payment.id, 'data': f"{response.json()}" }, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                return Response({'error': 'CloudPaymentsERROR'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+            link = self.get_pay_link(float(price_with_discount), "Покупка сериала")
+            return Response({'status': "succeed", 'link': link}, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    @action(detail=False, methods=['get'])
+    def check_payment_serial(self, request):
+        order_id = request.query_params.get('order_id', None)
+        serail_id = request.query_params.get('serail_id')
+        tg_id = int(self.request.tg_user_data.get('tg_id', 0))
+        user = Users.objects.filter(tg_id=tg_id).first()
+        public_id = 'pk_09a630484c3fe65ceb64733085d2d'
+        api_key = 'da9d495d1f33b2f1367a20f14095e5e1'
+        data = {
+            "InvoiceId": int(order_id)
+        }
+        response = requests.post(
+            f"https://api.cloudpayments.ru/v2/payments/find",
+            json=data,
+            auth=HTTPBasicAuth(public_id, api_key)
+        )
+        serail_price = SerailPrice.objects.filter(serail_id=serail_id).first()
+        if not serail_price:
+            return Response({"detail": "Price for the specified serial not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        base_price = int(serail_price.price)
+        stars_base_price = int(serail_price.stars_price)
+
+        feast_discount = self.get_feast_discount()
+        price_with_discount = self.get_discounted_price(base_price, feast_discount['percent'])
+        new_payment = Payments.objects.create(
+            user=user,
+            summa=int(price_with_discount),
+            status=Payments.StatusEnum.ONCE
+        )
+
+        series_list = Series.objects.filter(serail_id=serail_id)
+        for series in series_list:
+            PermissionsModel.objects.create(series=series, user=user)
+        if not user.isActive:
+            user.isActive = True
+            user.paid = True
+            user.save()
+        return Response(response.json(), status=status.HTTP_201_CREATED)
 
     def create_invoice(self, price_value, payload):
-        prices = [telebot.types.LabeledPrice(label="Image Purchase", amount=int(price_value))]  # сумма в минимальных единицах валюты, например, 100 = 1.00 XTR
+        prices = [telebot.types.LabeledPrice(label="Image Purchase", amount=int(price_value))]
 
         # Создаем ссылку на оплату
         payment_link = bot.create_invoice_link(
