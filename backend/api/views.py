@@ -22,6 +22,7 @@ from .models import (
     UserRating,
     Tokens,
     SeriesLikes,
+    Orders,
 )
 from cloudpayments import CloudPayments
 from .serializers import (
@@ -1597,47 +1598,15 @@ class PaymentsViewSet(viewsets.ModelViewSet):
             public_id = 'pk_09a630484c3fe65ceb64733085d2d'
             api_key = 'da9d495d1f33b2f1367a20f14095e5e1'
             if el['subtype'] == "TEMPORARILY_YEAR":
-                link = self.get_pay_link(float(price_value), "Доступ на год")
+                oid, link = self.get_pay_link(float(price_value), "Доступ на год")
             elif el['subtype'] == "TEMPORARILY_MONTH":
-                link = self.get_pay_link(float(price_value), "Доступ на месяц")
+                oid, link = self.get_pay_link(float(price_value), "Доступ на месяц")
             elif el['subtype'] == "TEMPORARILY_WEEK":
-                link = self.get_pay_link(float(price_value), "Доступ на неделю")
+                oid, link = self.get_pay_link(float(price_value), "Доступ на неделю")
 
-            """  print(float(price_value))
-
-            data = {
-                "Amount": str(price_value) + "0",
-                "Currency": "RUB",
-                "IpAddress": "81.200.149.79",
-                "CardCryptogramPacket": payment_id,
-                "Name":"CARDHOLDER NAME", 
-                "Description":"Оплата товаров в example.com",
-            }
-            
-            response = requests.post(
-                f"https://api.cloudpayments.ru/payments/cards/charge",
-                json=data,
-                auth=HTTPBasicAuth(public_id, api_key)
-            )
-            print(response.status_code)
-            print(response.json())
-            new_payment = Payments.objects.create(
-                user=user,
-                summa=int(price_value),
-                status=subscription_type  
-            )
-            if not user.isActive:
-                user.isActive = True
-                user.paid = True
-                user.save() """
+            Orders.objects.create(user=user, order_id=oid, status=el['subtype'], summa=int(price_value))
             return Response({'status': "succeed", 'link': link}, status=status.HTTP_201_CREATED)
-            """ if response.status_code == 200:
-                if response.json()["Success"] == True:
-                    return Response({'status': "succeed", 'payment_id': new_payment.id, 'data': f"{response.json()}" }, status=status.HTTP_201_CREATED)
-                else:
-                    return Response({'status': "declined", 'payment_id': new_payment.id, 'data': f"{response.json()}" }, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                return Response({'error': 'CloudPaymentsERROR'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) """
+            
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -1692,7 +1661,8 @@ class PaymentsViewSet(viewsets.ModelViewSet):
         price_with_discount = self.get_discounted_price(base_price, feast_discount['percent'])
 
         try:
-            link = self.get_pay_link(float(price_with_discount), "Покупка сериала")
+            oid, link = self.get_pay_link(float(price_with_discount), "Покупка сериала")
+            Orders.objects.create(user=user, order_id=oid, status='ONCE', summa=int(price_with_discount), serail_id=serail_id)
             return Response({'status': "succeed", 'link': link}, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

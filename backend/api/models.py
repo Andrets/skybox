@@ -3,6 +3,7 @@ import rest_framework
 from .storage_backends import VideoStorage, PhotoStorage
 from django.utils.translation import gettext_lazy as _
 from django.utils.crypto import get_random_string
+from datetime import datetime
 
 class Language(models.Model):
     lang_name = models.CharField('Имя языка на анг.', null=True, max_length=300, blank=True)
@@ -416,3 +417,20 @@ class SeriesLikes(models.Model):
     class Meta:
         verbose_name = 'Лайк'
         verbose_name_plural = 'Лайки'
+
+
+class Orders(models.Model):
+    class StatusEnum(models.TextChoices):
+        TEMPORARILY_YEAR = 'TEMPORARILY_YEAR', _('TEMPORARILY_YEAR')
+        TEMPORARILY_MONTH = 'TEMPORARILY_MONTH', _('TEMPORARILY_MONTH')
+        TEMPORARILY_WEEK = 'TEMPORARILY_WEEK', _('TEMPORARILY_WEEK')
+
+        ALWAYS = 'ALWAYS', _('ALWAYS')
+        ONCE = 'ONCE', _('ONCE')
+        
+    user = models.ForeignKey(Users, on_delete=models.CASCADE)
+    order_id = models.BigIntegerField('Номер заказа', null=True, blank=True)
+    summa = models.BigIntegerField('Сумма оплаты', default=0, null=True)
+    status = models.CharField('Тип', choices=StatusEnum.choices, null=True, blank=True ,max_length=250)
+    serail_id = models.BigIntegerField('Номер сериала', null=True, blank=True)
+    created_at = models.DateTimeField(default=datetime.now)

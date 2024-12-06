@@ -29,6 +29,7 @@ from .models import (
     StartBonus,
     StartBonusSerail,
     SeriesLikes,
+    Orders,
 )
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
@@ -238,6 +239,7 @@ admin.site.register(Newprice)
 admin.site.register(SerailPrice)
 admin.site.register(UserRating)
 admin.site.register(Tokens)
+admin.site.register(Orders)
 admin.site.register(SeriesLikes)
 
 
