@@ -45,7 +45,6 @@ export const PaySubscribe = () => {
         subType: subType,
       });
       const { link, status } = paymentInfo.data;
-      const { link, status } = paymentInfo.data;
       if (link) {
         navigate("/dmca");
         window.location.href = link;
