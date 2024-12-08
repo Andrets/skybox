@@ -82,7 +82,6 @@ export interface ListLikeItem {
 }
 
 export interface CreatePaymentParams {
-  paymentToken: string;
   subType: string;
 }
 
