@@ -91,7 +91,7 @@ export interface CreatePaymentSerialParams {
 }
 
 export interface PaymentCreateStatusResponse {
-  payment_id: number;
+  link: string;
   status: string;
 }
 
