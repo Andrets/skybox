@@ -1,10 +1,9 @@
-import { SelectPayment, SelectSubscribe } from "./components";
+import { SelectSubscribe } from "./components";
 import { Button } from "@mui/material";
 import styles from "./styles.module.scss";
 import { useContext, useEffect, useState } from "react";
 import { AddCardContext } from "@/reusable-in-pages/contexts/AddCardContext/context";
 import { useTranslation } from "react-i18next";
-import { useGetToken } from "./helpers/useGetToken";
 import useBackButton from "@/shared/hooks/useBackButton";
 import { ReactComponent as LoaderSpinner } from "@icons/Loader.svg";
 import {
@@ -29,13 +28,11 @@ export const PaySubscribe = () => {
     formHook: {
       formState: { isValid },
       reset,
-      setError,
     },
   } = useContext(AddCardContext);
 
   const { t } = useTranslation();
 
-  const getToken = useGetToken();
 
   const paymentFunc = async () => {
     setLoading(true);
@@ -47,6 +44,7 @@ export const PaySubscribe = () => {
       const paymentInfo = await createPaymentQuery({
         subType: subType,
       });
+      const { link, status } = paymentInfo.data;
       const { link, status } = paymentInfo.data;
       if (link) {
         navigate("/dmca");
@@ -60,7 +58,7 @@ export const PaySubscribe = () => {
       const serial_id = searchParams.get("serial_id");
       if (serial_id) {
         const paymentInfo = await createPaymentSerial({
-          paymentToken: resp,
+          paymentToken: "someToken", // или замените на реальное значение
           serial_id: serial_id,
         });
 
@@ -140,7 +138,6 @@ export const PaySubscribe = () => {
     >
       <SelectSubscribe />
 
-      {/* <SelectPayment /> */}
 
       <div className={styles.payBtnCont}>
         <Button
