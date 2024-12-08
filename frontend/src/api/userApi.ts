@@ -107,7 +107,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
       providesTags: ["Likes"],
     }),
     createPayment: builder.mutation<
-      CreatePaymentParams
+      CreatePaymentParams, string
     >({
       query: (params) => {
         return {
