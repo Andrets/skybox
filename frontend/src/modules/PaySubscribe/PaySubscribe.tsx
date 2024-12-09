@@ -1,9 +1,10 @@
-import { SelectSubscribe } from "./components";
+import { SelectPayment, SelectSubscribe } from "./components";
 import { Button } from "@mui/material";
 import styles from "./styles.module.scss";
 import { useContext, useEffect, useState } from "react";
 import { AddCardContext } from "@/reusable-in-pages/contexts/AddCardContext/context";
 import { useTranslation } from "react-i18next";
+import { useGetToken } from "./helpers/useGetToken";
 import useBackButton from "@/shared/hooks/useBackButton";
 import { ReactComponent as LoaderSpinner } from "@icons/Loader.svg";
 import {
@@ -28,52 +29,15 @@ export const PaySubscribe = () => {
     formHook: {
       formState: { isValid },
       reset,
+      setError,
     },
   } = useContext(AddCardContext);
 
   const { t } = useTranslation();
 
+  const getToken = useGetToken();
 
   const paymentFunc = async () => {
-    setLoading(true);
-    if (
-      subType === SubscriptionSubtype.TEMPORARILY_MONTH ||
-      subType === SubscriptionSubtype.TEMPORARILY_WEEK ||
-      subType === SubscriptionSubtype.TEMPORARILY_YEAR
-    ) {
-      const paymentInfo = await createPaymentQuery({
-        subType: subType,
-      });
-      const { link, status } = paymentInfo.data;
-      if (link) {
-        navigate("/dmca");
-        window.location.href = link;
-      } else if (status === "succeed") {
-        dispatch(filmInfoApiSlice.util.invalidateTags(["Pay"]));
-        navigate("/successPayment");
-        reset();
-      }
-    } else {
-      const serial_id = searchParams.get("serial_id");
-      if (serial_id) {
-        const paymentInfo = await createPaymentSerial({
-          paymentToken: "someToken", // или замените на реальное значение
-          serial_id: serial_id,
-        });
-
-        if (paymentInfo && paymentInfo?.data) {
-          if (paymentInfo?.data.status === "succeed") {
-            dispatch(filmInfoApiSlice.util.invalidateTags(["Pay"]));
-            navigate("/successPayment");
-            reset();
-          }
-        }
-      }
-    }
-  }
-
-
- /*  const paymentFunc = async () => {
     try {
       const resp = await getToken();
       if (typeof resp === "string") {
@@ -121,7 +85,7 @@ export const PaySubscribe = () => {
         });
       }
     }
-  }; */
+  };
 
   useEffect(() => {
     document.body.style.overflow = "auto";
@@ -137,6 +101,7 @@ export const PaySubscribe = () => {
     >
       <SelectSubscribe />
 
+      <SelectPayment />
 
       <div className={styles.payBtnCont}>
         <Button

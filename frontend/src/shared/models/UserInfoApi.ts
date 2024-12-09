@@ -82,6 +82,7 @@ export interface ListLikeItem {
 }
 
 export interface CreatePaymentParams {
+  paymentToken: string;
   subType: string;
 }
 
@@ -91,7 +92,7 @@ export interface CreatePaymentSerialParams {
 }
 
 export interface PaymentCreateStatusResponse {
-  link: string;
+  payment_id: number;
   status: string;
 }
 
@@ -100,7 +101,6 @@ export function isSubscriptionSubtype(
 ): value is SubscriptionSubtype {
   return Object.values(SubscriptionSubtype).includes(value);
 }
-
 
 export interface TGStarsPaymentResponse {
   payment_link: string;
