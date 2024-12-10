@@ -113,7 +113,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
       query: (params) => {
         return {
           method: "POST",
-          url: `payments/create_payment/?payment_id=${params.paymentToken}&subscription_type=${params.subType}`,
+          url: `payments/create_payment/?subscription_type=${params.subType}`,
         };
       },
     }),
@@ -146,7 +146,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
       query: (params) => {
         return {
           method: "POST",
-          url: `payments/create_payment_serail/?payment_id=${params.paymentToken}&serail_id=${params.serial_id}`,
+          url: `payments/create_payment_serail/?serail_id=${params.serial_id}`,
         };
       },
     }),

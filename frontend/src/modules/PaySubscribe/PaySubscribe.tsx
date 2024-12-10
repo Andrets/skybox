@@ -1,88 +1,58 @@
-import { SelectPayment, SelectSubscribe } from "./components";
+import { SelectSubscribe } from "./components";
 import { Button } from "@mui/material";
+import { useEffect, useState } from "react";
 import styles from "./styles.module.scss";
-import { useContext, useEffect, useState } from "react";
-import { AddCardContext } from "@/reusable-in-pages/contexts/AddCardContext/context";
 import { useTranslation } from "react-i18next";
-import { useGetToken } from "./helpers/useGetToken";
 import useBackButton from "@/shared/hooks/useBackButton";
 import { ReactComponent as LoaderSpinner } from "@icons/Loader.svg";
 import {
   useCreatePaymentForSerialMutation,
   useCreatePaymentMutation,
 } from "@/api/userApi";
-import { useAppDispatch, useAppSelector } from "@/shared/hooks/reduxTypes";
-import { useNavigate } from "react-router-dom";
+import { useAppSelector } from "@/shared/hooks/reduxTypes";
+import { Link } from "react-router-dom";
 import { SubscriptionSubtype } from "@/shared/models/UserInfoApi";
-import { filmInfoApiSlice } from "@/api/FilmInfoApi";
+
 export const PaySubscribe = () => {
   useBackButton();
   const searchParams = new URLSearchParams(window.location.search);
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const dispatch = useAppDispatch();
+  const [agreement, setAgreement] = useState(false);
   const subType = useAppSelector((state) => state.paySubscribe.type_subscribe);
 
   const [createPaymentQuery] = useCreatePaymentMutation();
   const [createPaymentSerial] = useCreatePaymentForSerialMutation();
-  const {
-    formHook: {
-      formState: { isValid },
-      reset,
-      setError,
-    },
-  } = useContext(AddCardContext);
 
   const { t } = useTranslation();
 
-  const getToken = useGetToken();
-
   const paymentFunc = async () => {
-    try {
-      const resp = await getToken();
-      if (typeof resp === "string") {
-        setLoading(true);
-        if (
-          subType === SubscriptionSubtype.TEMPORARILY_MONTH ||
-          subType === SubscriptionSubtype.TEMPORARILY_WEEK ||
-          subType === SubscriptionSubtype.TEMPORARILY_YEAR
-        ) {
-          const paymentInfo = await createPaymentQuery({
-            paymentToken: String(resp),
-            subType: subType,
+    setLoading(true);
+    if (
+      subType === SubscriptionSubtype.TEMPORARILY_MONTH ||
+      subType === SubscriptionSubtype.TEMPORARILY_WEEK ||
+      subType === SubscriptionSubtype.TEMPORARILY_YEAR
+    ) {
+      const paymentInfo = await createPaymentQuery({
+        subType: subType,
+      });
+
+      if (paymentInfo && paymentInfo?.data) {
+        if (paymentInfo?.data.status === "succeed") {
+          window.location.href = paymentInfo.data.link;
+        }
+      } else {
+        const serial_id = searchParams.get("serial_id");
+        if (serial_id) {
+          const paymentInfo = await createPaymentSerial({
+            serial_id: serial_id,
           });
 
           if (paymentInfo && paymentInfo?.data) {
             if (paymentInfo?.data.status === "succeed") {
-              dispatch(filmInfoApiSlice.util.invalidateTags(["Pay"]));
-              navigate("/successPayment");
-              reset();
-            }
-          }
-        } else {
-          const serial_id = searchParams.get("serial_id");
-          if (serial_id) {
-            const paymentInfo = await createPaymentSerial({
-              paymentToken: resp,
-              serial_id: serial_id,
-            });
-
-            if (paymentInfo && paymentInfo?.data) {
-              if (paymentInfo?.data.status === "succeed") {
-                dispatch(filmInfoApiSlice.util.invalidateTags(["Pay"]));
-                navigate("/successPayment");
-                reset();
-              }
+              window.location.href = paymentInfo.data.link;
             }
           }
         }
-      }
-    } catch (e: any) {
-      if (e?.cardNumber) {
-        setError("number", {
-          type: "value",
-          message: t("error.validateCardNumber"),
-        });
       }
     }
   };
@@ -101,14 +71,29 @@ export const PaySubscribe = () => {
     >
       <SelectSubscribe />
 
-      <SelectPayment />
+      <label className={styles.privacy}>
+        <input
+          checked={agreement}
+          onClick={() => setAgreement(!agreement)}
+          type="checkbox"
+        />
+        <span className={styles.checkboxMask}></span>
+
+        <span className={`${styles.text}}`}>
+          {t("privacyPolicyAggrement.mainText")}
+          <Link to="/privacyPolicy">
+            {" "}
+            {t("privacyPolicyAggrement.linkText")}
+          </Link>
+        </span>
+      </label>
 
       <div className={styles.payBtnCont}>
         <Button
           className={`${styles.payBtn} ${
-            (!isValid || loading) && styles.disabled
+            loading || (!agreement && styles.disabled)
           }`}
-          disabled={!isValid || loading}
+          disabled={loading || !agreement}
           type={"submit"}
         >
           <>

@@ -82,17 +82,15 @@ export interface ListLikeItem {
 }
 
 export interface CreatePaymentParams {
-  paymentToken: string;
   subType: string;
 }
 
 export interface CreatePaymentSerialParams {
-  paymentToken: string;
   serial_id: string | number;
 }
 
 export interface PaymentCreateStatusResponse {
-  payment_id: number;
+  link: string;
   status: string;
 }
 
