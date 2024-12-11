@@ -96,11 +96,12 @@ def check_payment_status(order_id):
         return {}
 
 def assign_access(user, order):
+    print("assign_access")
     if order.status == 'ONCE':
         series_list = Series.objects.filter(serail_id=order.serail_id)
         for series in series_list:
             PermissionsModel.objects.create(series=series, user=user)
-            
+
     existing_payment = Payments.objects.filter(
         user=user, 
         status=order.status, 
@@ -142,6 +143,7 @@ def orders():
             payment_status = check_payment_status(order.order_id)
 
             if payment_status.get("Success"):
+                print(payment_status)
                 assign_access(order.user, order)
             
 

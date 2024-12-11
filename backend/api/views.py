@@ -2027,10 +2027,6 @@ class FavoriteViewSet(viewsets.ModelViewSet):
                 "cover": favorite.serail.vertical_photo.url if favorite.serail.vertical_photo else None
             }
             serialized_data.append(data)
-
-                
-            
-
         return Response(serialized_data)
 
 
@@ -2045,7 +2041,7 @@ class SubscriptionsViewSet(viewsets.ModelViewSet):
 
     def get_feast_discount(self):
         """Получение скидки на сегодня из праздников."""
-        today = date.today()  # Теперь date определен
+        today = date.today()
         feast = Feasts.objects.filter(date=today).first()
         if feast:
             return {
