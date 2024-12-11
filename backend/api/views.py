@@ -1595,8 +1595,8 @@ class PaymentsViewSet(viewsets.ModelViewSet):
                     break
             
 
-            public_id = 'pk_09a630484c3fe65ceb64733085d2d'
-            api_key = 'da9d495d1f33b2f1367a20f14095e5e1'
+            public_id = 'pk_b7bdec8e9c868a7dcd34d04fb3c3d'
+            api_key = '52d894c1c825b53685850f3a854b7bae'
             if el['subtype'] == "TEMPORARILY_YEAR":
                 oid, link = self.get_pay_link(float(price_value), "Доступ на год")
             elif el['subtype'] == "TEMPORARILY_MONTH":
@@ -1616,8 +1616,8 @@ class PaymentsViewSet(viewsets.ModelViewSet):
         subscription_type = request.query_params.get('subscription_type', None)
         tg_id = int(self.request.tg_user_data.get('tg_id', 0))
         user = Users.objects.filter(tg_id=tg_id).first()
-        public_id = 'pk_09a630484c3fe65ceb64733085d2d'
-        api_key = 'da9d495d1f33b2f1367a20f14095e5e1'
+        public_id ='pk_b7bdec8e9c868a7dcd34d04fb3c3'
+        api_key = '52d894c1c825b53685850f3a854b7bae'
         data = {
             "InvoiceId": int(order_id)
         }
@@ -1673,8 +1673,8 @@ class PaymentsViewSet(viewsets.ModelViewSet):
         serail_id = request.query_params.get('serail_id')
         tg_id = int(self.request.tg_user_data.get('tg_id', 0))
         user = Users.objects.filter(tg_id=tg_id).first()
-        public_id = 'pk_09a630484c3fe65ceb64733085d2d'
-        api_key = 'da9d495d1f33b2f1367a20f14095e5e1'
+        public_id = 'pk_b7bdec8e9c868a7dcd34d04fb3c3d'
+        api_key = '52d894c1c825b53685850f3a854b7bae'
         data = {
             "InvoiceId": int(order_id)
         }
