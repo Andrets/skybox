@@ -96,7 +96,16 @@ def check_payment_status(order_id):
         return {}
 
 def assign_access(user, order):
-    existing_payment = Payments.objects.filter(user=user, status=order.status).first()
+    if order.status == 'ONCE':
+        series_list = Series.objects.filter(serail_id=order.serail_id)
+        for series in series_list:
+            PermissionsModel.objects.create(series=series, user=user)
+            
+    existing_payment = Payments.objects.filter(
+        user=user, 
+        status=order.status, 
+        created_date__date=now().date()
+    ).first()
     if existing_payment:
         print(f"Payment already exists for user {user.id} and order {order.id}")
         return
@@ -112,10 +121,6 @@ def assign_access(user, order):
         user.paid = True
         user.save()
 
-    if order.status == 'ONCE':
-        series_list = Series.objects.filter(serail_id=order.serail_id)
-        for series in series_list:
-            PermissionsModel.objects.create(series=series, user=user)
 
     order.delete()
 
