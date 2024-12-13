@@ -79,8 +79,8 @@ def remove_birthday_permissions():
 
 
 def check_payment_status(order_id):
-    public_id = 'pk_09a630484c3fe65ceb64733085d2d'
-    api_key = 'da9d495d1f33b2f1367a20f14095e5e1'
+    public_id = 'pk_b7bdec8e9c868a7dcd34d04fb3c3d'
+    api_key = '52d894c1c825b53685850f3a854b7bae'
     data = {"InvoiceId": int(order_id)}
 
     response = requests.post(
