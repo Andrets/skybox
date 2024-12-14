@@ -2,6 +2,16 @@
   display: flex;
   flex-direction: column;
   flex: 1 0 auto;
+
+  .tgBtn {
+    padding: 8px;
+    margin: 16px 0 0 0;
+    img {
+      max-width: 24px;
+      max-height: 24px;
+      margin-right: 8px;
+    }
+  }
 }
 
 .payBtnCont {
