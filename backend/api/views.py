@@ -749,13 +749,15 @@ class SerailViewSet(viewsets.ModelViewSet):
         now = timezone.now()
         one_year_ago = now - timedelta(days=365)
         one_month_ago = now - timedelta(days=30)
+        one_week_ago = now - timedelta(days=7)  
 
         active_payment = Payments.objects.filter(
             user=user
         ).filter(
             Q(status=Payments.StatusEnum.ALWAYS) |  
             (Q(status=Payments.StatusEnum.TEMPORARILY_YEAR) & Q(created_date__gte=one_year_ago)) |  
-            (Q(status=Payments.StatusEnum.TEMPORARILY_MONTH) & Q(created_date__gte=one_month_ago))  
+            (Q(status=Payments.StatusEnum.TEMPORARILY_MONTH) & Q(created_date__gte=one_month_ago)) |  
+            (Q(status=Payments.StatusEnum.TEMPORARILY_WEEK) & Q(created_date__gte=one_week_ago)) 
         ).exists()
         return active_payment
 
@@ -1283,13 +1285,15 @@ class SeriesViewSet(viewsets.ModelViewSet):
         now = timezone.now()
         one_year_ago = now - timedelta(days=365)
         one_month_ago = now - timedelta(days=30)  
+        one_week_ago = now - timedelta(days=7)  
 
         active_payment = Payments.objects.filter(
             user=user
         ).filter(
             Q(status=Payments.StatusEnum.ALWAYS) |  
             (Q(status=Payments.StatusEnum.TEMPORARILY_YEAR) & Q(created_date__gte=one_year_ago)) |  
-            (Q(status=Payments.StatusEnum.TEMPORARILY_MONTH) & Q(created_date__gte=one_month_ago))  
+            (Q(status=Payments.StatusEnum.TEMPORARILY_MONTH) & Q(created_date__gte=one_month_ago)) |  
+            (Q(status=Payments.StatusEnum.TEMPORARILY_WEEK) & Q(created_date__gte=one_week_ago)) 
         ).exists()
         return active_payment
 
