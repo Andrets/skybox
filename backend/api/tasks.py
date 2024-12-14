@@ -79,8 +79,8 @@ def remove_birthday_permissions():
 
 
 def check_payment_status(order_id):
-    public_id = 'pk_09a630484c3fe65ceb64733085d2d'
-    api_key = 'da9d495d1f33b2f1367a20f14095e5e1'
+    public_id = 'pk_b7bdec8e9c868a7dcd34d04fb3c3d'
+    api_key = '52d894c1c825b53685850f3a854b7bae'
     data = {"InvoiceId": int(order_id)}
 
     response = requests.post(
@@ -101,6 +101,7 @@ def assign_access(user, order):
         series_list = Series.objects.filter(serail_id=order.serail_id)
         for series in series_list:
             PermissionsModel.objects.create(series=series, user=user)
+        
 
     existing_payment = Payments.objects.filter(
         user=user, 
@@ -116,16 +117,34 @@ def assign_access(user, order):
         summa=order.summa,
         status=order.status
     )
-
+    if order.status == 'ONCE':
+        Messages.objects.create(
+            tg_id=user.tg_id,
+            data=f'Вы купили сериал! Желаем приятного просмотра'
+        )
+    else:
+        if order.status == "TEMPORARILY_YEAR":
+            Messages.objects.create(
+                tg_id=user.tg_id,
+                data=f'Вы приобрели подписку на год! Желаем приятного просмотра'
+            )
+        elif order.status == "TEMPORARILY_MONTH":
+            Messages.objects.create(
+                tg_id=user.tg_id,
+                data=f'Вы приобрели подписку на месяц! Желаем приятного просмотра'
+            )
+        elif order.status == "TEMPORARILY_WEEK":
+            Messages.objects.create(
+                tg_id=user.tg_id,
+                data=f'Вы приобрели подписку на неделю! Желаем приятного просмотра'
+            )
     if not user.isActive:
         user.isActive = True
         user.paid = True
         user.save()
-
+    
 
     order.delete()
-
-
 
 def orders():
 
