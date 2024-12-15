@@ -1107,12 +1107,15 @@ class SeriesViewSet(viewsets.ModelViewSet):
             return cached_permisson
         one_month_ago = timezone.now() - timedelta(days=30)
         one_year_ago = timezone.now() - timedelta(days=365)
+        one_week_ago = now - timedelta(days=7)
+
         active_payment = Payments.objects.filter(
             user=user
         ).filter(
             Q(status=Payments.StatusEnum.ALWAYS) |  
             (Q(status=Payments.StatusEnum.TEMPORARILY_YEAR) & Q(created_date__gte=one_year_ago)) |  
-            (Q(status=Payments.StatusEnum.TEMPORARILY_MONTH) & Q(created_date__gte=one_month_ago))  
+            (Q(status=Payments.StatusEnum.TEMPORARILY_MONTH) & Q(created_date__gte=one_month_ago)) |  
+            (Q(status=Payments.StatusEnum.TEMPORARILY_WEEK) & Q(created_date__gte=one_week_ago)) 
         ).exists()
         if active_payment:
             redis_client.set(redis_key, 1, ex=120)
