@@ -38,20 +38,7 @@ export const SubsDrawer = ({
         </Button>
       </div>
 
-      {serial_data && (
-        <TypeSubscribeBanner
-          onClick={clickBanner}
-          className={styles.subItem}
-          header={t("buySerial")}
-          description={t("infinitySerialAccess")}
-          price={
-            <span>
-              {serial_data.price_in_rubles}₽ <span>/ {t("month")}</span>
-            </span>
-          }
-          isActive={false}
-        />
-      )}
+      
 
       {data[SubscriptionSubtype.TEMPORARILY_WEEK] && (
         <TypeSubscribeBanner
