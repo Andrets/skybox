@@ -20,7 +20,6 @@ export interface SubsDrawerProps extends DrawerProps {
 export const SubsDrawer = ({
   data,
   open,
-  serial_data,
   closeClick,
 }: SubsDrawerProps) => {
   const { t } = useTranslation();
