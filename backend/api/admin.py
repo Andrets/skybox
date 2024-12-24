@@ -157,7 +157,7 @@ class HistoryAdmin(admin.ModelAdmin):
     class Meta:
         model = History
 
-admin.site.register(History, HistoryAdmin)
+#admin.site.register(History, HistoryAdmin)
 
 class StatusNewAdmin(admin.ModelAdmin):
     list_per_page = 500
@@ -218,7 +218,7 @@ class PermissionsModelAdmin(admin.ModelAdmin):
     class Meta:
         model = PermissionsModel
 
-admin.site.register(PermissionsModel, PermissionsModelAdmin)
+#admin.site.register(PermissionsModel, PermissionsModelAdmin)
 
 
 class FavoriteAdmin(admin.ModelAdmin):
@@ -230,7 +230,7 @@ class FavoriteAdmin(admin.ModelAdmin):
     class Meta:
         model = Favorite
 
-admin.site.register(Favorite, FavoriteAdmin)
+#admin.site.register(Favorite, FavoriteAdmin)
 
 
 admin.site.register(Subscriptions)
