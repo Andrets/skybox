@@ -195,7 +195,7 @@ class DocsTextsAdmin(admin.ModelAdmin):
     class Meta:
         model = DocsTexts
 
-admin.site.register(DocsTexts, DocsTextsAdmin)
+#admin.site.register(DocsTexts, DocsTextsAdmin)
 
 class ViewedSeriesAdmin(admin.ModelAdmin):
     list_per_page = 500
@@ -206,7 +206,7 @@ class ViewedSeriesAdmin(admin.ModelAdmin):
     class Meta:
         model = ViewedSeries
 
-admin.site.register(ViewedSeries, ViewedSeriesAdmin)
+#admin.site.register(ViewedSeries, ViewedSeriesAdmin)
 
 
 class PermissionsModelAdmin(admin.ModelAdmin):
@@ -238,9 +238,9 @@ admin.site.register(Feasts)
 admin.site.register(Newprice)
 admin.site.register(SerailPrice)
 admin.site.register(UserRating)
-admin.site.register(Tokens)
-admin.site.register(Orders)
-admin.site.register(SeriesLikes)
+#admin.site.register(Tokens)
+#admin.site.register(Orders)
+#admin.site.register(SeriesLikes)
 
 
 
